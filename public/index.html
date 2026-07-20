@@ -3,10 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=./zh/" />
-    <link rel="canonical" href="./zh/" />
+    <script>
+      // Redirect to the default locale
+      const path = window.location.pathname;
+      if (!path.includes('/zh') && !path.includes('/en')) {
+        window.location.href = path + 'zh/';
+      }
+    </script>
   </head>
   <body>
-    Redirecting to <a href="./zh/">Chinese version</a>...
+    Redirecting...
   </body>
 </html>
