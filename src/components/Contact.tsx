@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+type SubmitStatus = "idle" | "loading" | "success" | "error";
+
 export default function Contact() {
   const t = useTranslations();
   const [formData, setFormData] = useState({
@@ -10,6 +12,8 @@ export default function Contact() {
     email: "",
     message: "",
   });
+  const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [message, setMessage] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -21,14 +25,42 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      t("nav.contact") +
-        ": " +
-        JSON.stringify(formData, null, 2)
-    );
-    setFormData({ name: "", email: "", message: "" });
+    setStatus("loading");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setStatus("error");
+        setMessage(data.error || "Failed to submit form");
+        return;
+      }
+
+      setStatus("success");
+      setMessage(data.message || "Thank you! We have received your message.");
+      setFormData({ name: "", email: "", message: "" });
+
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setStatus("idle");
+        setMessage("");
+      }, 3000);
+    } catch (error) {
+      setStatus("error");
+      setMessage("Network error. Please try again.");
+      console.error("Contact form error:", error);
+    }
   };
 
   return (
@@ -78,7 +110,8 @@ export default function Contact() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                disabled={status === "loading"}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Your Name"
               />
             </div>
@@ -92,7 +125,8 @@ export default function Contact() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                disabled={status === "loading"}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="your@email.com"
               />
             </div>
@@ -105,16 +139,39 @@ export default function Contact() {
                 value={formData.message}
                 onChange={handleChange}
                 required
+                disabled={status === "loading"}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                 placeholder="Your message..."
               ></textarea>
             </div>
+
+            {/* 状态消息 */}
+            {message && (
+              <div
+                className={`p-3 rounded-lg text-sm font-medium ${
+                  status === "success"
+                    ? "bg-green-50 text-green-800 border border-green-200"
+                    : "bg-red-50 text-red-800 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
+              disabled={status === "loading"}
+              className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {t("hero.cta")}
+              {status === "loading" ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Submitting...
+                </>
+              ) : (
+                t("hero.cta")
+              )}
             </button>
           </form>
         </div>

@@ -34,7 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         locale === "zh"
           ? "汉理楚能致力于为全球企业提供先进的能源管理技术与服务"
           : "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide",
-      url: `https://gitee.io/hanlichuneng/${locale}/`,
       type: "website",
       locale: locale === "zh" ? "zh_CN" : "en_US",
     },
