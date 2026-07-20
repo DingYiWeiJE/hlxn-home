@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "products": "产品",
+    "contact": "联系我们",
+    "language": "语言"
+  },
+  "hero": {
+    "title": "汉理楚能",
+    "subtitle": "智能能源管理解决方案",
+    "description": "致力于为全球企业提供先进的能源管理技术与服务",
+    "cta": "立即了解"
+  },
+  "features": {
+    "title": "核心优势",
+    "item1": {
+      "title": "智能监控",
+      "description": "实时监控能源消耗数据"
+    },
+    "item2": {
+      "title": "数据分析",
+      "description": "深度挖掘能源消耗规律"
+    },
+    "item3": {
+      "title": "成本优化",
+      "description": "帮助企业降低能源成本"
+    },
+    "item4": {
+      "title": "环保减排",
+      "description": "实现绿色低碳目标"
+    }
+  },
+  "about": {
+    "title": "关于我们",
+    "description": "汉理楚能是一家专注于能源管理领域的创新型企业，致力于通过先进的物联网和大数据技术，为全球企业提供智能的能源管理解决方案。"
+  },
+  "footer": {
+    "copyright": "© 2024 汉理楚能. 版权所有。",
+    "links": {
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "contact": "联系我们"
+    }
+  }
+}

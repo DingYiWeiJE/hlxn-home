@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "products": "Products",
+    "contact": "Contact",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Hanli Chuneng",
+    "subtitle": "Intelligent Energy Management Solutions",
+    "description": "Committed to providing advanced energy management technology and services to enterprises worldwide",
+    "cta": "Learn More"
+  },
+  "features": {
+    "title": "Core Advantages",
+    "item1": {
+      "title": "Smart Monitoring",
+      "description": "Real-time monitoring of energy consumption data"
+    },
+    "item2": {
+      "title": "Data Analytics",
+      "description": "Deep analysis of energy consumption patterns"
+    },
+    "item3": {
+      "title": "Cost Optimization",
+      "description": "Help enterprises reduce energy costs"
+    },
+    "item4": {
+      "title": "Environmental Protection",
+      "description": "Achieve green and low-carbon goals"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Hanli Chuneng is an innovative enterprise focused on the energy management field, dedicated to providing intelligent energy management solutions to enterprises worldwide through advanced IoT and big data technology."
+  },
+  "footer": {
+    "copyright": "© 2024 Hanli Chuneng. All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact Us"
+    }
+  }
+}
