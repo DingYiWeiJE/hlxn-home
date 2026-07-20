@@ -13,6 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  icons: [
+    {
+      rel: "icon",
+      url: "/favicon.png",
+      type: "image/png",
+    },
+  ],
   title: "汉理楚能 | 智能能源管理解决方案",
   description: "汉理楚能致力于为全球企业提供先进的能源管理技术与服务",
   keywords: "能源管理,智能监控,数据分析,成本优化",
