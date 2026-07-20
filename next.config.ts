@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "/hanlichuneng",
+  basePath: "/hlxn-home",
   trailingSlash: true,
   images: {
     unoptimized: true,
