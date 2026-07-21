@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     await requireAdmin();
     const query = adminListNewsQuerySchema.parse(Object.fromEntries(request.nextUrl.searchParams));
     const where: Prisma.NewsWhereInput = {
+      locale: query.locale,
       ...(query.status ? { status: query.status } : {}),
       ...(query.featured === undefined ? {} : { isFeatured: query.featured }),
       ...(query.deleted === undefined ? {} : { deletedAt: query.deleted ? { not: null } : null }),

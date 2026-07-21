@@ -26,11 +26,12 @@ type NewsCenterProps = {
   className?: string;
 };
 
-async function fetchNews(maxItems: number = 3): Promise<NewsItem[]> {
+async function fetchNews(locale: string, maxItems: number = 3): Promise<NewsItem[]> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-    console.log(`[NewsCenter] Fetching news from: ${baseUrl}/api/news?pageSize=${maxItems}`);
-    const response = await fetch(`${baseUrl}/api/news?pageSize=${maxItems}`, {
+    const url = `${baseUrl}/api/news?pageSize=${maxItems}&locale=${locale}`;
+    console.log(`[NewsCenter] Fetching news from: ${url}`);
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -58,7 +59,7 @@ export default async function NewsCenter({
   className = "",
 }: NewsCenterProps) {
   const t = await getTranslations({ locale });
-  const newsList = await fetchNews(maxItems);
+  const newsList = await fetchNews(locale, maxItems);
 
   const moreText = t("newsCenter.moreText");
   const moreHref = `/${locale}/news`;
@@ -114,7 +115,7 @@ export default async function NewsCenter({
           {newsList.length > 0 && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {newsListWithLocale.map((item) => (
-                <NewsCard key={item.id} item={item} />
+                <NewsCard key={item.id} item={item} locale={locale} />
               ))}
             </div>
           )}
@@ -143,7 +144,7 @@ export default async function NewsCenter({
   );
 }
 
-function NewsCard({ item }: { item: NewsItem }) {
+function NewsCard({ item, locale }: { item: NewsItem; locale: string }) {
   const content = (
     <article
       className="
@@ -176,7 +177,7 @@ function NewsCard({ item }: { item: NewsItem }) {
           dateTime={item.publishedAt}
           className="mt-2 block text-sm text-slate-400"
         >
-          {formatNewsDate(item.publishedAt)}
+          {formatNewsDate(item.publishedAt, locale)}
         </time>
       </div>
     </article>
@@ -215,14 +216,15 @@ function ArrowIcon() {
   );
 }
 
-function formatNewsDate(value: string) {
+function formatNewsDate(value: string, locale: string) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  const localeCode = locale === "zh" ? "zh-CN" : "en-US";
+  return new Intl.DateTimeFormat(localeCode, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
