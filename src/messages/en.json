@@ -246,6 +246,10 @@
     "moreText": "Learn More",
     "noNews": "No news available"
   },
+  "focusSection": {
+    "title": "Focused on New Energy Power System Solutions",
+    "moreText": "Learn More"
+  },
   "productCards": {
     "electricDirectDrive": {
       "title": "Electric Direct Drive System\nSolutions",

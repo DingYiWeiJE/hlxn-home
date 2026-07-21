@@ -129,6 +129,51 @@ export default async function Home({ params }: Props) {
       />
       
       <NewsCenter locale={locale} maxItems={3} />
+
+      <div
+        className="h-[300px] relative bg-cover bg-center flex flex-col items-center justify-center"
+        style={{
+          backgroundImage: "url('/images/home/home-bg-3.png')",
+        }}
+      >
+        {/* 遮罩 */}
+        <div className="absolute inset-0" style={{ backgroundColor: '#1A589BA6' }}></div>
+
+        {/* 内容层 */}
+        <div className="relative flex flex-col items-center justify-center gap-4 text-center">
+          <h2 className="text-[2.25rem] font-bold text-white">{t("focusSection.title")}</h2>
+          <a
+            href="#"
+            className="
+              inline-flex items-center gap-3
+              rounded-full bg-white
+              px-7 py-3
+              text-base font-medium text-slate-600
+              shadow-sm
+              transition-all duration-200
+              hover:opacity-90 hover:shadow-md
+            "
+          >
+            <span>{t("focusSection.moreText")}</span>
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
       <Footer />
     </div>
   );

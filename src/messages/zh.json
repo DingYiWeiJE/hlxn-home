@@ -246,6 +246,10 @@
     "moreText": "了解更多",
     "noNews": "暂无新闻内容"
   },
+  "focusSection": {
+    "title": "专注新能源动力系统解决方案",
+    "moreText": "了解更多"
+  },
   "productCards": {
     "electricDirectDrive": {
       "title": "电力直推系统\n解决方案",
