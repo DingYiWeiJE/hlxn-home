@@ -120,7 +120,8 @@
     ]
   },
   "news": {
-    "title": "新闻"
+    "title": "新闻",
+    "back": "返回新闻列表"
   },
   "newsPage": {
     "title": "新闻中心",

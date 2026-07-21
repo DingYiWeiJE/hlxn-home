@@ -120,7 +120,8 @@
     ]
   },
   "news": {
-    "title": "News"
+    "title": "News",
+    "back": "Back to News List"
   },
   "newsPage": {
     "title": "News & Updates",
