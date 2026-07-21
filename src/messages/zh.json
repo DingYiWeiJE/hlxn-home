@@ -119,6 +119,9 @@
       }
     ]
   },
+  "news": {
+    "title": "新闻"
+  },
   "newsPage": {
     "title": "新闻中心",
     "subtitle": "汉理楚能最新动态",

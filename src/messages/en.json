@@ -119,6 +119,9 @@
       }
     ]
   },
+  "news": {
+    "title": "News"
+  },
   "newsPage": {
     "title": "News & Updates",
     "subtitle": "Latest News from Hanli Chuneng",
