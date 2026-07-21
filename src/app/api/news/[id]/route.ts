@@ -39,7 +39,7 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const input = newsPatchSchema.parse(await request.json());
-    const nextSlug = input.slug ? await ensureUniqueSlug(input.slug, id) : undefined;
+    const nextSlug = input.slug ? await ensureUniqueSlug(input.slug, existing.locale, id) : undefined;
     const firstPublish = existing.status !== "PUBLISHED" && input.status === "PUBLISHED" && !existing.publishedAt && !input.publishedAt;
     const data: Prisma.NewsUpdateInput = {
       ...(input.title !== undefined ? { title: input.title } : {}),

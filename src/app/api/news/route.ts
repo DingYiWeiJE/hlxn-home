@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         }
       : undefined;
     const where: Prisma.NewsWhereInput = {
+      locale: query.locale,
       status: "PUBLISHED",
       deletedAt: null,
       publishedAt: { lte: now },
@@ -69,12 +70,13 @@ export async function POST(request: Request) {
     await requireAdmin();
     assertSameOriginRequest(request);
     const input = newsInputSchema.parse(await request.json());
-    const slug = await ensureUniqueSlug(input.slug ?? slugifyTitle(input.title));
+    const slug = await ensureUniqueSlug(input.slug ?? slugifyTitle(input.title), input.locale);
     const publishedAt = input.status === "PUBLISHED" ? input.publishedAt ?? new Date() : input.publishedAt;
     const created = await prisma.news.create({
       data: {
         title: input.title,
         slug,
+        locale: input.locale,
         summary: input.summary || null,
         coverImage: input.coverImage || null,
         coverImageAlt: input.coverImageAlt || null,

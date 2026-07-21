@@ -12,10 +12,16 @@ enum NewsStatus {
   PUBLISHED
 }
 
+enum NewsLocale {
+  zh
+  en
+}
+
 model News {
   id            String     @id @default(cuid())
   title         String
-  slug          String     @unique
+  slug          String
+  locale        NewsLocale
   summary       String?
   coverImage    String?
   coverImageAlt String?
@@ -32,6 +38,8 @@ model News {
   updatedAt     DateTime   @updatedAt
   deletedAt     DateTime?
 
+  @@unique([slug, locale])
+  @@index([locale, status, publishedAt])
   @@index([status, publishedAt])
   @@index([deletedAt])
   @@index([isFeatured])

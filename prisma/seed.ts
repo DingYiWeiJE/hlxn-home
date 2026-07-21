@@ -29,18 +29,19 @@ const content = (image: string) => ({
 async function main() {
   const now = new Date();
   const rows = [
-    ["公司新闻示例一", "demo-news-1", "/media/news/demo/example-1.webp"],
-    ["公司新闻示例二", "demo-news-2", "/media/news/demo/example-1.webp"],
-    ["公司新闻示例三", "demo-news-3", "/media/news/demo/example-1.webp"],
+    ["公司新闻示例一", "demo-news-1", "/media/news/demo/example-1.webp", "zh"],
+    ["公司新闻示例二", "demo-news-2", "/media/news/demo/example-1.webp", "zh"],
+    ["公司新闻示例三", "demo-news-3", "/media/news/demo/example-1.webp", "zh"],
   ] as const;
 
-  for (const [title, slug, image] of rows) {
+  for (const [title, slug, image, locale] of rows) {
     await prisma.news.upsert({
-      where: { slug },
+      where: { slug_locale: { slug, locale: locale as any } },
       update: {},
       create: {
         title,
         slug,
+        locale: locale as any,
         summary: "这是一条新闻 seed 数据，用于本地开发和页面验证。",
         coverImage: image,
         coverImageAlt: "示例图片",

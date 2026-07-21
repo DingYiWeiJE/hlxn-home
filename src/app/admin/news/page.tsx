@@ -23,6 +23,7 @@ export default async function AdminNewsPage() {
       id: true,
       title: true,
       slug: true,
+      locale: true,
       status: true,
       isFeatured: true,
       publishedAt: true,
@@ -44,6 +45,7 @@ export default async function AdminNewsPage() {
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="px-4 py-3">标题</th>
+              <th className="px-4 py-3">语言</th>
               <th className="px-4 py-3">状态</th>
               <th className="px-4 py-3">推荐</th>
               <th className="px-4 py-3">发布时间</th>
@@ -55,6 +57,7 @@ export default async function AdminNewsPage() {
             {items.map((item) => (
               <tr key={item.id} className="border-t border-slate-100">
                 <td className="px-4 py-3">{item.title}</td>
+                <td className="px-4 py-3">{item.locale === "zh" ? "中文" : "English"}</td>
                 <td className="px-4 py-3">{item.deletedAt ? "已删除" : item.status}</td>
                 <td className="px-4 py-3">{item.isFeatured ? "是" : "否"}</td>
                 <td className="px-4 py-3">{item.publishedAt?.toLocaleString() ?? "-"}</td>

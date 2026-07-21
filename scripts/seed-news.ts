@@ -5,6 +5,7 @@ async function main() {
     {
       title: "汉理新能源推出新一代混合动力系统",
       slug: "new-hybrid-power-system-2024",
+      locale: "zh" as const,
       summary: "我们荣幸宣布推出最新一代混合动力系统，具有更高的效率和可靠性。",
       coverImage: "/images/home/home-bg-1.jpg",
       coverImageAlt: "混合动力系统",
@@ -31,6 +32,7 @@ async function main() {
     {
       title: "与国际领先企业达成战略合作",
       slug: "strategic-partnership-announcement",
+      locale: "zh" as const,
       summary: "汉理新能源与国际领先的海事企业签署战略合作协议。",
       coverImage: "/images/home/home-bg-1.jpg",
       coverImageAlt: "战略合作",
@@ -57,6 +59,7 @@ async function main() {
     {
       title: "荣获行业创新奖",
       slug: "industry-innovation-award",
+      locale: "zh" as const,
       summary: "汉理新能源因在船舶新能源技术方面的创新成就荣获行业创新奖。",
       coverImage: "/images/home/home-bg-1.jpg",
       coverImageAlt: "创新奖",
@@ -83,8 +86,8 @@ async function main() {
   ];
 
   for (const item of newsItems) {
-    const existing = await prisma.news.findUnique({
-      where: { slug: item.slug },
+    const existing = await prisma.news.findFirst({
+      where: { slug: item.slug, locale: item.locale },
     });
 
     if (!existing) {

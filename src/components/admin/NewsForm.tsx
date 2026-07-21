@@ -8,6 +8,7 @@ import type { TiptapNode } from "@/lib/news/tiptap";
 type NewsFormState = {
   title: string;
   slug: string;
+  locale: "zh" | "en";
   summary: string;
   coverImage: string;
   coverImageAlt: string;
@@ -31,6 +32,7 @@ export default function NewsForm({ mode, id, initialValue }: Props) {
   const [form, setForm] = useState<NewsFormState>({
     title: initialValue?.title ?? "",
     slug: initialValue?.slug ?? "",
+    locale: (initialValue?.locale ?? "zh") as "zh" | "en",
     summary: initialValue?.summary ?? "",
     coverImage: initialValue?.coverImage ?? "",
     coverImageAlt: initialValue?.coverImageAlt ?? "",
@@ -97,6 +99,12 @@ export default function NewsForm({ mode, id, initialValue }: Props) {
     <div className="space-y-6">
       {error && <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
       <div className="grid gap-4 md:grid-cols-2">
+        <Field label="语言" error={fieldErrors.locale?.[0]}>
+          <select value={form.locale} onChange={(e) => setForm({ ...form, locale: e.target.value as "zh" | "en" })} className="w-full rounded-md border border-slate-300 px-3 py-2">
+            <option value="zh">中文</option>
+            <option value="en">English</option>
+          </select>
+        </Field>
         <Field label="标题" error={fieldErrors.title?.[0]}>
           <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full rounded-md border border-slate-300 px-3 py-2" />
         </Field>

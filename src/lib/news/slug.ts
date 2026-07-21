@@ -16,13 +16,13 @@ export function randomSlugSuffix() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export async function ensureUniqueSlug(slug: string, ignoreId?: string) {
+export async function ensureUniqueSlug(slug: string, locale: string, ignoreId?: string) {
   let candidate = slug;
   let index = 1;
 
   while (true) {
-    const existing = await prisma.news.findUnique({
-      where: { slug: candidate },
+    const existing = await prisma.news.findFirst({
+      where: { slug: candidate, locale: locale as any },
       select: { id: true },
     });
 

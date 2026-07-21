@@ -28,6 +28,7 @@ export default async function AdminEditNewsPage({ params }: Props) {
         initialValue={{
           title: news.title,
           slug: news.slug,
+          locale: news.locale,
           summary: news.summary ?? "",
           coverImage: news.coverImage ?? "",
           coverImageAlt: news.coverImageAlt ?? "",

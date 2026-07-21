@@ -18,10 +18,10 @@ type Props = {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
 
-  const news = await prisma.news.findUnique({
-    where: { slug },
+  const news = await prisma.news.findFirst({
+    where: { slug, locale: locale as any },
     select: {
       title: true,
       summary: true,
@@ -51,8 +51,8 @@ export default async function NewsDetail({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
-  const news = await prisma.news.findUnique({
-    where: { slug },
+  const news = await prisma.news.findFirst({
+    where: { slug, locale: locale as any },
     select: {
       id: true,
       title: true,

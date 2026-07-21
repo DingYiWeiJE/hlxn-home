@@ -18,6 +18,7 @@ export const listNewsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(50).default(10),
   keyword: z.string().trim().max(100).optional(),
   featured: z.coerce.boolean().optional(),
+  locale: z.enum(["zh", "en"]).default("zh"),
   sort: z.enum(["publishedAt", "createdAt", "updatedAt"]).default("publishedAt"),
   order: z.enum(["asc", "desc"]).default("desc"),
 });
@@ -30,6 +31,7 @@ export const adminListNewsQuerySchema = listNewsQuerySchema.extend({
 export const newsInputSchema = z.object({
   title: z.string().trim().min(1, "请输入标题").max(200, "标题不能超过 200 字"),
   slug: slugSchema.optional().or(z.literal("").transform(() => undefined)),
+  locale: z.enum(["zh", "en"], { message: "请选择语言" }),
   summary: z.string().trim().max(500, "摘要不能超过 500 字").optional().nullable(),
   coverImage: z
     .string()
