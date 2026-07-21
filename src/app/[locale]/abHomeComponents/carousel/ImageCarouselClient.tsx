@@ -91,9 +91,13 @@ export default function ImageCarouselClient({
    * 禁用动画，避免响应式切换时产生滑动。
    */
   useEffect(() => {
-    setTransitionEnabled(false);
-    setIsAnimating(false);
-    setCurrentIndex(canSlide ? effectiveVisibleCount : 0);
+    const frame = requestAnimationFrame(() => {
+      setTransitionEnabled(false);
+      setIsAnimating(false);
+      setCurrentIndex(canSlide ? effectiveVisibleCount : 0);
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, [canSlide, effectiveVisibleCount]);
 
   const goToPrevious = useCallback(() => {

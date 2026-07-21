@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import IntroCard from "./IntroCard";
 
@@ -34,9 +35,11 @@ const ProductIntroCard: React.FC<ProductIntroCardProps> = async ({
       <div className={`mx-auto max-w-[1440px] flex flex-col lg:flex-row items-stretch lg:gap-0 ${imageFirst ? "lg:flex-row" : "lg:flex-row-reverse"} ${className}`}>
         {/* Image Section */}
         <div className="w-full lg:w-1/2 flex items-center justify-center py-8 sm:py-10 lg:py-0 lg:min-h-[520px]" >
-          <img
+          <Image
             src={imageUrl}
             alt={imageAlt}
+            width={900}
+            height={600}
             className="h-auto w-full max-w-full max-h-80 sm:max-h-96 lg:max-h-[520px] object-contain"
           />
         </div>

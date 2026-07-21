@@ -16,8 +16,6 @@ export default function Navigation() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
 
-  const otherLocale = locale === "zh" ? "en" : "zh";
-
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -33,12 +31,6 @@ export default function Navigation() {
     const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
     const hrefWithoutLocale = href.replace(`/${locale}`, "") || "/";
     return pathWithoutLocale === hrefWithoutLocale;
-  };
-
-  const handleLanguageSwitch = () => {
-    const pathWithoutLocale = pathname.replace(`/${locale}`, "");
-    const hash = typeof window !== "undefined" ? window.location.hash : "";
-    router.push(`/${otherLocale}${pathWithoutLocale}${hash}`);
   };
 
   const switchLanguage = (lang: string) => {

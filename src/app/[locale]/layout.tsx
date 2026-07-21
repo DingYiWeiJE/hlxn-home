@@ -10,11 +10,15 @@ type Props = {
   }>;
 };
 
+function isLocale(value: string): value is (typeof locales)[number] {
+  return locales.some((locale) => locale === value);
+}
+
 export async function generateMetadata({
   params,
 }: Omit<Props, "children">): Promise<Metadata> {
   const { locale } = await params;
-  const isValidLocale = locales.includes(locale as any);
+  const isValidLocale = isLocale(locale);
 
   if (!isValidLocale) notFound();
 
@@ -40,7 +44,7 @@ export function generateStaticParams() {
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
 
-  if (!locales.includes(locale as any)) {
+  if (!isLocale(locale)) {
     notFound();
   }
 

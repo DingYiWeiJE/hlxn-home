@@ -1,5 +1,4 @@
 import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import type { Metadata } from "next";
