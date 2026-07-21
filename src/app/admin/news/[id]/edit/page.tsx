@@ -1,23 +1,81 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/admin-auth/session";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import NewsForm from "@/components/admin/NewsForm";
+import type { TiptapNode } from "@/lib/news/tiptap";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
+type NewsData = {
+  id: string;
+  title: string;
+  slug: string;
+  locale: "zh" | "en";
+  summary: string | null;
+  coverImage: string | null;
+  coverImageAlt: string | null;
+  authorName: string | null;
+  status: "DRAFT" | "PUBLISHED";
+  isFeatured: boolean;
+  publishedAt: string | null;
+  content: TiptapNode;
 };
-export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ id: string }> };
+export default function AdminEditNewsPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function AdminEditNewsPage({ params }: Props) {
-  const session = await getAdminSession();
-  if (!session) redirect("/admin/login");
+  const [news, setNews] = useState<NewsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const { id } = await params;
-  const news = await prisma.news.findUnique({ where: { id } });
-  if (!news) redirect("/admin/news");
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const url = new URL(`/api/admin/news/${id}`, window.location.origin);
+        const response = await fetch(url.toString());
+        if (response.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+        if (!response.ok) {
+          if (response.status === 404) {
+            router.replace("/admin/news");
+          } else {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return;
+        }
+        const data = (await response.json()) as { success: boolean; data?: NewsData };
+        if (data.success && data.data) {
+          setNews(data.data);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "加载失败");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadNews();
+  }, [id, router]);
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        <div className="text-center text-slate-600">加载中...</div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      </main>
+    );
+  }
+
+  if (!news) return null;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -35,8 +93,8 @@ export default async function AdminEditNewsPage({ params }: Props) {
           authorName: news.authorName ?? "",
           status: news.status,
           isFeatured: news.isFeatured,
-          publishedAt: news.publishedAt ? news.publishedAt.toISOString().slice(0, 16) : "",
-          content: news.content as never,
+          publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString().slice(0, 16) : "",
+          content: news.content,
         }}
       />
     </main>

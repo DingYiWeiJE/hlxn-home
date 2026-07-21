@@ -1,36 +1,68 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/admin-auth/session";
-import { prisma } from "@/lib/prisma";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import AdminNewsActions from "@/components/admin/AdminNewsActions";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
+type NewsItem = {
+  id: string;
+  title: string;
+  slug: string;
+  locale: "zh" | "en";
+  status: "DRAFT" | "PUBLISHED";
+  isFeatured: boolean;
+  publishedAt: string | null;
+  updatedAt: string;
+  deletedAt: string | null;
 };
-export const dynamic = "force-dynamic";
 
-export default async function AdminNewsPage() {
-  const session = await getAdminSession();
-  if (!session) {
-    redirect("/admin/login");
+export default function AdminNewsPage() {
+  const router = useRouter();
+  const [items, setItems] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadNews = async () => {
+    try {
+      const url = new URL("/api/admin/news", window.location.origin);
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.replace("/admin/login");
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = (await response.json()) as { success: boolean; items?: NewsItem[]; data?: { items: NewsItem[] } };
+      const newsList = data.items || data.data?.items || [];
+      setItems(newsList);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "加载失败");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNews();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-8">
+        <div className="text-center text-slate-600">加载中...</div>
+      </main>
+    );
   }
 
-  const items = await prisma.news.findMany({
-    orderBy: [{ createdAt: "desc" }],
-    take: 50,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      locale: true,
-      status: true,
-      isFeatured: true,
-      publishedAt: true,
-      updatedAt: true,
-      deletedAt: true,
-    },
-  });
+  if (error) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-8">
+        <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
@@ -60,10 +92,10 @@ export default async function AdminNewsPage() {
                 <td className="px-4 py-3">{item.locale === "zh" ? "中文" : "English"}</td>
                 <td className="px-4 py-3">{item.deletedAt ? "已删除" : item.status}</td>
                 <td className="px-4 py-3">{item.isFeatured ? "是" : "否"}</td>
-                <td className="px-4 py-3">{item.publishedAt?.toLocaleString() ?? "-"}</td>
-                <td className="px-4 py-3">{item.updatedAt.toLocaleString()}</td>
+                <td className="px-4 py-3">{item.publishedAt ? new Date(item.publishedAt).toLocaleString() : "-"}</td>
+                <td className="px-4 py-3">{new Date(item.updatedAt).toLocaleString()}</td>
                 <td className="px-4 py-3">
-                  <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} />
+                  <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} onUpdate={loadNews} />
                 </td>
               </tr>
             ))}

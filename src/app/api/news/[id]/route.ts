@@ -39,11 +39,16 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const input = newsPatchSchema.parse(await request.json());
-    const nextSlug = input.slug ? await ensureUniqueSlug(input.slug, existing.locale, id) : undefined;
+    console.log('input.locale:', input.locale);
+    console.log('existing.locale:', existing.locale);
+    console.log('input.slug:', input.slug);
+    const nextSlug = input.slug ? await ensureUniqueSlug(input.slug, input.locale || existing.locale, id) : (input.locale && input.locale !== existing.locale ? await ensureUniqueSlug(existing.slug, input.locale, id) : undefined);
+    console.log('nextSlug:', nextSlug);
     const firstPublish = existing.status !== "PUBLISHED" && input.status === "PUBLISHED" && !existing.publishedAt && !input.publishedAt;
     const data: Prisma.NewsUpdateInput = {
       ...(input.title !== undefined ? { title: input.title } : {}),
       ...(nextSlug !== undefined ? { slug: nextSlug } : {}),
+      ...(input.locale !== undefined ? { locale: input.locale } : {}),
       ...(input.summary !== undefined ? { summary: input.summary || null } : {}),
       ...(input.coverImage !== undefined ? { coverImage: input.coverImage || null } : {}),
       ...(input.coverImageAlt !== undefined ? { coverImageAlt: input.coverImageAlt || null } : {}),
@@ -56,6 +61,8 @@ export async function PATCH(request: Request, { params }: Params) {
       ...(input.publishedAt !== undefined ? { publishedAt: input.publishedAt } : {}),
       ...(firstPublish ? { publishedAt: new Date() } : {}),
     };
+
+    console.log('data to update:', JSON.stringify(data, null, 2));
 
     const updated = await prisma.news.update({
       where: { id },
