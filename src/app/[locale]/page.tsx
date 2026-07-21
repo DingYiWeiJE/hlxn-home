@@ -1,11 +1,14 @@
 import { setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import About from "@/components/About";
-import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
 import type { Metadata } from "next";
+import ChooseHanliSection from "./abHomeComponents/ChooseHanliSection";
+import AboutHanli from "./abHomeComponents/AboutHanli";
+import SolutionsSection from "./abHomeComponents/SolutionsSection";
+import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCard";
+import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
 
 type Props = {
   params: Promise<{
@@ -43,16 +46,86 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations({ locale });
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navigation />
-      <main className="flex-grow">
-        <Hero />
-        <Features />
-        <About />
-        <Contact />
-      </main>
+      {/* Hero Section */}
+      <div
+        className="relative h-[60vh] md:h-screen bg-cover bg-center flex flex-col"
+        style={{
+          backgroundImage: "url('/images/home/home-bg-1.jpg')",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* 黑色遮罩 */}
+        <div className="absolute inset-0 bg-[#001524C9] opacity-50"></div>
+
+        {/* 内容层 */}
+        <div className="relative flex flex-col h-full">
+          <Navigation />
+          <HeroContent />
+        </div>
+      </div>
+      <ChooseHanliSection locale={locale} />
+      <AboutHanli locale={locale} />
+      <SolutionsSection locale={locale} />
+      <ProductIntroCard
+        locale={locale}
+        imageUrl="/images/home/electric-direct-drive.png"
+        backgroundColor="white"
+        imageFirst={true}
+        translationKey="productCards.electricDirectDrive"
+        buttonHref="/products"
+      />
+      <ProductIntroCard
+        locale={locale}
+        imageUrl="/images/home/hybrid-power-system.png"
+        backgroundColor="#e7f6ff"
+        imageFirst={false}
+        translationKey="productCards.hybridPower"
+        buttonHref="/products"
+      />
+      <ProductIntroCard
+        locale={locale}
+        imageUrl="/images/home/marine-energy-storage.png"
+        backgroundColor="white"
+        imageFirst={true}
+        translationKey="productCards.shipEnergyStorage"
+        buttonHref="/products"
+      />
+      <ProductIntroCard
+        locale={locale}
+        imageUrl="/images/home/hydrogen-fuel-system.png"
+        backgroundColor="#e7f6ff"
+        imageFirst={false}
+        translationKey="productCards.hydrogenFuelSystem"
+        buttonHref="/products"
+      />
+      <ProductIntroCard
+        locale={locale}
+        imageUrl="/images/home/methanol-fuel-system.png"
+        backgroundColor="white"
+        imageFirst={true}
+        translationKey="productCards.methanolFuelSystem"
+        buttonHref="/products"
+      />
+
+      <div className="w-full bg-[#e7f6ff] py-12 text-center pb-0">
+        <h2 className="text-3xl font-bold text-[#3d71c2] ">{t("caseSection.title")}</h2>
+      </div>
+
+      <ImageCarousel
+        images={[
+          '/images/home/case-1.jpg',
+          '/images/home/case-2.jpg',
+          '/images/home/case-3.jpg',
+          '/images/home/case-4.jpg',
+          '/images/home/case-5.jpg',
+          '/images/home/case-6.jpg',
+        ]}
+        imagePriorityCount={3}
+      />
       <Footer />
     </div>
   );

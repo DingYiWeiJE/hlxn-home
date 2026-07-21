@@ -1,16 +1,22 @@
 {
   "nav": {
     "home": "Home",
-    "about": "About",
+    "about": "About Us",
     "products": "Products",
-    "contact": "Contact",
+    "solutions": "Solutions",
+    "cases": "Cases",
+    "news": "News",
+    "contact": "Contact Us",
     "language": "Language"
   },
   "hero": {
     "title": "Hanli Chuneng",
     "subtitle": "Intelligent Energy Management Solutions",
     "description": "Committed to providing advanced energy management technology and services to enterprises worldwide",
-    "cta": "Learn More"
+    "cta": "Learn More",
+    "homeTitle": "Hanli New Energy: Innovation Driving Green Revolution",
+    "homeSubtitle": "Focused on Comprehensive Solutions for New Energy Marine Power Systems",
+    "homeButton": "Learn More"
   },
   "features": {
     "title": "Core Advantages",
@@ -41,6 +47,221 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "contact": "Contact Us"
+    }
+  },
+  "aboutPage": {
+    "title": "About Us",
+    "subtitle": "Leading Intelligent Energy Management Solutions Provider",
+    "description": "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide.",
+    "section1": {
+      "title": "Company Overview",
+      "content": "Founded in 2020, Hanli Chuneng focuses on intelligent energy management solutions, combining IoT technology, big data analysis, and AI algorithms to help enterprises optimize energy consumption and reduce costs."
+    },
+    "section2": {
+      "title": "Core Values",
+      "items": ["Innovation", "Reliability", "Sustainability", "Customer-First"]
+    }
+  },
+  "productsPage": {
+    "title": "Our Products",
+    "subtitle": "Comprehensive Energy Management Solutions",
+    "products": [
+      {
+        "name": "Smart Monitoring System",
+        "description": "Real-time energy consumption monitoring with intelligent alerts and reporting."
+      },
+      {
+        "name": "Data Analytics Platform",
+        "description": "Advanced analytics for deep insights into energy usage patterns."
+      },
+      {
+        "name": "Energy Optimization Suite",
+        "description": "AI-powered recommendations to reduce energy costs and environmental impact."
+      }
+    ]
+  },
+  "solutionsPage": {
+    "title": "Our Solutions",
+    "subtitle": "Tailored Solutions for Your Industry",
+    "solutions": [
+      {
+        "name": "Industrial Energy Management",
+        "description": "Optimize energy usage in manufacturing and industrial operations."
+      },
+      {
+        "name": "Building Energy Management",
+        "description": "Smart solutions for commercial buildings and facilities."
+      },
+      {
+        "name": "Renewable Energy Integration",
+        "description": "Seamless integration of renewable energy sources."
+      }
+    ]
+  },
+  "casesPage": {
+    "title": "Case Studies",
+    "subtitle": "Success Stories from Our Clients",
+    "cases": [
+      {
+        "title": "Large Manufacturing Plant",
+        "company": "Fortune 500 Company",
+        "result": "30% energy cost reduction"
+      },
+      {
+        "title": "Commercial Building Complex",
+        "company": "Real Estate Developer",
+        "result": "40% peak load reduction"
+      },
+      {
+        "title": "Data Center Operations",
+        "company": "Tech Company",
+        "result": "25% energy efficiency improvement"
+      }
+    ]
+  },
+  "newsPage": {
+    "title": "News & Updates",
+    "subtitle": "Latest News from Hanli Chuneng",
+    "news": [
+      {
+        "date": "2024-12-15",
+        "title": "New AI-Powered Analytics Engine Released",
+        "summary": "We've launched our latest analytics engine with machine learning capabilities."
+      },
+      {
+        "date": "2024-11-20",
+        "title": "Partnership with Leading Tech Company",
+        "summary": "Collaboration to enhance our energy management platform."
+      },
+      {
+        "date": "2024-10-10",
+        "title": "Industry Recognition Award",
+        "summary": "Hanli Chuneng recognized as top energy management solution provider."
+      }
+    ]
+  },
+  "aboutHanli": {
+    "title": "About Hanli",
+    "description1": "We leverage the unique industry-university-research consortium of Chaowei Group and Wuhan University of Technology, dedicated to providing the world's leading new energy marine power system solutions for inland and coastal vessels, covering pure electric, hybrid power, and multi-fuel clean propulsion technologies including methanol, ammonia, and hydrogen.",
+    "description2": "Hanli New Energy focuses on providing green, efficient, and sustainable power solutions for inland and coastal shipping, covering green marine power system integration, multi-fuel hybrid engine R&D, multi-fuel supply systems, and ship energy storage systems. The company has the capability to adapt engines to diverse clean fuels such as methanol, ammonia, and hydrogen, driving a smooth transition of marine power from traditional fuels to low-carbon and zero-carbon energy.",
+    "buttonText": "Learn More"
+  },
+  "chooseHanli": {
+    "title": "Why Choose Hanli",
+    "cards": [
+      {
+        "heading": "Leaders in Green Marine Propulsion",
+        "bannerLines": ["Comprehensive R&D Service System", "Diverse Clean Fuel Adaptation"],
+        "features": [
+          {
+            "title": "Clear Strategic Positioning",
+            "description": "Focused on the green transformation of inland and coastal vessels, committed to becoming a leading global provider of comprehensive new energy marine power system solutions."
+          },
+          {
+            "title": "Clean Fuel Adaptation",
+            "description": "Capable of adapting engines to diverse low-carbon/zero-carbon clean fuels such as methanol, ammonia, and hydrogen, driving a smooth transition from traditional fuels to green energy."
+          },
+          {
+            "title": "Policy Alignment",
+            "description": "Deeply responsive to dual-carbon goals and national green shipping policies, helping customers meet increasingly stringent environmental regulations."
+          }
+        ]
+      },
+      {
+        "heading": "Top-Tier Technical R&D Strength",
+        "bannerLines": ["Industry-University-Research Integration", "Modular Integration Design"],
+        "features": [
+          {
+            "title": "Strong Backing",
+            "description": "Jointly invested and supported by Hong Kong-listed Chaowei Group and Wuhan University of Technology, integrating industrial resources and research expertise."
+          },
+          {
+            "title": "Elite Team Configuration",
+            "description": "Core R&D led by the School of Naval Architecture, Ocean and Energy Power Engineering at Wuhan University of Technology, bringing together senior technical experts from international leaders like Rolls-Royce and Wärtsilä."
+          },
+          {
+            "title": "Comprehensive R&D System",
+            "description": "Building a complete R&D architecture covering the entire marine power system lifecycle, combining international technical vision with localized implementation capabilities."
+          }
+        ]
+      },
+      {
+        "heading": "Full-Lifecycle Customized Services",
+        "bannerLines": ["Scenario-Based Solution Customization", "Regulatory Compliance Support"],
+        "features": [
+          {
+            "title": "Full-Stack Product Coverage",
+            "description": "Business encompasses green marine power system integration, multi-fuel hybrid engine R&D, multi-fuel supply systems, ship energy storage systems and other key areas."
+          },
+          {
+            "title": "Customized Solutions",
+            "description": "Through modular and integrated design, providing personalized, high-performance, and highly reliable solutions tailored to different vessel types and operational scenarios."
+          },
+          {
+            "title": "Full-Lifecycle Empowerment",
+            "description": "Providing end-to-end services from R&D, integration, and adaptation to subsequent support, helping vessel owners and builders complete their green transformation seamlessly."
+          }
+        ]
+      }
+    ]
+  },
+  "solutionsSection": {
+    "title": "Solutions",
+    "subtitle": "Hanli New Energy Breaks Through the Complex Challenges of Green Marine Propulsion",
+    "tagline": "Hanli New Energy: Innovation Driving Green Revolution.",
+    "learnMore": "Learn More",
+    "solutions": [
+      {
+        "title": "Electric Direct Drive System",
+        "description": "Providing zero-emission solutions for inland, lake, and coastal vessels. Core components include high-performance permanent magnet synchronous motors, high-density energy storage systems, DC power distribution, and intelligent propulsion control systems."
+      },
+      {
+        "title": "Hybrid Power System",
+        "description": "For vessels requiring long range and high power, intelligently coupling engines, generators, energy storage systems, and propulsion motors. Supports multiple operating modes (pure electric, generator direct drive, combined drive, smart charging)."
+      },
+      {
+        "title": "Marine Energy Storage System",
+        "description": "Marine energy storage system, derived from Chaowei Group's leading battery technology and cutting-edge research from Wuhan University of Technology, built specifically for harsh marine environments and diverse power scenarios. We provide high-safety, long-lifespan, multi-protection energy storage solutions that serve as the reliable foundation for pure electric navigation, hybrid power, and future zero-carbon fuel systems."
+      },
+      {
+        "title": "New Energy Fuel Supply System",
+        "description": "Targeting alcohol, ammonia, and hydrogen clean fuel power systems, paving the way for zero-carbon emissions. Our integrated capabilities ensure each solution is highly reliable, scenario-appropriate, and optimized for total lifecycle cost."
+      }
+    ]
+  },
+  "productIntroCard": {
+    "title": "Hybrid Power System",
+    "description": "For vessels requiring long range and high power, intelligently coupling engines, generators, energy storage systems, and propulsion motors. Supports multiple operating modes (pure electric, generator direct drive, combined drive, smart charging).",
+    "buttonText": "Learn More"
+  },
+  "caseSection": {
+    "title": "Case Studies"
+  },
+  "productCards": {
+    "electricDirectDrive": {
+      "title": "Electric Direct Drive System\nSolutions",
+      "description": "Providing zero-emission solutions for inland, lake, and coastal vessels. Core components include high-performance permanent magnet synchronous motors, high-density energy storage systems, DC power distribution, and intelligent propulsion control systems.",
+      "buttonText": "Learn More"
+    },
+    "hybridPower": {
+      "title": "Hybrid Power System\nSolutions",
+      "description": "For vessels requiring long range and high power, intelligently coupling engines, generators, energy storage systems, and propulsion motors. Supports multiple operating modes (pure electric, generator direct drive, combined drive, smart charging).",
+      "buttonText": "Learn More"
+    },
+    "shipEnergyStorage": {
+      "title": "Marine Energy Storage System\nProduct Series",
+      "description": "Optical Energy Storage and Charging Intelligent System (Marine Energy Storage System), derived from Chaowei Group's leading battery technology and cutting-edge research from Wuhan University of Technology, built specifically for harsh marine environments and diverse power scenarios. We provide high-safety, long-lifespan, multi-protection energy storage solutions that serve as the reliable foundation for pure electric navigation, hybrid power, and future zero-carbon fuel systems.",
+      "buttonText": "Learn More"
+    },
+    "hydrogenFuelSystem": {
+      "title": "Hydrogen Fuel System\nProduct Series",
+      "description": "This system pioneered flexible hydrogen liquefaction technology, abandoning traditional turbine expansion cycles and adopting independently developed high-power low-temperature refrigeration units. Production capacity can be dynamically adjusted between 20%-100%, enabling rapid liquid startup. Modular design results in compact equipment with flexible parallel expansion capabilities and high reliability redundancy. Core components include hydrogen liquefaction units, liquid nitrogen precooling units, refrigeration compressors, and liquid hydrogen storage tanks.",
+      "buttonText": "Learn More"
+    },
+    "methanolFuelSystem": {
+      "title": "Methanol Fuel System\nProduct Series",
+      "description": "The methanol fuel system mainly consists of methanol loading units, methanol barge units, and methanol supply units as key modules. Additionally, it includes inert gas systems, air instrument systems, methanol emission systems, ventilation systems, and control monitoring & safety systems as subsystems. Through the coordination of various systems, it achieves safe storage and efficient supply of methanol fuel.",
+      "buttonText": "Learn More"
     }
   }
 }
