@@ -21,7 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
 
   const news = await prisma.news.findFirst({
-    where: { slug, locale: locale as any },
+    where: {
+      slug,
+      locale: locale === "zh" ? "zh" : "en"
+    },
     select: {
       title: true,
       summary: true,
@@ -52,7 +55,10 @@ export default async function NewsDetail({ params }: Props) {
   const t = await getTranslations({ locale });
 
   const news = await prisma.news.findFirst({
-    where: { slug, locale: locale as any },
+    where: {
+      slug,
+      locale: locale === "zh" ? "zh" : "en"
+    },
     select: {
       id: true,
       title: true,

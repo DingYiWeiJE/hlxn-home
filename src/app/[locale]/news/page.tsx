@@ -23,7 +23,12 @@ export default async function LocaleNews({ params }: Props) {
   const t = await getTranslations({ locale });
 
   const items = await prisma.news.findMany({
-    where: { locale: locale as any, status: "PUBLISHED", deletedAt: null, publishedAt: { lte: new Date() } },
+    where: {
+      locale: locale === "zh" ? "zh" : "en",
+      status: "PUBLISHED",
+      deletedAt: null,
+      publishedAt: { lte: new Date() }
+    },
     orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
     select: {
       id: true,
