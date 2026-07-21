@@ -15,12 +15,16 @@ export default function Navigation() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [scrolledPast, setScrolledPast] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const scrollThreshold = (window.innerHeight * 1) / 4;
       setIsVisible(currentScrollY < lastScrollY || currentScrollY < 50);
+      setScrolledPast(currentScrollY > scrollThreshold);
       setLastScrollY(currentScrollY);
+      setMobileMenuOpen(false);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -41,7 +45,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`} style={{ backgroundColor: scrolledPast ? "#2a62bb" : "transparent" }}>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -84,47 +88,52 @@ export default function Navigation() {
               {t("nav.contact")}
             </Link>
             {/* Language Dropdown */}
-            <div className="relative">
+            <div
+              className="relative group"
+              onMouseEnter={() => setLanguageDropdownOpen(true)}
+              onMouseLeave={() => setLanguageDropdownOpen(false)}
+            >
               <button
-                onClick={() => setLanguageDropdownOpen(!languageDropdownOpen)}
                 className="p-2 text-white hover:text-gray-300 transition"
               >
-                <svg
+                <Image
+                  src="/Language.svg"
+                  alt="Language"
+                  width={24}
+                  height={24}
                   className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h.5A2.5 2.5 0 0016 5.5V3.935m0 2v5m0 0a2 2 0 102 2v-2m-2-2a2 2 0 10-2 2m2-2V3.935M6 17a2 2 0 100 4m0-4a2 2 0 110 4m0-4v2.945"
-                  />
-                </svg>
+                />
               </button>
               {languageDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-white rounded shadow-lg overflow-hidden">
-                  <button
-                    onClick={() => switchLanguage("zh")}
-                    className={`block w-full text-left px-4 py-2 transition ${
-                      locale === "zh"
-                        ? "bg-blue-600 text-white font-bold"
-                        : "text-gray-800 hover:bg-gray-100"
-                    }`}
-                  >
-                    中文
-                  </button>
-                  <button
-                    onClick={() => switchLanguage("en")}
-                    className={`block w-full text-left px-4 py-2 transition ${
-                      locale === "en"
-                        ? "bg-blue-600 text-white font-bold"
-                        : "text-gray-800 hover:bg-gray-100"
-                    }`}
-                  >
-                    English
-                  </button>
+                <div className="absolute right-0 top-full pt-1 w-32">
+                  <div className="backdrop-blur-md rounded shadow-lg overflow-hidden" style={{ backgroundColor: "rgba(100, 116, 139, 0.6)" }}>
+                    <button
+                      onClick={() => switchLanguage("zh")}
+                      className={`block w-full text-left px-4 py-2 transition ${
+                        locale === "zh"
+                          ? "bg-blue-600 text-white font-bold"
+                          : "text-white"
+                      }`}
+                      style={locale !== "zh" ? { backgroundColor: "rgba(100, 116, 139, 0.4)" } : {}}
+                      onMouseEnter={(e) => locale !== "zh" && (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)")}
+                      onMouseLeave={(e) => locale !== "zh" && (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)")}
+                    >
+                      中文
+                    </button>
+                    <button
+                      onClick={() => switchLanguage("en")}
+                      className={`block w-full text-left px-4 py-2 transition ${
+                        locale === "en"
+                          ? "bg-blue-600 text-white font-bold"
+                          : "text-white"
+                      }`}
+                      style={locale !== "en" ? { backgroundColor: "rgba(100, 116, 139, 0.4)" } : {}}
+                      onMouseEnter={(e) => locale !== "en" && (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)")}
+                      onMouseLeave={(e) => locale !== "en" && (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)")}
+                    >
+                      English
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
