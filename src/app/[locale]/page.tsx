@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
 import type { Metadata } from "next";
 import ChooseHanliSection from "./abHomeComponents/ChooseHanliSection";
@@ -10,6 +9,7 @@ import SolutionsSection from "./abHomeComponents/SolutionsSection";
 import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCard";
 import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
 import NewsCenter from "./abHomeComponents/NewsCenter";
+import SiteFooter from "@/components/SiteFooter";
 
 type Props = {
   params: Promise<{
@@ -174,7 +174,7 @@ export default async function Home({ params }: Props) {
         </div>
       </div>
 
-      <Footer />
+      <SiteFooter locale={locale} />
     </div>
   );
 }

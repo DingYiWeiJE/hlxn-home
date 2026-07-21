@@ -276,5 +276,32 @@
       "description": "The methanol fuel system mainly consists of methanol loading units, methanol barge units, and methanol supply units as key modules. Additionally, it includes inert gas systems, air instrument systems, methanol emission systems, ventilation systems, and control monitoring & safety systems as subsystems. Through the coordination of various systems, it achieves safe storage and efficient supply of methanol fuel.",
       "buttonText": "Learn More"
     }
+  },
+  "siteFooter": {
+    "company": "About Hanli",
+    "companyLinks": [
+      { "label": "Company Overview", "href": "/about" },
+      { "label": "Products", "href": "/products" },
+      { "label": "Case Studies", "href": "/cases" },
+      { "label": "News", "href": "/news" }
+    ],
+    "news": "News Center",
+    "newsLinks": [
+      { "label": "News & Updates", "href": "/news" },
+      { "label": "Exhibitions & Events", "href": "/news/exhibitions" }
+    ],
+    "careers": "Join Us",
+    "careerLinks": [
+      { "label": "Careers", "href": "/careers" }
+    ],
+    "contact": "Contact Us",
+    "phone": "Phone",
+    "phoneNumber": "027-86660081",
+    "address": "Address",
+    "addressDetail": "9th Floor, Building B, Wuhan Central Tower,\nWuchang District, Wuhan, Hubei Province",
+    "wechatQR": "Scan to Follow Hanli New Energy",
+    "copyright": "Copyright © 2026 Hanly Energy. All Rights Reserved",
+    "companyName": "Hanli New Energy (Beijing) Technology Co., Ltd. All Rights Reserved",
+    "icp": "京ICP备2026001017号-1"
   }
 }

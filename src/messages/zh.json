@@ -276,5 +276,32 @@
       "description": "甲醇燃料系统主要包括甲醇加注撬、甲醇驳运橇、甲醇供给撬等关键模块。同时，设置有惰性气体系统、空气仪表系统、甲醇排放系统、通风系统、控制监测与安全系统等子系统，通过各系统的配合，可实现甲醇燃料的安全储存与高效供应。",
       "buttonText": "了解更多"
     }
+  },
+  "siteFooter": {
+    "company": "走进汉理",
+    "companyLinks": [
+      { "label": "企业简介", "href": "/about" },
+      { "label": "产品中心", "href": "/products" },
+      { "label": "应用案例", "href": "/cases" },
+      { "label": "新闻中心", "href": "/news" }
+    ],
+    "news": "新闻中心",
+    "newsLinks": [
+      { "label": "新闻动态", "href": "/news" },
+      { "label": "展会活动", "href": "/news/exhibitions" }
+    ],
+    "careers": "加入我们",
+    "careerLinks": [
+      { "label": "诚聘英才", "href": "/careers" }
+    ],
+    "contact": "联系我们",
+    "phone": "总机",
+    "phoneNumber": "027-86660081",
+    "address": "地址",
+    "addressDetail": "湖北省武汉市武昌区\n武汉中央大厦B座九层",
+    "wechatQR": "扫码关注汉理新能源",
+    "copyright": "Copyright © 2026 Hanly Energy. All Rights Reserved",
+    "companyName": "汉理新能源（北京）科技有限责任公司 版权所有",
+    "icp": "京ICP备2026001017号-1"
   }
 }

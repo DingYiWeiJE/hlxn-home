@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 
 type Props = {
@@ -33,7 +33,7 @@ export default async function ContactPage({ params }: Props) {
       <Navigation />
       <main className="flex-grow">
       </main>
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }

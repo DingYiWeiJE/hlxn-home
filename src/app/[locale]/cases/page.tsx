@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 
 type Props = {
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function CasesContent() {
+function CasesContent({ locale }: { locale: string }) {
   const t = useTranslations();
   const page = t.raw("casesPage");
 
@@ -70,7 +70,7 @@ function CasesContent() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer locale={locale} />
     </div>
   );
 }
@@ -79,5 +79,5 @@ export default async function Cases({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <CasesContent />;
+  return <CasesContent locale={locale} />;
 }
