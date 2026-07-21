@@ -11,7 +11,10 @@ async function main() {
   const hash = await hashAdminPassword(password);
   const secret = randomBytes(32).toString("base64url");
 
-  console.log(`ADMIN_PASSWORD_HASH=${hash}`);
+  // Escape $ symbols for .env file compatibility
+  const escapedHash = hash.replace(/\$/g, '\\$');
+
+  console.log(`ADMIN_PASSWORD_HASH=${escapedHash}`);
   console.log(`ADMIN_SESSION_SECRET=${secret}`);
 }
 
