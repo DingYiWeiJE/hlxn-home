@@ -9,6 +9,7 @@ import AboutHanli from "./abHomeComponents/AboutHanli";
 import SolutionsSection from "./abHomeComponents/SolutionsSection";
 import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCard";
 import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
+import NewsCenter from "./abHomeComponents/NewsCenter";
 
 type Props = {
   params: Promise<{
@@ -126,6 +127,8 @@ export default async function Home({ params }: Props) {
         ]}
         imagePriorityCount={3}
       />
+      
+      <NewsCenter locale={locale} maxItems={3} />
       <Footer />
     </div>
   );

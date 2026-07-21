@@ -1,10 +1,6 @@
-// components/home/NewsCenter.tsx
-
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { getTranslations } from "next-intl/server";
 
 export type NewsItem = {
   id: string | number;
@@ -15,75 +11,64 @@ export type NewsItem = {
 };
 
 type NewsApiResponse = {
-  list: NewsItem[];
+  success: boolean;
+  data: {
+    items: NewsItem[];
+    pagination: {
+      total: number;
+    };
+  };
 };
 
-export type NewsCenterProps = {
-  apiUrl: string;
-  title?: string;
-  moreText?: string;
-  moreHref?: string;
+type NewsCenterProps = {
+  locale: string;
   maxItems?: number;
   className?: string;
 };
 
-export default function NewsCenter({
-  apiUrl,
-  title = "新闻中心",
-  moreText = "了解更多",
-  moreHref = "/news",
+async function fetchNews(maxItems: number = 3): Promise<NewsItem[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+    console.log(`[NewsCenter] Fetching news from: ${baseUrl}/api/news?pageSize=${maxItems}`);
+    const response = await fetch(`${baseUrl}/api/news?pageSize=${maxItems}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      throw new Error(`获取新闻失败：${response.status}`);
+    }
+
+    const data = (await response.json()) as NewsApiResponse;
+    const items = Array.isArray(data.data.items) ? data.data.items.slice(0, maxItems) : [];
+    console.log(`[NewsCenter] Successfully fetched ${items.length} news items`);
+    return items;
+  } catch (err) {
+    console.error("[NewsCenter] Failed to fetch news:", err);
+    return [];
+  }
+}
+
+export default async function NewsCenter({
+  locale,
   maxItems = 3,
   className = "",
 }: NewsCenterProps) {
-  const [newsList, setNewsList] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const t = await getTranslations({ locale });
+  const newsList = await fetchNews(maxItems);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  const moreText = t("newsCenter.moreText");
+  const moreHref = `/${locale}/news`;
+  const noNewsText = t("newsCenter.noNews");
 
-    async function fetchNews() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await fetch(apiUrl, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-          signal: controller.signal,
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error(`获取新闻失败：${response.status}`);
-        }
-
-        const data = (await response.json()) as NewsApiResponse;
-
-        setNewsList(
-          Array.isArray(data.list) ? data.list.slice(0, maxItems) : [],
-        );
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
-
-        setError(err instanceof Error ? err.message : "新闻加载失败");
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchNews();
-
-    return () => {
-      controller.abort();
-    };
-  }, [apiUrl, maxItems]);
+  // 添加 locale 前缀到每个新闻项的 href
+  const newsListWithLocale = newsList.map((item) => ({
+    ...item,
+    href: item.href ? `/${locale}${item.href}` : undefined,
+  }));
 
   return (
     <section
@@ -97,7 +82,7 @@ export default function NewsCenter({
       <div className="mx-auto max-w-[1440px]">
         <div className="flex items-center justify-between gap-6">
           <h2 className="text-3xl font-bold tracking-wide text-[#2f67bd] sm:text-4xl">
-            {title}
+            {t("newsCenter.title")}
           </h2>
 
           <Link
@@ -120,23 +105,15 @@ export default function NewsCenter({
         </div>
 
         <div className="mt-10 sm:mt-12">
-          {loading && <NewsSkeleton count={maxItems} />}
-
-          {!loading && error && (
+          {newsList.length === 0 && (
             <div className="flex min-h-48 items-center justify-center rounded-xl bg-slate-50 px-6 text-center text-sm text-slate-500">
-              {error}
+              {noNewsText}
             </div>
           )}
 
-          {!loading && !error && newsList.length === 0 && (
-            <div className="flex min-h-48 items-center justify-center rounded-xl bg-slate-50 px-6 text-center text-sm text-slate-500">
-              暂无新闻内容
-            </div>
-          )}
-
-          {!loading && !error && newsList.length > 0 && (
+          {newsList.length > 0 && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {newsList.map((item) => (
+              {newsListWithLocale.map((item) => (
                 <NewsCard key={item.id} item={item} />
               ))}
             </div>
@@ -216,27 +193,6 @@ function NewsCard({ item }: { item: NewsItem }) {
     >
       {content}
     </Link>
-  );
-}
-
-function NewsSkeleton({ count }: { count: number }) {
-  return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-      {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="overflow-hidden rounded-lg bg-white shadow-[0_2px_10px_rgba(15,23,42,0.1)]"
-        >
-          <div className="aspect-[16/9] animate-pulse bg-slate-200" />
-
-          <div className="space-y-3 px-4 py-4 sm:px-5">
-            <div className="h-5 animate-pulse rounded bg-slate-200" />
-            <div className="h-5 w-3/4 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-24 animate-pulse rounded bg-slate-100" />
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }
 

@@ -241,6 +241,11 @@
   "caseSection": {
     "title": "Case Studies"
   },
+  "newsCenter": {
+    "title": "News Center",
+    "moreText": "Learn More",
+    "noNews": "No news available"
+  },
   "productCards": {
     "electricDirectDrive": {
       "title": "Electric Direct Drive System\nSolutions",

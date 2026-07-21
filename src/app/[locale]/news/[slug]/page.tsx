@@ -5,6 +5,7 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import TiptapContent from "@/components/news/TiptapContent";
+import type { TiptapNode } from "@/lib/news/tiptap";
 import Link from "next/link";
 
 type Props = {
@@ -72,7 +73,7 @@ export default async function NewsDetail({ params }: Props) {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <Link href={`/${locale}/news`} className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800">
-        ← {t("news.back", "返回新闻列表")}
+        ← {t("news.back")}
       </Link>
 
       {news.coverImage && (
@@ -94,14 +95,14 @@ export default async function NewsDetail({ params }: Props) {
 
         {news.content && (
           <div className="prose prose-sm max-w-none">
-            <TiptapContent content={news.content} />
+            <TiptapContent content={news.content as TiptapNode} />
           </div>
         )}
       </article>
 
       <nav className="mt-12 border-t border-slate-200 pt-8">
         <Link href={`/${locale}/news`} className="inline-flex items-center text-blue-600 hover:text-blue-800">
-          ← {t("news.back", "返回新闻列表")}
+          ← {t("news.back")}
         </Link>
       </nav>
     </main>

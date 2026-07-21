@@ -241,6 +241,11 @@
   "caseSection": {
     "title": "应用案例"
   },
+  "newsCenter": {
+    "title": "新闻中心",
+    "moreText": "了解更多",
+    "noNews": "暂无新闻内容"
+  },
   "productCards": {
     "electricDirectDrive": {
       "title": "电力直推系统\n解决方案",
