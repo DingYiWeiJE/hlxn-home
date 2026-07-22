@@ -31,6 +31,16 @@ export type ImageCarouselProps = {
    * 桌面端一屏展示数量。
    */
   desktopVisibleCount?: number;
+
+  /**
+   * 是否开启自动轮播，默认 true
+   */
+  autoplay?: boolean;
+
+  /**
+   * 自动轮播间隔（毫秒），默认 5000
+   */
+  autoplayInterval?: number;
 };
 
 export default function ImageCarousel({
@@ -40,6 +50,8 @@ export default function ImageCarousel({
   imageFit = "cover",
   imageAspectRatio,
   desktopVisibleCount = 3,
+  autoplay = true,
+  autoplayInterval = 2000,
 }: ImageCarouselProps) {
   const normalizedImages: CarouselImage[] = images.map((image, index) => {
     if (typeof image === "string") {
@@ -67,6 +79,8 @@ export default function ImageCarousel({
       imageFit={imageFit}
       imageAspectRatio={imageAspectRatio}
       desktopVisibleCount={desktopVisibleCount}
+      autoplay={autoplay}
+      autoplayInterval={autoplayInterval}
     />
   );
 }

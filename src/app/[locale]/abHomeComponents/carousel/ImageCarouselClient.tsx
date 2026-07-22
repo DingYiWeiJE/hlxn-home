@@ -21,6 +21,8 @@ type ImageCarouselClientProps = {
   imageFit?: "cover" | "contain";
   imageAspectRatio?: string;
   desktopVisibleCount?: number;
+  autoplay?: boolean;
+  autoplayInterval?: number;
 };
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
@@ -35,6 +37,8 @@ export default function ImageCarouselClient({
   imageFit = "cover",
   imageAspectRatio,
   desktopVisibleCount = 3,
+  autoplay = true,
+  autoplayInterval = 5000,
 }: ImageCarouselClientProps) {
   const [visibleCount, setVisibleCount] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -43,6 +47,7 @@ export default function ImageCarouselClient({
 
   const touchStartX = useRef<number | null>(null);
   const touchCurrentX = useRef<number | null>(null);
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const imageCount = images.length;
   const canSlide = imageCount > 1;
@@ -105,9 +110,39 @@ export default function ImageCarouselClient({
     return () => cancelAnimationFrame(frame);
   }, [canSlide, effectiveVisibleCount]);
 
+  /*
+   * 自动轮播效果
+   */
+  useEffect(() => {
+    if (!autoplay || !canSlide) {
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current);
+        autoplayTimerRef.current = null;
+      }
+      return;
+    }
+
+    autoplayTimerRef.current = setInterval(() => {
+      setTransitionEnabled(true);
+      setIsAnimating(true);
+      setCurrentIndex((previousIndex) => previousIndex + 1);
+    }, autoplayInterval);
+
+    return () => {
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current);
+        autoplayTimerRef.current = null;
+      }
+    };
+  }, [autoplay, autoplayInterval, canSlide]);
+
   const goToPrevious = useCallback(() => {
     if (!canSlide || isAnimating) {
       return;
+    }
+
+    if (autoplayTimerRef.current) {
+      clearInterval(autoplayTimerRef.current);
     }
 
     setTransitionEnabled(true);
@@ -120,6 +155,10 @@ export default function ImageCarouselClient({
       return;
     }
 
+    if (autoplayTimerRef.current) {
+      clearInterval(autoplayTimerRef.current);
+    }
+
     setTransitionEnabled(true);
     setIsAnimating(true);
     setCurrentIndex((previousIndex) => previousIndex + 1);
@@ -129,6 +168,10 @@ export default function ImageCarouselClient({
     (imageIndex: number) => {
       if (!canSlide || isAnimating) {
         return;
+      }
+
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current);
       }
 
       setTransitionEnabled(true);
