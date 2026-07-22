@@ -18,10 +18,12 @@ type ImageCarouselClientProps = {
   images: CarouselImage[];
   className?: string;
   imagePriorityCount?: number;
+  imageFit?: "cover" | "contain";
+  imageAspectRatio?: string;
+  desktopVisibleCount?: number;
 };
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
-const DESKTOP_VISIBLE_COUNT = 3;
 const DESKTOP_GAP = 16;
 const SWIPE_THRESHOLD = 50;
 const TRANSITION_DURATION = 500;
@@ -30,6 +32,9 @@ export default function ImageCarouselClient({
   images,
   className = "",
   imagePriorityCount = 1,
+  imageFit = "cover",
+  imageAspectRatio,
+  desktopVisibleCount = 3,
 }: ImageCarouselClientProps) {
   const [visibleCount, setVisibleCount] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -72,7 +77,7 @@ export default function ImageCarouselClient({
 
     const updateVisibleCount = () => {
       const nextVisibleCount = mediaQuery.matches
-        ? DESKTOP_VISIBLE_COUNT
+        ? Math.max(1, desktopVisibleCount)
         : 1;
 
       setVisibleCount(nextVisibleCount);
@@ -84,7 +89,7 @@ export default function ImageCarouselClient({
     return () => {
       mediaQuery.removeEventListener("change", updateVisibleCount);
     };
-  }, []);
+  }, [desktopVisibleCount]);
 
   /*
    * 可视数量变化时，将索引重置到原始图片区域的第一张。
@@ -150,8 +155,7 @@ export default function ImageCarouselClient({
     }
 
     const firstOriginalIndex = effectiveVisibleCount;
-    const firstTailCloneIndex =
-      effectiveVisibleCount + imageCount;
+    const firstTailCloneIndex = effectiveVisibleCount + imageCount;
 
     if (currentIndex >= firstTailCloneIndex) {
       setTransitionEnabled(false);
@@ -174,15 +178,11 @@ export default function ImageCarouselClient({
   };
 
   const handleTouchEnd = () => {
-    if (
-      touchStartX.current === null ||
-      touchCurrentX.current === null
-    ) {
+    if (touchStartX.current === null || touchCurrentX.current === null) {
       return;
     }
 
-    const distance =
-      touchStartX.current - touchCurrentX.current;
+    const distance = touchStartX.current - touchCurrentX.current;
 
     if (Math.abs(distance) >= SWIPE_THRESHOLD) {
       if (distance > 0) {
@@ -201,10 +201,7 @@ export default function ImageCarouselClient({
    * 克隆区域也会归一化为真实图片索引。
    */
   const activeImageIndex = canSlide
-    ? normalizeIndex(
-        currentIndex - effectiveVisibleCount,
-        imageCount,
-      )
+    ? normalizeIndex(currentIndex - effectiveVisibleCount, imageCount)
     : 0;
 
   /*
@@ -218,14 +215,11 @@ export default function ImageCarouselClient({
    * = (100% - 32px) / 3 + 16px
    * = 100% / 3 + 16px / 3
    */
-  const gap =
-    effectiveVisibleCount > 1 ? DESKTOP_GAP : 0;
+  const gap = effectiveVisibleCount > 1 ? DESKTOP_GAP : 0;
 
-  const translatePercent =
-    (currentIndex * 100) / effectiveVisibleCount;
+  const translatePercent = (currentIndex * 100) / effectiveVisibleCount;
 
-  const translateGap =
-    (currentIndex * gap) / effectiveVisibleCount;
+  const translateGap = (currentIndex * gap) / effectiveVisibleCount;
 
   const trackTransform = `translate3d(calc(-${translatePercent}% - ${translateGap}px), 0, 0)`;
 
@@ -263,9 +257,7 @@ export default function ImageCarouselClient({
             style={{
               gap: `${gap}px`,
               transform: trackTransform,
-              transitionProperty: transitionEnabled
-                ? "transform"
-                : "none",
+              transitionProperty: transitionEnabled ? "transform" : "none",
               transitionDuration: transitionEnabled
                 ? `${TRANSITION_DURATION}ms`
                 : "0ms",
@@ -277,45 +269,50 @@ export default function ImageCarouselClient({
               const originalIndex = getOriginalImageIndex({
                 renderedIndex,
                 imageCount,
-                cloneCount: canSlide
-                  ? effectiveVisibleCount
-                  : 0,
+                cloneCount: canSlide ? effectiveVisibleCount : 0,
               });
 
               return (
                 <div
                   key={`${image.src}-${renderedIndex}`}
                   className={[
-                    "relative shrink-0 overflow-hidden bg-slate-100",
-                    "aspect-[4/3]",
-                    "lg:aspect-[1.43/1]",
+                    "relative shrink-0 overflow-hidden",
+                    imageFit === "contain" ? "bg-white" : "bg-slate-100",
+
+                    // 自定义比例时，不应用默认响应式比例。
+                    imageAspectRatio ? "" : "aspect-[4/3] lg:aspect-[1.43/1]",
                   ].join(" ")}
                   style={{
                     width:
                       effectiveVisibleCount === 1
                         ? "100%"
                         : `calc((100% - ${
-                            gap *
-                            (effectiveVisibleCount - 1)
+                            gap * (effectiveVisibleCount - 1)
                           }px) / ${effectiveVisibleCount})`,
+
+                    ...(imageAspectRatio
+                      ? {
+                          aspectRatio: imageAspectRatio,
+                        }
+                      : {}),
                   }}
-                  aria-hidden={
-                    originalIndex !== activeImageIndex
-                  }
+                  aria-hidden={originalIndex !== activeImageIndex}
                 >
                   <Image
                     src={image.src}
                     alt={image.alt ?? ""}
                     fill
-                    priority={
-                      originalIndex < imagePriorityCount
-                    }
+                    priority={originalIndex < imagePriorityCount}
                     sizes={
                       effectiveVisibleCount === 1
                         ? "90vw"
-                        : "(min-width: 1024px) 31vw, 90vw"
+                        : `(min-width: 1024px) ${Math.ceil(
+                            100 / effectiveVisibleCount,
+                          )}vw, 90vw`
                     }
-                    className="object-cover"
+                    className={
+                      imageFit === "contain" ? "object-contain" : "object-cover"
+                    }
                     draggable={false}
                   />
                 </div>
@@ -338,8 +335,7 @@ export default function ImageCarouselClient({
           aria-label="选择轮播图片"
         >
           {images.map((image, imageIndex) => {
-            const isActive =
-              imageIndex === activeImageIndex;
+            const isActive = imageIndex === activeImageIndex;
 
             return (
               <button
@@ -375,11 +371,7 @@ type CarouselArrowProps = {
   disabled: boolean;
 };
 
-function CarouselArrow({
-  direction,
-  onClick,
-  disabled,
-}: CarouselArrowProps) {
+function CarouselArrow({ direction, onClick, disabled }: CarouselArrowProps) {
   const isPrevious = direction === "previous";
 
   return (
@@ -466,8 +458,5 @@ function getOriginalImageIndex({
     return 0;
   }
 
-  return normalizeIndex(
-    renderedIndex - cloneCount,
-    imageCount,
-  );
+  return normalizeIndex(renderedIndex - cloneCount, imageCount);
 }

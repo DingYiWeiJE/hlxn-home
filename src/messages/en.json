@@ -49,19 +49,6 @@
       "contact": "Contact Us"
     }
   },
-  "aboutPage": {
-    "title": "About Us",
-    "subtitle": "Leading Intelligent Energy Management Solutions Provider",
-    "description": "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide.",
-    "section1": {
-      "title": "Company Overview",
-      "content": "Founded in 2020, Hanli Chuneng focuses on intelligent energy management solutions, combining IoT technology, big data analysis, and AI algorithms to help enterprises optimize energy consumption and reduce costs."
-    },
-    "section2": {
-      "title": "Core Values",
-      "items": ["Innovation", "Reliability", "Sustainability", "Customer-First"]
-    }
-  },
   "productsPage": {
     "title": "Our Products",
     "subtitle": "Comprehensive Energy Management Solutions",
@@ -276,6 +263,41 @@
       "description": "The methanol fuel system mainly consists of methanol loading units, methanol barge units, and methanol supply units as key modules. Additionally, it includes inert gas systems, air instrument systems, methanol emission systems, ventilation systems, and control monitoring & safety systems as subsystems. Through the coordination of various systems, it achieves safe storage and efficient supply of methanol fuel.",
       "buttonText": "Learn More"
     }
+  },
+  "aboutPage": {
+    "header": "About Hanli",
+    "headerSubtitle": "Focused on Marine New Energy Power System Solutions.",
+    "companyIntroTitle": "Company Overview",
+    "companyIntro": [
+      "Hanli New Energy (Beijing) Technology Co., Ltd. (HANLY ENERGY) is a high-tech enterprise in the maritime new energy field jointly invested and built by Hong Kong-listed Chaowei Group and Wuhan University of Technology.",
+      "The company is anchored in the inland and coastal green shipping sector, with forward-looking technology layout for ocean scenarios, dedicated to providing lifecycle low-carbon and zero-carbon power systems and supporting infrastructure solutions for maritime ecosystem participants, fully empowering the green transformation of shipping.",
+      "The company possesses deep research and development genes, with the core R&D team led by the School of Naval Architecture, Ocean and Energy Power Engineering at Wuhan University of Technology. Relying on the university's research platform, the company has established an integrated mechanism of 'talent cultivation, scientific research, product development, achievement transformation, and standard setting', jointly participating with ship inspection institutions in industry regulation and standard setting, continuously creating industry-leading green maritime power technology and products.",
+      "With new energy maritime power system integration as its core, the company focuses on pure electric and hybrid power systems and supporting infrastructure solutions, providing customers with comprehensive lifecycle services including design consultation, R&D and manufacturing, system integration, engineering delivery, and after-sales maintenance. Integrating high-quality industry resources and building an integrated product matrix of power, electrical control, energy storage, power distribution, and fuel supply adapted to maritime scenarios, providing shipyards, vessel owners, and port operators with safe, stable, efficient, reliable, and clean integrated solutions, accelerating the low-carbon and zero-carbon transformation of the maritime industry.",
+      "In the future, the company will continue to be supported by core R&D technology and engineering delivery capabilities, using technological innovation to shape new productive forces in the maritime industry, and leading the innovative upgrade and high-quality development of the green shipping industry."
+    ],
+    "visionTitle": "Vision & Mission",
+    "vision": "Innovation Driving Green Revolution",
+    "mission": "Providing Excellent Clean Energy System Solutions to the World",
+    "values": "Sunshine, Happiness, Efficiency & Excellence · Maritime China Heart, Hanli New Energy",
+    "patentTitle": "Patents & Certifications",
+    "patentPeriod": "2024-2026",
+    "patentItems": [
+      {
+        "number": "28",
+        "label": "National Major Scientific and Technological Project"
+      },
+      {
+        "number": "60",
+        "label": "Independent Intellectual Property"
+      },
+      {
+        "number": "59",
+        "label": "Landed Projects"
+      }
+    ],
+    "honorTitle": "Company Honors",
+    "mapTitle": "Controller Production Workshop",
+    "mapDescription": "Covering SMT placement, DIP insertion, program burning, aging testing, function verification and other full processes, achieving one-stop production from PCB to finished product."
   },
   "siteFooter": {
     "company": "About Hanli",
