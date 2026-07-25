@@ -10,8 +10,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const news = await prisma.news.findUnique({ where: { id } });
     if (!news) {
-      const error = new Error("新闻不存在");
-      (error as any).status = 404;
+      const error = new Error("新闻不存在") as Error & { status?: number };
+      error.status = 404;
       throw error;
     }
     return ok(news);

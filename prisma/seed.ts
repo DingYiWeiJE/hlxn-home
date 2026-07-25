@@ -36,12 +36,12 @@ async function main() {
 
   for (const [title, slug, image, locale] of rows) {
     await prisma.news.upsert({
-      where: { slug_locale: { slug, locale: locale as any } },
+      where: { slug_locale: { slug, locale: locale as "zh" | "en" } },
       update: {},
       create: {
         title,
         slug,
-        locale: locale as any,
+        locale: locale as "zh" | "en",
         summary: "这是一条新闻 seed 数据，用于本地开发和页面验证。",
         coverImage: image,
         coverImageAlt: "示例图片",

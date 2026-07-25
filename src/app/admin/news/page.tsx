@@ -24,29 +24,29 @@ export default function AdminNewsPage() {
   const [error, setError] = useState("");
   const [locale, setLocale] = useState<"zh" | "en">("zh");
 
-  const loadNews = async () => {
-    try {
-      const url = new URL("/api/admin/news", window.location.origin);
-      url.searchParams.set("locale", locale);
-      const response = await fetch(url.toString());
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.replace("/admin/login");
-          return;
-        }
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = (await response.json()) as { success: boolean; items?: NewsItem[]; data?: { items: NewsItem[] } };
-      const newsList = data.items || data.data?.items || [];
-      setItems(newsList);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "加载失败");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const url = new URL("/api/admin/news", window.location.origin);
+        url.searchParams.set("locale", locale);
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.replace("/admin/login");
+            return;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = (await response.json()) as { success: boolean; items?: NewsItem[]; data?: { items: NewsItem[] } };
+        const newsList = data.items || data.data?.items || [];
+        setItems(newsList);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "加载失败");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadNews();
   }, [router, locale]);
 
@@ -124,7 +124,7 @@ export default function AdminNewsPage() {
                   <td className="px-4 py-3">{item.publishedAt ? new Date(item.publishedAt).toLocaleString() : "-"}</td>
                   <td className="px-4 py-3">{new Date(item.updatedAt).toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} onUpdate={loadNews} />
+                    <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} onUpdate={() => window.location.reload()} />
                   </td>
                 </tr>
               ))}
@@ -139,7 +139,7 @@ export default function AdminNewsPage() {
           <div key={item.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-start justify-between gap-3">
               <h3 className="flex-1 text-base font-semibold text-slate-800">{item.title}</h3>
-              <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} onUpdate={loadNews} />
+              <AdminNewsActions id={item.id} deleted={Boolean(item.deletedAt)} onUpdate={() => window.location.reload()} />
             </div>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
+import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
 
@@ -232,7 +233,7 @@ async function PatentSection({ locale }: { locale: string }) {
           {patents.map((item, index) => (
             <div key={index} className="text-center">
               <AnimatedCounter
-                value={parseInt(item.number as any)}
+                value={parseInt(item.number as string)}
                 duration={1600 + index * 200}
                 delay={index * 120}
                 className="block text-4xl md:text-6xl lg:text-7xl font-bold tabular-nums leading-none text-[#2365c4]"
@@ -273,9 +274,11 @@ async function MapSection({ locale }: { locale: string }) {
       <section className="bg-white py-16">
         <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="flex justify-center">
-            <img
+            <Image
               src="/images/about/map.png"
               alt="Company Map"
+              width={1440}
+              height={600}
               className="w-full h-auto"
             />
           </div>

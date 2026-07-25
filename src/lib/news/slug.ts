@@ -22,7 +22,7 @@ export async function ensureUniqueSlug(slug: string, locale: string, ignoreId?: 
 
   while (true) {
     const existing = await prisma.news.findFirst({
-      where: { slug: candidate, locale: locale as any },
+      where: { slug: candidate, locale: locale as "zh" | "en" },
       select: { id: true },
     });
 

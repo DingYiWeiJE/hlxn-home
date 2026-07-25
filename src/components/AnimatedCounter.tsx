@@ -15,27 +15,24 @@ export default function AnimatedCounter({
   delay = 0,
   className,
 }: AnimatedCounterProps) {
-  const [displayValue, setDisplayValue] = useState(0);
+  const [displayValue, setDisplayValue] = useState(value);
   const counterRef = useRef<HTMLSpanElement>(null);
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     const element = counterRef.current;
-
     if (!element) return;
 
-    // 尊重用户系统中的“减少动态效果”设置
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (prefersReducedMotion) {
-      setDisplayValue(value);
-      return;
-    }
-
     let animationFrameId: number;
     let delayTimer: ReturnType<typeof setTimeout>;
+
+    if (prefersReducedMotion) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -51,13 +48,11 @@ export default function AnimatedCounter({
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // easeOutCubic：前期增长较快，结尾平滑减速
             const easedProgress = 1 - Math.pow(1 - progress, 3);
             const currentValue = Math.round(value * easedProgress);
 
-            setDisplayValue(currentValue);
-
             if (progress < 1) {
+              setDisplayValue(currentValue);
               animationFrameId = requestAnimationFrame(animate);
             } else {
               setDisplayValue(value);
@@ -68,7 +63,6 @@ export default function AnimatedCounter({
         }, delay);
       },
       {
-        // 统计区域约有 25% 进入视口时启动
         threshold: 0.25,
       },
     );
