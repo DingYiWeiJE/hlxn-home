@@ -233,7 +233,7 @@ async function PatentSection({ locale }: { locale: string }) {
           {patents.map((item, index) => (
             <div key={index} className="text-center">
               <AnimatedCounter
-                value={parseInt(item.number as string)}
+                value={item.number}
                 duration={1600 + index * 200}
                 delay={index * 120}
                 className="block text-4xl md:text-6xl lg:text-7xl font-bold tabular-nums leading-none text-[#2365c4]"
