@@ -13,6 +13,8 @@ export const errorCodes = [
   "INVALID_IMAGE",
   "INVALID_MEDIA_PATH",
   "UPLOAD_FAILED",
+  "NOT_FOUND",
+  "BAD_REQUEST",
   "INTERNAL_SERVER_ERROR",
 ] as const;
 
