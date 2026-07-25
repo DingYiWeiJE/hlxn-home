@@ -28,7 +28,7 @@ export default function AdminLoginForm() {
       return;
     }
 
-    router.replace("/admin/news");
+    router.replace("/admin");
     router.refresh();
   }
 

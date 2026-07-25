@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
         const result = (await response.json()) as { success: boolean; data: { authenticated: boolean } };
         const authenticated = result.data?.authenticated ?? false;
         if (authenticated) {
-          router.replace("/admin/news");
+          router.replace("/admin");
         } else {
           setIsLoading(false);
         }
