@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -27,6 +28,26 @@ const content = (image: string) => ({
 });
 
 async function main() {
+  // Create default super admin
+  const hashedPassword = await bcrypt.hash("changeme123", 12);
+  const admin = await prisma.user.upsert({
+    where: { username: "admin" },
+    update: {},
+    create: {
+      username: "admin",
+      email: "admin@hanli.com",
+      password: hashedPassword,
+      role: UserRole.SUPER_ADMIN,
+      isActive: true,
+    },
+  });
+  console.log("✓ Default super admin created/updated");
+  console.log(`  Username: ${admin.username}`);
+  console.log(`  Email: ${admin.email}`);
+  console.log(`  Role: ${admin.role}`);
+  console.log(`  Temporary password: changeme123\n`);
+
+  // Seed news data
   const now = new Date();
   const rows = [
     ["公司新闻示例一", "demo-news-1", "/media/news/demo/example-1.webp", "zh"],
@@ -54,6 +75,7 @@ async function main() {
       },
     });
   }
+  console.log("✓ News seed data created");
 }
 
 main()

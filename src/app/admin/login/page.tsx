@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const url = new URL("/api/admin/session", window.location.origin);
+        const url = new URL("/api/auth/session", window.location.origin);
         const response = await fetch(url.toString());
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
