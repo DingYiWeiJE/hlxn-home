@@ -26,10 +26,10 @@ const roleLabels = {
 };
 
 const roleColors = {
-  SUPER_ADMIN: "text-red-700 bg-red-100",
-  ADMIN: "text-blue-700 bg-blue-100",
-  EDITOR: "text-green-700 bg-green-100",
-  VIEWER: "text-gray-700 bg-gray-100",
+  SUPER_ADMIN: "from-red-500 to-red-600",
+  ADMIN: "from-blue-500 to-blue-600",
+  EDITOR: "from-green-500 to-green-600",
+  VIEWER: "from-gray-500 to-gray-600",
 };
 
 export default function AdminDashboard() {
@@ -42,7 +42,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        // Check session and get current user
         const sessionResponse = await fetch("/api/auth/session");
         if (!sessionResponse.ok) {
           router.replace("/admin/login");
@@ -61,7 +60,6 @@ export default function AdminDashboard() {
 
         setUser(sessionData.data.user);
 
-        // Load dashboard stats
         const statsResponse = await fetch("/api/admin/stats");
         if (statsResponse.ok) {
           const statsData = (await statsResponse.json()) as {
@@ -85,119 +83,223 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="text-center text-slate-600">加载中...</div>
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">加载中...</p>
+          </div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {error && (
-        <div className="mb-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
-      )}
-
-      {/* Welcome Section */}
-      <div className="mb-12">
-        <div className="rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 p-8">
-          <h1 className="mb-2 text-3xl font-bold text-slate-900">
-            欢迎回来，{user?.username}! 👋
-          </h1>
-          <p className="text-slate-600">
-            角色: <span className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${roleColors[user?.role || "VIEWER"]}`}>
-              {roleLabels[user?.role || "VIEWER"]}
-            </span>
-          </p>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      {stats && (
-        <div className="mb-12 grid gap-6 md:grid-cols-4">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="text-sm font-medium text-slate-600">总用户数</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{stats.totalUsers}</div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="text-sm font-medium text-slate-600">新闻总数</div>
-            <div className="mt-2 text-3xl font-bold text-slate-900">{stats.totalNews}</div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="text-sm font-medium text-slate-600">已发布</div>
-            <div className="mt-2 text-3xl font-bold text-green-600">{stats.publishedNews}</div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="text-sm font-medium text-slate-600">草稿</div>
-            <div className="mt-2 text-3xl font-bold text-orange-600">{stats.draftNews}</div>
-          </div>
+        <div className="fixed top-6 right-6 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-md">
+          <p className="font-medium">{error}</p>
         </div>
       )}
 
-      {/* Quick Access Cards */}
-      <div className="mb-12">
-        <h2 className="mb-6 text-xl font-semibold text-slate-900">快速访问</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Users Management */}
-          <Link href="/admin/users" className="group">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-blue-300">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-                <span className="text-2xl">👥</span>
-              </div>
-              <h3 className="mb-2 font-semibold text-slate-900 group-hover:text-blue-600">用户管理</h3>
-              <p className="text-sm text-slate-600">创建、编辑和管理系统用户账户</p>
-              <div className="mt-4 flex items-center text-sm text-blue-600 opacity-0 transition group-hover:opacity-100">
-                进入 →
-              </div>
-            </div>
-          </Link>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        {/* Welcome Hero Section */}
+        <div className="mb-12">
+          <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${roleColors[user?.role || "VIEWER"]} p-8 sm:p-12 text-white shadow-2xl`}>
+            {/* Background Pattern */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-40 -mt-40"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mb-32"></div>
 
-          {/* News Management */}
-          <Link href="/admin/news" className="group">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-green-300">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-                <span className="text-2xl">📰</span>
+            {/* Content */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-4xl">
+                  👤
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold mb-1">欢迎回来，{user?.username}！</h1>
+                  <p className="text-white/90 text-lg">管理你的系统，保持一切井然有序</p>
+                </div>
               </div>
-              <h3 className="mb-2 font-semibold text-slate-900 group-hover:text-green-600">新闻管理</h3>
-              <p className="text-sm text-slate-600">创建、编辑和发布新闻文章</p>
-              <div className="mt-4 flex items-center text-sm text-green-600 opacity-0 transition group-hover:opacity-100">
-                进入 →
-              </div>
-            </div>
-          </Link>
 
-          {/* Media Management */}
-          <div className="group">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-purple-300 opacity-50 cursor-not-allowed">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-                <span className="text-2xl">🖼️</span>
-              </div>
-              <h3 className="mb-2 font-semibold text-slate-900">媒体管理</h3>
-              <p className="text-sm text-slate-600">即将推出</p>
-              <div className="mt-4 flex items-center text-sm text-purple-600">
-                开发中
+              <div className="flex flex-wrap gap-4 items-center">
+                <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
+                  角色: {roleLabels[user?.role || "VIEWER"]}
+                </span>
+                {user?.email && (
+                  <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
+                    {user.email}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Recent Activities - Placeholder */}
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-xl font-semibold text-slate-900">最近活动</h2>
-        <p className="text-center text-slate-500">暂无最近活动</p>
-      </div>
+        {/* Stats Grid */}
+        {stats && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">系统概览</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {/* Total Users */}
+              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-blue-300">
+                <div className="absolute top-6 right-6 text-4xl opacity-20">👥</div>
+                <div className="relative z-10">
+                  <p className="text-slate-600 text-sm font-medium mb-2">总用户数</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-blue-600">{stats.totalUsers}</span>
+                    <span className="text-xs text-slate-500">用户</span>
+                  </div>
+                </div>
+              </div>
 
-      {/* Help & Documentation */}
-      <div className="mt-12 rounded-lg bg-slate-50 p-6">
-        <h3 className="mb-4 font-semibold text-slate-900">需要帮助？</h3>
-        <ul className="space-y-2 text-sm text-slate-600">
-          <li>• 查看用户文档了解如何管理用户和设置权限</li>
-          <li>• 访问新闻管理系统发布和管理内容</li>
-          <li>• 联系管理员解决任何技术问题</li>
-        </ul>
+              {/* Total News */}
+              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-purple-300">
+                <div className="absolute top-6 right-6 text-4xl opacity-20">📰</div>
+                <div className="relative z-10">
+                  <p className="text-slate-600 text-sm font-medium mb-2">新闻总数</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-purple-600">{stats.totalNews}</span>
+                    <span className="text-xs text-slate-500">篇</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Published */}
+              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-green-300">
+                <div className="absolute top-6 right-6 text-4xl opacity-20">✅</div>
+                <div className="relative z-10">
+                  <p className="text-slate-600 text-sm font-medium mb-2">已发布</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-green-600">{stats.publishedNews}</span>
+                    <span className="text-xs text-slate-500">篇</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drafts */}
+              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-orange-300">
+                <div className="absolute top-6 right-6 text-4xl opacity-20">📝</div>
+                <div className="relative z-10">
+                  <p className="text-slate-600 text-sm font-medium mb-2">草稿</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-orange-600">{stats.draftNews}</span>
+                    <span className="text-xs text-slate-500">篇</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">快速操作</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Users Management */}
+            <Link href="/admin/users" className="group block">
+              <div className="relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 hover:border-blue-300 h-full">
+                {/* Top accent bar */}
+                <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+
+                <div className="p-8">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 text-3xl group-hover:scale-110 transition-transform">
+                    👥
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">用户管理</h3>
+                  <p className="text-slate-600 text-sm mb-6">创建、编辑和管理系统用户账户，分配角色和权限</p>
+
+                  <div className="inline-flex items-center gap-2 text-blue-600 font-medium text-sm group-hover:gap-3 transition-all">
+                    <span>进入系统</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* News Management */}
+            <Link href="/admin/news" className="group block">
+              <div className="relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-300 border border-slate-100 hover:border-purple-300 h-full">
+                <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600"></div>
+
+                <div className="p-8">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 text-3xl group-hover:scale-110 transition-transform">
+                    📰
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">新闻管理</h3>
+                  <p className="text-slate-600 text-sm mb-6">创建、编辑、发布和管理新闻文章内容</p>
+
+                  <div className="inline-flex items-center gap-2 text-purple-600 font-medium text-sm group-hover:gap-3 transition-all">
+                    <span>进入系统</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Media Management - Coming Soon */}
+            <div className="group block">
+              <div className="relative rounded-xl overflow-hidden bg-slate-50 shadow-sm border border-slate-200 h-full opacity-60">
+                <div className="h-1 bg-gradient-to-r from-gray-300 to-gray-400"></div>
+
+                <div className="p-8">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 text-3xl">
+                    🖼️
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-600 mb-2">媒体管理</h3>
+                  <p className="text-slate-500 text-sm mb-6">管理系统中的所有媒体资源和文件</p>
+
+                  <div className="inline-flex items-center gap-2 text-slate-400 font-medium text-sm">
+                    <span className="px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-xs font-semibold">即将推出</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Activity and Help Section */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Recent Activity */}
+          <div className="rounded-xl bg-white p-8 shadow-sm border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <span className="text-xl">📊</span>
+              最近活动
+            </h3>
+            <div className="text-center py-8">
+              <div className="text-5xl mb-3">✨</div>
+              <p className="text-slate-500 font-medium">暂无最近活动</p>
+              <p className="text-slate-400 text-sm mt-2">活动日志将在这里显示</p>
+            </div>
+          </div>
+
+          {/* Help & Tips */}
+          <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-8 border border-blue-200">
+            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <span className="text-xl">💡</span>
+              快速提示
+            </h3>
+            <ul className="space-y-4">
+              <li className="flex gap-3">
+                <span className="text-blue-600 font-bold">→</span>
+                <span className="text-slate-700"><strong>用户管理：</strong>管理系统用户、分配角色权限</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-blue-600 font-bold">→</span>
+                <span className="text-slate-700"><strong>新闻管理：</strong>发布和管理公司新闻内容</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-blue-600 font-bold">→</span>
+                <span className="text-slate-700"><strong>权限检查：</strong>仅超级管理员可访问用户管理</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </main>
   );
