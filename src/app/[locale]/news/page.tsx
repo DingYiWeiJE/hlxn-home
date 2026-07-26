@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/SiteFooter";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -40,23 +40,28 @@ export default async function LocaleNews({ params }: Props) {
     },
   });
 
-  return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mb-8 text-3xl font-semibold">{t("news.title")}</h1>
-      <div className="grid gap-6 md:grid-cols-2">
-        {items.map((item) => (
-          <Link key={item.id} href={`/${locale}/news/${item.slug}`} className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-            <div className="relative aspect-[16/9] bg-slate-100">
-              <Image src={item.coverImage ?? "/images/home/home-bg-1.jpg"} alt={item.title} fill className="object-cover" />
+    return (
+      <div className="flex min-h-screen flex-col">
+        <div
+          className="relative h-[60vh] bg-cover bg-center flex flex-col"
+          style={{
+            backgroundImage: "url('/images/news/news-bg.jpg')",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          <div className="absolute inset-0 bg-[#070614] opacity-50"></div>
+          <div className="relative flex flex-col h-full">
+            <Navigation />
+            <div className="flex-1 flex flex-col items-start justify-center">
+              <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+                  新闻中心
+                </h1>
+              </div>
             </div>
-            <div className="space-y-3 p-4">
-              <h2 className="text-xl font-medium">{item.title}</h2>
-              {item.summary && <p className="text-sm text-slate-600">{item.summary}</p>}
-              <time className="block text-xs text-slate-500">{item.publishedAt?.toLocaleString()}</time>
-            </div>
-          </Link>
-        ))}
+          </div>
+        </div>
+        <Footer locale={locale} />
       </div>
-    </main>
-  );
+    );
 }
