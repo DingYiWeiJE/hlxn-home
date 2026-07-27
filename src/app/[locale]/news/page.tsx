@@ -4,6 +4,7 @@ import Footer from "@/components/SiteFooter";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import NewsList from "./components/NewsList";
 
 type Props = {
   params: Promise<{
@@ -61,6 +62,7 @@ export default async function LocaleNews({ params }: Props) {
             </div>
           </div>
         </div>
+        <NewsList/>
         <Footer locale={locale} />
       </div>
     );

@@ -1,48 +1,12 @@
 import Image from "next/image";
 
 const categories = [
-  {
-    id: "storage",
-    name: "船/岸光储充放",
-  },
-  {
-    id: "fuel",
-    name: "燃料供应",
-  },
-  {
-    id: "hybrid",
-    name: "混合动力",
-  },
-  {
-    id: "control",
-    name: "能量控制",
-  },
 ];
 
 const subCategories = [
-  {
-    id: "ship",
-    name: "船用补能系统",
-  },
-  {
-    id: "shore",
-    name: "岸基补能系统",
-  },
 ];
 
 const products = [
-  {
-    name: "船用锂/钠电池包",
-    image: "/products/battery.png",
-    category: "storage",
-    type: "ship",
-  },
-  {
-    name: "“船电宝”光伏逆控一体机 V2.0",
-    image: "/products/inverter.png",
-    category: "storage",
-    type: "ship",
-  },
 ];
 
 export default function ProductCatalog() {

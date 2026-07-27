@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
+import SolutionSection from "./components/SolutionSection";
 
 type Props = {
   params: Promise<{
@@ -53,6 +54,7 @@ function SolutionsContent({ locale }: { locale: string }) {
             </div>
           </div>
         </div>
+        <SolutionSection/>
         <Footer locale={locale} />
       </div>
     );
