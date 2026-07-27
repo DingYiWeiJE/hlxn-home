@@ -1,27 +1,31 @@
 import type { Metadata } from "next";
+
 import AdminNavigation from "@/components/admin/AdminNavigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export const metadata: Metadata = {
-  robots: { index: false, follow: false },
+  robots: {
+    index: false,
+    follow: false,
+  },
   referrer: "no-referrer",
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+type AdminLayoutProps = {
+  children: React.ReactNode;
+};
+
+export default function AdminLayout({
+  children,
+}: AdminLayoutProps) {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900">
-      {/* Top Navigation */}
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <AdminNavigation />
 
-      {/* Main Content with Sidebar (Desktop Only) */}
-      <div className="flex flex-1">
-        {/* Sidebar - Desktop only */}
-        <div className="hidden md:flex md:w-64">
-          <AdminSidebar />
-        </div>
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        <AdminSidebar />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="min-w-0 flex-1 overflow-x-hidden">
           {children}
         </main>
       </div>

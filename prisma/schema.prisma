@@ -7,15 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum NewsStatus {
-  DRAFT
-  PUBLISHED
-}
-
-enum NewsLocale {
-  zh
-  en
-}
+// ============================================================
+// 用户相关
+// ============================================================
 
 enum UserRole {
   SUPER_ADMIN
@@ -25,19 +19,35 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  email     String?  @unique
+  id        String    @id @default(cuid())
+  username  String    @unique
+  email     String?   @unique
   password  String
-  role      UserRole @default(ADMIN)
-  isActive  Boolean  @default(true)
+  role      UserRole  @default(ADMIN)
+  isActive  Boolean   @default(true)
   lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  mediaAssets MediaAsset[] @relation("MediaAssetCreatedBy")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([username])
   @@index([deletedAt])
+}
+
+// ============================================================
+// 新闻相关
+// ============================================================
+
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum NewsLocale {
+  zh
+  en
 }
 
 model News {
@@ -49,17 +59,17 @@ model News {
   coverImage    String?
   coverImageAlt String?
 
-  content       Json
-  contentText   String?    @db.Text
+  content     Json
+  contentText String? @db.Text
 
-  authorName    String?
-  status        NewsStatus @default(DRAFT)
-  isFeatured    Boolean    @default(false)
+  authorName String?
+  status     NewsStatus @default(DRAFT)
+  isFeatured Boolean    @default(false)
 
-  publishedAt   DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  deletedAt     DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@unique([slug, locale])
   @@index([locale, status, publishedAt])
@@ -68,19 +78,196 @@ model News {
   @@index([isFeatured])
 }
 
+// ============================================================
+// 媒体资源相关
+// ============================================================
+
+enum MediaAssetType {
+  IMAGE
+  PDF
+}
+
 model MediaAsset {
-  id           String   @id @default(cuid())
-  url          String   @unique
-  relativePath String   @unique
+  id String @id @default(cuid())
+
+  type MediaAssetType @default(IMAGE)
+
+  url          String  @unique
+  relativePath String  @unique
   filename     String
   originalName String?
-  mimeType     String
-  size         Int
-  width        Int?
-  height       Int?
-  alt          String?
-  createdAt    DateTime @default(now())
-  deletedAt    DateTime?
 
+  mimeType String
+  size     Int
+
+  checksum String?
+
+  width  Int?
+  height Int?
+  alt    String?
+
+  enabled Boolean @default(true)
+
+  createdById String?
+  createdBy   User?   @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  advantages   ProductAdvantage[]
+  applications ProductApplication[]
+
+  productPdfs   Product[] @relation("ProductDetailPdf")
+  productCovers Product[] @relation("ProductCoverImage")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
+
+  @@index([type, createdAt])
+  @@index([type, enabled, deletedAt])
+  @@index([createdById])
   @@index([deletedAt])
+}
+
+// ============================================================
+// 产品分类相关
+// ============================================================
+
+enum CategoryLevel {
+  LEVEL_ONE
+  LEVEL_TWO
+}
+
+model Category {
+  id        String        @id @default(cuid())
+  name      String
+  slug      String        @unique
+  level     CategoryLevel
+  parentId  String?
+  sortOrder Int           @default(0)
+  enabled   Boolean       @default(true)
+
+  // 分类自关联
+  parent   Category?  @relation("CategoryChildren", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryChildren")
+
+  // 产品只关联二级分类
+  products Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // 防止同一个父级分类下出现同名分类
+  // 一级分类 parentId 为 null 时，仍建议在业务层检查重名
+  @@unique([parentId, name])
+  @@index([parentId, sortOrder])
+  @@index([level, enabled])
+  @@index([deletedAt])
+}
+
+// ============================================================
+// 产品相关
+// ============================================================
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  OFFLINE
+}
+
+enum ProductLocale {
+  zh
+  en
+}
+
+model Product {
+  id         String        @id @default(cuid())
+  name       String
+  slug       String
+  locale     ProductLocale @default(zh)
+  seriesName String?
+
+  secondaryCategoryId String
+
+  summaryParagraphs      Json @default("[]")
+  highlights             Json @default("[]")
+  introductionParagraphs Json @default("[]")
+
+  specificationTitle   String?
+  specificationHeaders Json?
+  specificationRows    Json?
+
+  // 产品封面图片
+  coverImageAssetId String?
+
+  // 产品详情 PDF
+  detailPdfAssetId String?
+
+  status    ProductStatus @default(DRAFT)
+  sortOrder Int           @default(0)
+
+  secondaryCategory Category @relation(fields: [secondaryCategoryId], references: [id], onDelete: Restrict)
+
+  coverImageAsset MediaAsset? @relation("ProductCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
+  detailPdfAsset  MediaAsset? @relation("ProductDetailPdf", fields: [detailPdfAssetId], references: [id], onDelete: SetNull)
+
+  advantages   ProductAdvantage[]
+  applications ProductApplication[]
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  // 同一种语言下 slug 唯一
+  // zh 和 en 可以使用相同 slug
+  @@unique([slug, locale])
+  @@index([locale, status, sortOrder])
+  @@index([locale, secondaryCategoryId, status, sortOrder])
+  @@index([secondaryCategoryId, status, sortOrder])
+  @@index([status, sortOrder])
+  @@index([coverImageAssetId])
+  @@index([detailPdfAssetId])
+  @@index([deletedAt])
+}
+
+// ============================================================
+// 产品优势
+// ============================================================
+
+model ProductAdvantage {
+  id        String @id @default(cuid())
+  productId String
+  assetId   String
+  title     String
+  sortOrder Int    @default(0)
+
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  asset   MediaAsset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId, sortOrder])
+  @@index([assetId])
+}
+
+// ============================================================
+// 产品应用场景
+// ============================================================
+
+model ProductApplication {
+  id        String @id @default(cuid())
+  productId String
+  assetId   String
+  title     String
+  sortOrder Int    @default(0)
+
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  asset   MediaAsset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId, sortOrder])
+  @@index([assetId])
 }

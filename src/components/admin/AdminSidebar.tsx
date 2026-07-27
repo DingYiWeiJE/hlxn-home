@@ -1,145 +1,396 @@
 "use client";
 
+import {
+  FolderTree,
+  Images,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Newspaper,
+  Package,
+  Users,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+type NavigationItem = {
+  href: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+const navigationItems: NavigationItem[] = [
+  {
+    href: "/admin",
+    label: "仪表板",
+    description: "系统概览和统计",
+    icon: LayoutDashboard,
+  },
+  {
+    href: "/admin/products",
+    label: "产品管理",
+    description: "创建和维护产品内容",
+    icon: Package,
+  },
+  {
+    href: "/admin/categories",
+    label: "产品分类",
+    description: "管理一级和二级分类",
+    icon: FolderTree,
+  },
+  {
+    href: "/admin/assets",
+    label: "素材库",
+    description: "管理产品图片和 PDF",
+    icon: Images,
+  },
+  {
+    href: "/admin/news",
+    label: "新闻管理",
+    description: "管理新闻内容",
+    icon: Newspaper,
+  },
+  {
+    href: "/admin/users",
+    label: "用户管理",
+    description: "管理系统用户",
+    icon: Users,
+  },
+];
+
+function isNavigationItemActive(
+  pathname: string,
+  href: string,
+): boolean {
+  if (href === "/admin") {
+    return pathname === "/admin";
+  }
+
+  return (
+    pathname === href ||
+    pathname.startsWith(`${href}/`)
+  );
+}
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [isOpen, setIsOpen] =
+    useState(false);
+
+  const [
+    isAuthenticated,
+    setIsAuthenticated,
+  ] = useState(false);
+
+  const [
+    isCheckingAuth,
+    setIsCheckingAuth,
+  ] = useState(true);
+
+  const [
+    isLoggingOut,
+    setIsLoggingOut,
+  ] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    let cancelled = false;
+
+    async function checkAuth() {
       try {
-        const response = await fetch("/api/auth/session");
-        if (response.ok) {
-          const data = (await response.json()) as { success: boolean; data?: { authenticated: boolean } };
-          setIsAuthenticated(data.data?.authenticated ?? false);
-        } else {
-          setIsAuthenticated(false);
+        const response = await fetch(
+          "/api/auth/session",
+          {
+            method: "GET",
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          if (!cancelled) {
+            setIsAuthenticated(false);
+          }
+
+          return;
+        }
+
+        const result = (await response.json()) as {
+          success: boolean;
+          data?: {
+            authenticated?: boolean;
+          };
+        };
+
+        if (!cancelled) {
+          setIsAuthenticated(
+            result.success &&
+              result.data?.authenticated ===
+                true,
+          );
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
-        setIsAuthenticated(false);
+        console.error(
+          "Admin authentication check failed",
+          error,
+        );
+
+        if (!cancelled) {
+          setIsAuthenticated(false);
+        }
       } finally {
-        setIsCheckingAuth(false);
+        if (!cancelled) {
+          setIsCheckingAuth(false);
+        }
       }
+    }
+
+    void checkAuth();
+
+    return () => {
+      cancelled = true;
     };
-    checkAuth();
   }, [pathname]);
 
-  async function handleLogout() {
-    setIsLoggingOut(true);
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
-      if (response.ok) {
-        setIsAuthenticated(false);
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    function handleKeyDown(
+      event: KeyboardEvent,
+    ) {
+      if (event.key === "Escape") {
         setIsOpen(false);
-        router.replace("/admin/login");
-        router.refresh();
-      } else {
-        setIsLoggingOut(false);
       }
+    }
+
+    document.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+    };
+  }, [isOpen]);
+
+  async function handleLogout() {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      const response = await fetch(
+        "/api/auth/logout",
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Logout failed with status ${response.status}`,
+        );
+      }
+
+      setIsAuthenticated(false);
+      setIsOpen(false);
+
+      router.replace("/admin/login");
+      router.refresh();
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error(
+        "Admin logout failed",
+        error,
+      );
+
       setIsLoggingOut(false);
     }
   }
 
-  const navItems = [
-    { href: "/admin", label: "仪表板", icon: "📊", desc: "系统概览和统计" },
-    { href: "/admin/users", label: "用户管理", icon: "👥", desc: "管理系统用户" },
-    { href: "/admin/news", label: "新闻管理", icon: "📰", desc: "管理新闻内容" },
-  ];
-
-  if (isCheckingAuth || !isAuthenticated) {
+  if (
+    isCheckingAuth ||
+    !isAuthenticated
+  ) {
     return null;
   }
 
   return (
     <>
-      {/* Mobile Menu Button - Left side of top nav */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden flex items-center justify-center w-10 h-10 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-        aria-label="Toggle menu"
+        type="button"
+        onClick={() => {
+          setIsOpen((current) => !current);
+        }}
+        className="fixed left-4 top-20 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition hover:bg-slate-50 md:hidden"
+        aria-label={
+          isOpen
+            ? "关闭后台导航菜单"
+            : "打开后台导航菜单"
+        }
+        aria-expanded={isOpen}
+        aria-controls="admin-sidebar"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
+        {isOpen ? (
+          <X
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+        ) : (
+          <Menu
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+        )}
       </button>
 
-      {/* Sidebar Overlay (Mobile) */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        ></div>
-      )}
+      {isOpen ? (
+        <button
+          type="button"
+          aria-label="关闭后台导航菜单"
+          onClick={() => {
+            setIsOpen(false);
+          }}
+          className="fixed inset-x-0 bottom-0 top-16 z-40 bg-slate-950/50 backdrop-blur-sm md:hidden"
+        />
+      ) : null}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-16 h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white w-64 transform transition-transform duration-300 z-40 md:relative md:top-0 md:translate-x-0 md:shadow-lg ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        id="admin-sidebar"
+        className={[
+          "fixed bottom-0 left-0 top-16 z-50 flex w-72 flex-col border-r border-slate-800 bg-slate-950 text-white shadow-2xl transition-transform duration-300",
+          "md:sticky md:top-16 md:z-20 md:h-[calc(100vh-4rem)] md:w-72 md:shrink-0 md:translate-x-0 md:shadow-none",
+          isOpen
+            ? "translate-x-0"
+            : "-translate-x-full",
+        ].join(" ")}
       >
-        <div className="flex flex-col h-full">
-          {/* Navigation Items */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-start gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-300 hover:bg-slate-700/50 hover:text-white"
-                  }`}
-                >
-                  <span className="text-2xl mt-0.5">{item.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{item.label}</div>
-                    <div className={`text-xs ${isActive ? "text-blue-100" : "text-slate-500"}`}>
-                      {item.desc}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <div className="w-1 h-6 bg-white rounded-full mt-1"></div>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+        <div className="border-b border-slate-800 px-6 py-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
+            Management
+          </p>
 
-          {/* Footer - Logout Button */}
-          <div className="p-4 border-t border-slate-700">
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-600/20 text-red-300 hover:bg-red-600/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span className="text-sm font-medium">
-                {isLoggingOut ? "登出中..." : "登出"}
-              </span>
-            </button>
-          </div>
+          <h2 className="mt-2 text-lg font-semibold text-white">
+            内容管理中心
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-slate-400">
+            管理产品、分类、素材和新闻内容
+          </p>
+        </div>
+
+        <nav
+          className="flex-1 space-y-1 overflow-y-auto px-4 py-5"
+          aria-label="后台管理导航"
+        >
+          {navigationItems.map((item) => {
+            const active =
+              isNavigationItemActive(
+                pathname,
+                item.href,
+              );
+
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => {
+                  setIsOpen(false);
+                }}
+                aria-current={
+                  active ? "page" : undefined
+                }
+                className={[
+                  "group relative flex items-center gap-3 rounded-xl px-4 py-3 transition",
+                  active
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-950/30"
+                    : "text-slate-300 hover:bg-slate-900 hover:text-white",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition",
+                    active
+                      ? "bg-white/15 text-white"
+                      : "bg-slate-900 text-slate-400 group-hover:bg-slate-800 group-hover:text-white",
+                  ].join(" ")}
+                >
+                  <Icon
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold">
+                    {item.label}
+                  </span>
+
+                  <span
+                    className={[
+                      "mt-0.5 block truncate text-xs",
+                      active
+                        ? "text-blue-100"
+                        : "text-slate-500 group-hover:text-slate-400",
+                    ].join(" ")}
+                  >
+                    {item.description}
+                  </span>
+                </span>
+
+                {active ? (
+                  <span
+                    className="absolute bottom-3 right-0 top-3 w-1 rounded-l-full bg-white"
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-slate-800 p-4">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex w-full items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300 transition hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+              <LogOut
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+            </span>
+
+            <span>
+              {isLoggingOut
+                ? "正在退出..."
+                : "退出登录"}
+            </span>
+          </button>
         </div>
       </aside>
     </>
