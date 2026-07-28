@@ -50,32 +50,77 @@ enum NewsLocale {
   en
 }
 
+enum NewsSourceType {
+  MANUAL
+  WECHAT
+}
+
 model News {
-  id            String     @id @default(cuid())
-  title         String
-  slug          String
-  locale        NewsLocale
-  summary       String?
-  coverImage    String?
+  id String @id @default(cuid())
+
+  // 基础信息
+  title  String
+  slug   String
+  locale NewsLocale
+
+  summary String? @db.Text
+
+  // 封面图使用本地素材库
+  coverImageAssetId String?
+  coverImageAsset   MediaAsset? @relation("NewsCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
+
   coverImageAlt String?
 
-  content     Json
+  // Tiptap JSON 正文
+  content Json
+
+  // 用于后台搜索、SEO 和纯文本摘要
   contentText String? @db.Text
 
   authorName String?
+
   status     NewsStatus @default(DRAFT)
   isFeatured Boolean    @default(false)
 
+  // 内容来源
+  sourceType NewsSourceType @default(MANUAL)
+
+  // 微信公众号原文地址
+  sourceUrl String? @db.Text
+
+  // 公众号名称
+  sourceAccountName String?
+
+  // 微信文章唯一标识或规范化地址哈希
+  sourceArticleId String?
+
+  // 微信公众号原始发布时间
+  sourcePublishedAt DateTime?
+
+  // 导入到本系统的时间
+  importedAt DateTime?
+
+  // 保存解析过程中的其他信息
+  // 例如原始标题、微信参数、版权声明等
+  importMeta Json?
+
+  // 本网站的实际发布时间
   publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@unique([slug, locale])
+  // 同一篇微信公众号文章，同一种语言只能导入一次
+  @@unique([sourceArticleId, locale])
   @@index([locale, status, publishedAt])
   @@index([status, publishedAt])
   @@index([deletedAt])
   @@index([isFeatured])
+  @@index([coverImageAssetId])
+  @@index([sourceType])
+  @@index([sourcePublishedAt])
 }
 
 // ============================================================
@@ -116,6 +161,7 @@ model MediaAsset {
 
   productPdfs   Product[] @relation("ProductDetailPdf")
   productCovers Product[] @relation("ProductCoverImage")
+  newsCovers    News[]    @relation("NewsCoverImage")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt

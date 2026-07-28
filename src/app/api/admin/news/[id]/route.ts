@@ -1,8 +1,8 @@
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth/require-admin";
 import { getUserAuthConfig } from "@/lib/user-auth/config";
 import { getUserSession } from "@/lib/user-auth/session";
+import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 
 export const runtime = "nodejs";
 
@@ -22,7 +22,7 @@ async function checkAuth() {
     // Fall back to admin auth
   }
 
-  const adminSession = await requireAdmin();
+  const adminSession = await requireAdminActor();
   if (adminSession) {
     return true;
   }

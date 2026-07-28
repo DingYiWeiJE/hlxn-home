@@ -362,12 +362,15 @@ export async function PATCH(
         ? body.locale as ProductLocale
         : existingProduct.locale;
 
-    const nextSlug =
-      body.slug ?? existingProduct.slug;
-
+    /*
+    * Slug 不允许从后台编辑。
+    *
+    * 修改产品名称时，原 Slug 保持不变。
+    * 只有修改产品语言时，才需要检查原 Slug
+    * 在目标语言下是否已经被其他产品占用。
+    */
     if (
-      nextLocale !== existingProduct.locale ||
-      nextSlug !== existingProduct.slug
+      nextLocale !== existingProduct.locale
     ) {
       const slugExists =
         await prisma.product.findFirst({
@@ -375,9 +378,11 @@ export async function PATCH(
             id: {
               not: id,
             },
+
             locale: nextLocale,
-            slug: nextSlug,
+            slug: existingProduct.slug,
           },
+
           select: {
             id: true,
             deletedAt: true,
@@ -387,20 +392,19 @@ export async function PATCH(
       if (slugExists) {
         const message =
           slugExists.deletedAt
-            ? "该语言下的产品 Slug 已被已删除产品占用"
-            : "该语言下的产品 Slug 已经存在";
+            ? "目标语言下已有已删除产品使用相同地址"
+            : "目标语言下已有产品使用相同地址";
 
         throw new ApiError(
           "SLUG_ALREADY_EXISTS",
           message,
           409,
           {
-            slug: [message],
+            locale: [message],
           },
         );
       }
     }
-
     let publishedAt:
       | Date
       | undefined;
@@ -499,12 +503,6 @@ export async function PATCH(
               ...(body.name !== undefined
                 ? {
                     name: body.name,
-                  }
-                : {}),
-
-              ...(body.slug !== undefined
-                ? {
-                    slug: body.slug,
                   }
                 : {}),
 

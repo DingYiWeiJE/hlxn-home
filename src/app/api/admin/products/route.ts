@@ -6,8 +6,8 @@ import { NextRequest } from "next/server";
 
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
-import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { generateUniqueSlug } from "@/lib/slug/generate-slug";
 import { prisma } from "@/lib/prisma";
 import {
   adminProductListQuerySchema,
@@ -280,7 +280,8 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/products
  *
  * locale 必须传入 zh 或 en。
- * 同一种语言下 slug 不能重复。
+ * Slug 由后端根据产品名称自动生成。
+ * 同一种语言下重复时自动追加 -2、-3。
  */
 export async function POST(request: Request) {
   try {
@@ -311,34 +312,6 @@ export async function POST(request: Request) {
     const locale =
       body.locale as ProductLocale;
 
-    const slugExists =
-      await prisma.product.findFirst({
-        where: {
-          slug: body.slug,
-          locale,
-        },
-        select: {
-          id: true,
-          deletedAt: true,
-        },
-      });
-
-    if (slugExists) {
-      const message =
-        slugExists.deletedAt
-          ? "该语言下的产品 Slug 已被已删除产品占用"
-          : "该语言下的产品 Slug 已经存在";
-
-      throw new ApiError(
-        "SLUG_ALREADY_EXISTS",
-        message,
-        409,
-        {
-          slug: [message],
-        },
-      );
-    }
-
     const publishedAt =
       body.status === "PUBLISHED"
         ? new Date()
@@ -347,12 +320,39 @@ export async function POST(request: Request) {
     const product =
       await prisma.$transaction(
         async (transaction) => {
+          const slug =
+            await generateUniqueSlug({
+              source: body.name,
+              maxLength: 150,
+
+              exists: async (
+                candidate,
+              ) => {
+                const existingProduct =
+                  await transaction.product
+                    .findFirst({
+                      where: {
+                        locale,
+                        slug: candidate,
+                      },
+
+                      select: {
+                        id: true,
+                      },
+                    });
+
+                return (
+                  existingProduct !== null
+                );
+              },
+            });
+
           return transaction.product.create({
             data: {
               locale,
 
               name: body.name,
-              slug: body.slug,
+              slug,
 
               seriesName:
                 body.seriesName?.trim() ||

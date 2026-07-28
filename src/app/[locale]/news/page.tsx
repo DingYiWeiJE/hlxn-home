@@ -36,7 +36,21 @@ export default async function LocaleNews({ params }: Props) {
       title: true,
       slug: true,
       summary: true,
-      coverImage: true,
+      coverImageAssetId: true,
+      coverImageAlt: true,
+      coverImageAsset: {
+        select: {
+          id: true,
+          url: true,
+          filename: true,
+          originalName: true,
+          mimeType: true,
+          size: true,
+          width: true,
+          height: true,
+          alt: true,
+        },
+      },
       publishedAt: true,
     },
   });

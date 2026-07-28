@@ -773,7 +773,7 @@ export default function AdminAssetsPage() {
           <button
             type="button"
             aria-label="关闭上传窗口"
-            onClick={closeUpload}
+            onClick={() => closeUpload()}
             className="absolute inset-0"
           />
 
@@ -794,7 +794,7 @@ export default function AdminAssetsPage() {
 
               <button
                 type="button"
-                onClick={closeUpload}
+                onClick={() => closeUpload()}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                 aria-label="关闭"
               >
@@ -936,7 +936,7 @@ export default function AdminAssetsPage() {
               <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
                 <button
                   type="button"
-                  onClick={closeUpload}
+                  onClick={() => closeUpload()}
                   disabled={isUploading}
                   className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                 >

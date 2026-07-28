@@ -353,10 +353,6 @@ export default function ProductForm({
     initialData?.name ?? "",
   );
 
-  const [slug, setSlug] = useState(
-    initialData?.slug ?? "",
-  );
-
   const [seriesName, setSeriesName] =
     useState(
       initialData?.seriesName ?? "",
@@ -734,18 +730,9 @@ export default function ProductForm({
       const normalizedName =
         name.trim();
 
-      const normalizedSlug =
-        slug.trim().toLowerCase();
-
       if (!normalizedName) {
         throw new Error(
           "请填写产品名称",
-        );
-      }
-
-      if (!normalizedSlug) {
-        throw new Error(
-          "请填写产品 Slug",
         );
       }
 
@@ -773,7 +760,6 @@ export default function ProductForm({
       const payload = {
         locale,
         name: normalizedName,
-        slug: normalizedSlug,
 
         seriesName:
           seriesName.trim() || null,
@@ -925,9 +911,8 @@ export default function ProductForm({
             </h1>
 
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              产品语言在创建时必须选择。
-              中文和英文产品可以使用相同的
-              Slug，但同一种语言下不能重复。
+              产品语言在创建时必须选择。产品页面地址由系统根据产品名称自动生成，
+              创建后修改产品名称不会改变原有页面地址。
             </p>
           </div>
 
@@ -984,7 +969,7 @@ export default function ProductForm({
                 </h2>
 
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  设置产品语言、名称、地址标识、系列和所属分类。
+                  设置产品语言、名称、系列、排序和所属分类。
                 </p>
               </div>
 
@@ -1083,42 +1068,7 @@ export default function ProductForm({
                   />
                 </div>
 
-                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_180px]">
-                  <div>
-                    <label
-                      htmlFor="productSlug"
-                      className="text-sm font-semibold text-slate-700"
-                    >
-                      产品 Slug
-                      <span className="ml-1 text-red-500">
-                        *
-                      </span>
-                    </label>
-
-                    <input
-                      id="productSlug"
-                      value={slug}
-                      required
-                      maxLength={200}
-                      onChange={(event) =>
-                        setSlug(
-                          event.target.value
-                            .toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-",
-                            ),
-                        )
-                      }
-                      placeholder="industrial-energy-storage"
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 font-mono text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                    />
-
-                    <p className="mt-2 text-xs leading-5 text-slate-400">
-                      将用于产品详情页地址。同一种语言下必须唯一。
-                    </p>
-                  </div>
-
+                <div className="max-w-[220px]">
                   <InputField
                     id="productSortOrder"
                     label="排序值"
@@ -1126,9 +1076,7 @@ export default function ProductForm({
                     min={0}
                     value={sortOrder}
                     placeholder="0"
-                    onChange={
-                      setSortOrder
-                    }
+                    onChange={setSortOrder}
                   />
                 </div>
 

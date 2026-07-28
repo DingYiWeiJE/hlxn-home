@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
-import { requireAdmin } from "@/lib/admin-auth/require-admin";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { processUploadedImage } from "@/lib/media/upload";
+import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,7 @@ const formSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireAdminActor();
     assertSameOriginRequest(request);
     const formData = await request.formData();
     const file = formData.get("file");

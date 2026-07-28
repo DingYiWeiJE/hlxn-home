@@ -24,17 +24,6 @@ const updateCategorySchema = z
       .max(100, "分类名称不能超过 100 个字符")
       .optional(),
 
-    slug: z
-      .string()
-      .trim()
-      .min(1, "请输入分类 Slug")
-      .max(100, "分类 Slug 不能超过 100 个字符")
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        "Slug 只能包含小写字母、数字和中划线",
-      )
-      .optional(),
-
     parentId: z
       .string()
       .trim()
@@ -162,6 +151,8 @@ export async function GET(
  *
  * 注意：
  * 分类层级创建后不允许修改。
+ * 分类 Slug 创建后不允许修改。
+ * 修改分类名称不会改变原 Slug。
  * 一级分类不能设置 parentId。
  * 二级分类可以更换所属一级分类。
  */
@@ -272,35 +263,6 @@ export async function PATCH(
       nextParentId = parent.id;
     }
 
-    if (
-      body.slug &&
-      body.slug !== existingCategory.slug
-    ) {
-      const slugExists =
-        await prisma.category.findFirst({
-          where: {
-            slug: body.slug,
-            id: {
-              not: id,
-            },
-          },
-          select: {
-            id: true,
-          },
-        });
-
-      if (slugExists) {
-        throw new ApiError(
-          "SLUG_ALREADY_EXISTS",
-          "分类 Slug 已经存在",
-          409,
-          {
-            slug: ["分类 Slug 已经存在"],
-          },
-        );
-      }
-    }
-
     const nextName =
       body.name ?? existingCategory.name;
 
@@ -342,12 +304,6 @@ export async function PATCH(
           ...(body.name !== undefined
             ? {
                 name: body.name,
-              }
-            : {}),
-
-          ...(body.slug !== undefined
-            ? {
-                slug: body.slug,
               }
             : {}),
 

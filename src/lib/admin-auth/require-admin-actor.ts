@@ -36,7 +36,7 @@ export async function requireAdminActor(): Promise<AdminActor> {
     // 新用户鉴权不可用时，继续兼容旧版管理员鉴权
   }
 
-  await requireAdmin();
+  await requireAdminActor();
 
   return {
     userId: null,

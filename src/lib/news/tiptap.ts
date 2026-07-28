@@ -136,25 +136,95 @@ export function isAllowedLinkUrl(url: string) {
   return normalized.startsWith("/") || normalized.startsWith("http://") || normalized.startsWith("https://") || normalized.startsWith("mailto:");
 }
 
-export function isAllowedImageUrl(url: string) {
-  const normalized = url.trim().toLowerCase();
-  if (normalized.startsWith("javascript:") || normalized.startsWith("data:") || normalized.startsWith("file:")) {
+const allowedLocalImagePrefixes = [
+  "/media/",
+  "/api/media/",
+  "/uploads/",
+];
+
+const allowedWechatImageHosts = new Set([
+  "mmbiz.qpic.cn",
+  "mmecoa.qpic.cn",
+  "mmbiz.qlogo.cn",
+  "wx.qlogo.cn",
+  "thirdwx.qlogo.cn",
+  "res.wx.qq.com",
+]);
+
+export function isAllowedImageUrl(input: string) {
+  const value = input.trim();
+
+  if (!value || value.length > 2048) {
     return false;
   }
-  if (url.startsWith("/media/")) {
-    return true;
+
+  const normalized = value.toLowerCase();
+
+  /*
+   * 禁止脚本、内嵌文件、本地文件及协议相对地址。
+   */
+  if (
+    normalized.startsWith("javascript:") ||
+    normalized.startsWith("data:") ||
+    normalized.startsWith("file:") ||
+    normalized.startsWith("blob:") ||
+    value.startsWith("//") ||
+    value.includes("\\") ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  ) {
+    return false;
+  }
+
+  /*
+   * 允许本站受控的相对媒体地址。
+   */
+  if (value.startsWith("/")) {
+    try {
+      const parsed = new URL(value, "https://local.invalid");
+
+      if (parsed.origin !== "https://local.invalid") {
+        return false;
+      }
+
+      return allowedLocalImagePrefixes.some((prefix) =>
+        parsed.pathname.startsWith(prefix),
+      );
+    } catch {
+      return false;
+    }
   }
 
   try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:") {
+    const parsed = new URL(value);
+
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.username ||
+      parsed.password
+    ) {
       return false;
     }
-    const allowedHosts = (process.env.ALLOWED_EXTERNAL_IMAGE_HOSTS ?? "")
+
+    const hostname = parsed.hostname.toLowerCase();
+
+    /*
+     * 个别微信图片本地化失败时，允许暂时保留微信原图。
+     */
+    if (allowedWechatImageHosts.has(hostname)) {
+      return true;
+    }
+
+    /*
+     * 允许通过环境变量配置的其他可信图片域名。
+     */
+    const configuredHosts = (
+      process.env.ALLOWED_EXTERNAL_IMAGE_HOSTS ?? ""
+    )
       .split(",")
       .map((host) => host.trim().toLowerCase())
       .filter(Boolean);
-    return allowedHosts.includes(parsed.hostname.toLowerCase());
+
+    return configuredHosts.includes(hostname);
   } catch {
     return false;
   }

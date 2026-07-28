@@ -7,16 +7,6 @@ export const productLocaleSchema = z.enum(
   },
 );
 
-const slugSchema = z
-  .string()
-  .trim()
-  .min(1, "请输入产品 Slug")
-  .max(150, "产品 Slug 不能超过 150 个字符")
-  .regex(
-    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-    "Slug 只能包含小写字母、数字和中划线",
-  );
-
 const paragraphSchema = z
   .string()
   .trim()
@@ -103,8 +93,6 @@ const productFieldsSchema = z.object({
     .trim()
     .min(1, "请输入产品名称")
     .max(200, "产品名称不能超过 200 个字符"),
-
-  slug: slugSchema,
 
   seriesName: z
     .string()

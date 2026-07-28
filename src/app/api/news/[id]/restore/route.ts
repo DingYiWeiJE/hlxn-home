@@ -1,7 +1,7 @@
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
-import { requireAdmin } from "@/lib/admin-auth/require-admin";
+import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { prisma } from "@/lib/prisma";
 import { revalidateNewsCache } from "@/lib/news/cache";
 
@@ -11,7 +11,7 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function POST(request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireAdminActor();
     assertSameOriginRequest(request);
     const { id } = await params;
     const existing = await prisma.news.findUnique({ where: { id } });

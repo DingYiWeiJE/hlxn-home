@@ -64,7 +64,6 @@ type CategoryMutationResponse =
 
 type CategoryFormState = {
   name: string;
-  slug: string;
   level: CategoryLevel;
   parentId: string;
   sortOrder: string;
@@ -73,7 +72,6 @@ type CategoryFormState = {
 
 const emptyForm: CategoryFormState = {
   name: "",
-  slug: "",
   level: "LEVEL_ONE",
   parentId: "",
   sortOrder: "0",
@@ -239,7 +237,6 @@ export default function AdminCategoriesPage() {
     setFormError("");
     setForm({
       name: category.name,
-      slug: category.slug,
       level: category.level,
       parentId: category.parentId ?? "",
       sortOrder: String(category.sortOrder),
@@ -270,7 +267,7 @@ export default function AdminCategoriesPage() {
     try {
       const payload = {
         name: form.name.trim(),
-        slug: form.slug.trim(),
+
         parentId:
           form.level === "LEVEL_TWO"
             ? form.parentId || null
@@ -669,7 +666,7 @@ export default function AdminCategoriesPage() {
             type="button"
             aria-label="关闭分类表单"
             className="absolute inset-0"
-            onClick={closeForm}
+            onClick={() => closeForm()}
           />
 
           <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl">
@@ -688,7 +685,7 @@ export default function AdminCategoriesPage() {
 
               <button
                 type="button"
-                onClick={closeForm}
+                onClick={() => closeForm()}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                 aria-label="关闭"
               >
@@ -823,35 +820,6 @@ export default function AdminCategoriesPage() {
                   />
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="categorySlug"
-                    className="text-sm font-semibold text-slate-700"
-                  >
-                    分类 Slug
-                  </label>
-
-                  <input
-                    id="categorySlug"
-                    value={form.slug}
-                    required
-                    maxLength={100}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        slug: event.target.value
-                          .toLowerCase()
-                          .replace(/\s+/g, "-"),
-                      }))
-                    }
-                    placeholder="例如：energy-storage"
-                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4 font-mono text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  />
-
-                  <p className="mt-2 text-xs text-slate-400">
-                    仅允许小写字母、数字和中划线。
-                  </p>
-                </div>
 
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
@@ -924,7 +892,7 @@ export default function AdminCategoriesPage() {
               <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
                 <button
                   type="button"
-                  onClick={closeForm}
+                  onClick={() => closeForm()}
                   disabled={isSubmitting}
                   className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                 >

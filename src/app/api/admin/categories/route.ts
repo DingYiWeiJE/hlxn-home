@@ -1,6 +1,7 @@
 import { CategoryLevel, Prisma } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { generateUniqueSlug } from "@/lib/slug/generate-slug";
 
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
@@ -38,16 +39,6 @@ const createCategorySchema = z
       .trim()
       .min(1, "请输入分类名称")
       .max(100, "分类名称不能超过 100 个字符"),
-
-    slug: z
-      .string()
-      .trim()
-      .min(1, "请输入分类 Slug")
-      .max(100, "分类 Slug 不能超过 100 个字符")
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        "Slug 只能包含小写字母、数字和中划线",
-      ),
 
     level: z.enum(["LEVEL_ONE", "LEVEL_TWO"]),
 
@@ -202,6 +193,9 @@ export async function GET(request: NextRequest) {
  * 新增分类
  *
  * POST /api/admin/categories
+ *
+ * Slug 由后端根据分类名称自动生成。
+ * 重复时自动追加 -2、-3。
  */
 export async function POST(request: Request) {
   try {
@@ -241,26 +235,6 @@ export async function POST(request: Request) {
       }
     }
 
-    const slugExists = await prisma.category.findUnique({
-      where: {
-        slug: body.slug,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (slugExists) {
-      throw new ApiError(
-        "SLUG_ALREADY_EXISTS",
-        "分类 Slug 已经存在",
-        409,
-        {
-          slug: ["分类 Slug 已经存在"],
-        },
-      );
-    }
-
     const nameExists = await prisma.category.findFirst({
       where: {
         name: {
@@ -285,35 +259,61 @@ export async function POST(request: Request) {
       );
     }
 
-    const category = await prisma.category.create({
-      data: {
-        name: body.name,
-        slug: body.slug,
-        level: body.level,
-        parentId,
-        sortOrder: body.sortOrder,
-        enabled: body.enabled,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        level: true,
-        parentId: true,
-        sortOrder: true,
-        enabled: true,
-        createdAt: true,
-        updatedAt: true,
+    const category = await prisma.$transaction(
+      async (transaction) => {
+        const slug =
+          await generateUniqueSlug({
+            source: body.name,
+            maxLength: 100,
 
-        parent: {
+            exists: async (candidate) => {
+              const existingCategory =
+                await transaction.category.findUnique({
+                  where: {
+                    slug: candidate,
+                  },
+
+                  select: {
+                    id: true,
+                  },
+                });
+
+              return existingCategory !== null;
+            },
+          });
+
+        return transaction.category.create({
+          data: {
+            name: body.name,
+            slug,
+            level: body.level,
+            parentId,
+            sortOrder: body.sortOrder,
+            enabled: body.enabled,
+          },
+
           select: {
             id: true,
             name: true,
             slug: true,
+            level: true,
+            parentId: true,
+            sortOrder: true,
+            enabled: true,
+            createdAt: true,
+            updatedAt: true,
+
+            parent: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
-        },
+        });
       },
-    });
+    );
 
     return ok(category, {
       status: 201,

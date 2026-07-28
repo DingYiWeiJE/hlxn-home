@@ -23,12 +23,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const news = await prisma.news.findFirst({
     where: {
       slug,
-      locale: locale === "zh" ? "zh" : "en"
+      locale: locale === "zh" ? "zh" : "en",
     },
     select: {
       title: true,
       summary: true,
-      coverImage: true,
+      coverImageAsset: {
+        select: {
+          url: true,
+        },
+      },
     },
   });
 
@@ -44,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: news.title,
       description: news.summary || "新闻详情",
-      images: news.coverImage ? [{ url: news.coverImage }] : [],
+      images: news.coverImageAsset?.url
+        ? [{ url: news.coverImageAsset.url }]
+        : [],
     },
   };
 }
@@ -57,14 +63,22 @@ export default async function NewsDetail({ params }: Props) {
   const news = await prisma.news.findFirst({
     where: {
       slug,
-      locale: locale === "zh" ? "zh" : "en"
+      locale: locale === "zh" ? "zh" : "en",
     },
     select: {
       id: true,
       title: true,
       summary: true,
       content: true,
-      coverImage: true,
+
+      coverImageAlt: true,
+
+      coverImageAsset: {
+        select: {
+          url: true,
+        },
+      },
+
       publishedAt: true,
       createdAt: true,
       status: true,
@@ -72,20 +86,33 @@ export default async function NewsDetail({ params }: Props) {
     },
   });
 
-  if (!news || news.status !== "PUBLISHED" || news.deletedAt !== null || (news.publishedAt && news.publishedAt > new Date())) {
+  if (
+    !news ||
+    news.status !== "PUBLISHED" ||
+    news.deletedAt !== null ||
+    (news.publishedAt && news.publishedAt > new Date())
+  ) {
     notFound();
   }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
-      <Link href={`/${locale}/news`} className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800">
+      <Link
+        href={`/${locale}/news`}
+        className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800"
+      >
         ← {t("news.back")}
       </Link>
 
-      {news.coverImage && (
+      {news.coverImageAsset?.url && (
         <div className="mb-8 overflow-hidden rounded-lg">
           <div className="relative aspect-video bg-slate-100">
-            <Image src={news.coverImage} alt={news.title} fill className="object-cover" />
+            <Image
+              src={news.coverImageAsset.url}
+              alt={news.coverImageAlt || news.title}
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       )}
@@ -94,9 +121,15 @@ export default async function NewsDetail({ params }: Props) {
         <header className="border-b border-slate-200 pb-6">
           <h1 className="mb-4 text-4xl font-bold">{news.title}</h1>
           <div className="flex items-center gap-4 text-sm text-slate-600">
-            {news.publishedAt && <time dateTime={news.publishedAt.toISOString()}>{news.publishedAt.toLocaleString()}</time>}
+            {news.publishedAt && (
+              <time dateTime={news.publishedAt.toISOString()}>
+                {news.publishedAt.toLocaleString()}
+              </time>
+            )}
           </div>
-          {news.summary && <p className="mt-4 text-lg text-slate-700">{news.summary}</p>}
+          {news.summary && (
+            <p className="mt-4 text-lg text-slate-700">{news.summary}</p>
+          )}
         </header>
 
         {news.content && (
@@ -107,7 +140,10 @@ export default async function NewsDetail({ params }: Props) {
       </article>
 
       <nav className="mt-12 border-t border-slate-200 pt-8">
-        <Link href={`/${locale}/news`} className="inline-flex items-center text-blue-600 hover:text-blue-800">
+        <Link
+          href={`/${locale}/news`}
+          className="inline-flex items-center text-blue-600 hover:text-blue-800"
+        >
           ← {t("news.back")}
         </Link>
       </nav>

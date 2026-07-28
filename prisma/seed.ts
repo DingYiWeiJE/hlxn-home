@@ -64,7 +64,6 @@ async function main() {
         slug,
         locale: locale as "zh" | "en",
         summary: "这是一条新闻 seed 数据，用于本地开发和页面验证。",
-        coverImage: image,
         coverImageAlt: "示例图片",
         content: content(image),
         contentText: "项目进展 这是一条用于展示新闻正文结构的示例内容，包含重点信息和图文节点。支持 H2、段落和列表 图片 URL 使用 /media/ 前缀 示例图片仅用于说明数据格式。",
