@@ -36,6 +36,7 @@ const productDetailSelect = {
   specificationRows: true,
 
   coverImageAssetId: true,
+  introBackgroundImageAssetId: true,
   detailPdfAssetId: true,
 
   status: true,
@@ -67,6 +68,21 @@ const productDetailSelect = {
       id: true,
       type: true,
       url: true,
+      originalName: true,
+      mimeType: true,
+      size: true,
+      width: true,
+      height: true,
+      alt: true,
+    },
+  },
+
+  introBackgroundImageAsset: {
+    select: {
+      id: true,
+      type: true,
+      url: true,
+      filename: true,
       originalName: true,
       mimeType: true,
       size: true,
@@ -191,6 +207,12 @@ function formatProductDetail(
 
     coverImage:
       product.coverImageAsset,
+
+    introBackgroundImageAssetId:
+      product.introBackgroundImageAssetId,
+
+    introBackgroundImageAsset:
+      product.introBackgroundImageAsset,
 
     advantages:
       product.advantages,
@@ -346,6 +368,9 @@ export async function PATCH(
 
       coverImageAssetId:
         body.coverImageAssetId,
+
+      introBackgroundImageAssetId:
+        body.introBackgroundImageAssetId,
 
       advantages:
         body.advantages,
@@ -579,6 +604,14 @@ export async function PATCH(
                       body.coverImageAssetId,
                   }
                 : {}),
+
+              ...(body.introBackgroundImageAssetId !==
+                undefined
+                  ? {
+                      introBackgroundImageAssetId:
+                        body.introBackgroundImageAssetId,
+                    }
+                  : {}),
 
               ...(body.detailPdfAssetId !==
               undefined

@@ -142,6 +142,14 @@ const productFieldsSchema = z.object({
     .optional()
     .nullable(),
 
+  introBackgroundImageAssetId: z
+    .string()
+    .trim()
+    .min(
+      1,
+      "请选择产品介绍背景图",
+    ),
+
   detailPdfAssetId: z
     .string()
     .trim()

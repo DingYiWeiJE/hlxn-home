@@ -1,5 +1,6 @@
 import {
   CategoryLevel,
+  MediaAssetPurpose,
   MediaAssetType,
 } from "@prisma/client";
 
@@ -13,20 +14,35 @@ type ProductImageReference = {
 export type ProductReferenceInput = {
   secondaryCategoryId?: string;
 
-  coverImageAssetId?: string | null;
+  coverImageAssetId?:
+    | string
+    | null;
 
-  advantages?: ProductImageReference[];
+  introBackgroundImageAssetId?:
+    | string
+    | null;
 
-  applications?: ProductImageReference[];
+  advantages?:
+    ProductImageReference[];
 
-  detailPdfAssetId?: string | null;
+  applications?:
+    ProductImageReference[];
+
+  detailPdfAssetId?:
+    | string
+    | null;
 };
 
 /**
- * 校验产品关联的分类、封面图片、内容图片和 PDF。
+ * 校验产品关联的分类、图片和 PDF。
  *
- * 产品优势和应用场景中的标题属于当前产品，
- * 不保存在 MediaAsset 中。
+ * 图片用途：
+ * - 产品封面：PRODUCT_COVER
+ * - 产品介绍背景：PRODUCT_INTRO_BACKGROUND
+ * - 产品优势：PRODUCT_ADVANTAGE
+ * - 应用场景：PRODUCT_APPLICATION
+ *
+ * GENERAL 仅用于兼容迁移前已经上传的历史素材。
  */
 export async function validateProductReferences(
   input: ProductReferenceInput,
@@ -35,18 +51,64 @@ export async function validateProductReferences(
     input.secondaryCategoryId,
   );
 
-  await validateImageAssets(
-    [
+  await validateSingleImageAsset({
+    assetId:
       input.coverImageAssetId,
-      ...(input.advantages ?? []).map(
-        (item) => item.assetId,
-      ),
-      ...(input.applications ?? []).map(
-        (item) => item.assetId,
-      ),
-    ],
-    input.coverImageAssetId,
-  );
+
+    expectedPurpose:
+      MediaAssetPurpose.PRODUCT_COVER,
+
+    fieldName:
+      "coverImageAssetId",
+
+    errorMessage:
+      "产品封面图片不存在、已停用、文件类型不正确或素材用途不匹配",
+  });
+
+  await validateSingleImageAsset({
+    assetId:
+      input.introBackgroundImageAssetId,
+
+    expectedPurpose:
+      MediaAssetPurpose
+        .PRODUCT_INTRO_BACKGROUND,
+
+    fieldName:
+      "introBackgroundImageAssetId",
+
+    errorMessage:
+      "产品介绍背景图不存在、已停用、文件类型不正确或素材用途不匹配",
+  });
+
+  await validateImageAssetList({
+    items:
+      input.advantages,
+
+    expectedPurpose:
+      MediaAssetPurpose
+        .PRODUCT_ADVANTAGE,
+
+    fieldName:
+      "advantages",
+
+    errorMessage:
+      "部分产品优势图片不存在、已停用、文件类型不正确或素材用途不匹配",
+  });
+
+  await validateImageAssetList({
+    items:
+      input.applications,
+
+    expectedPurpose:
+      MediaAssetPurpose
+        .PRODUCT_APPLICATION,
+
+    fieldName:
+      "applications",
+
+    errorMessage:
+      "部分应用场景图片不存在、已停用、文件类型不正确或素材用途不匹配",
+  });
 
   await validatePdfAsset(
     input.detailPdfAssetId,
@@ -64,18 +126,24 @@ async function validateSecondaryCategory(
     await prisma.category.findFirst({
       where: {
         id: secondaryCategoryId,
-        level: CategoryLevel.LEVEL_TWO,
+
+        level:
+          CategoryLevel.LEVEL_TWO,
+
         enabled: true,
         deletedAt: null,
 
         parent: {
           is: {
-            level: CategoryLevel.LEVEL_ONE,
+            level:
+              CategoryLevel.LEVEL_ONE,
+
             enabled: true,
             deletedAt: null,
           },
         },
       },
+
       select: {
         id: true,
       },
@@ -95,74 +163,151 @@ async function validateSecondaryCategory(
   }
 }
 
-async function validateImageAssets(
-  assetIds: Array<string | null | undefined>,
-  coverImageAssetId?: string | null,
-): Promise<void> {
-  const uniqueAssetIds = [
-    ...new Set(
-      assetIds
-        .map((assetId) => assetId?.trim())
-        .filter(
-          (assetId): assetId is string =>
-            Boolean(assetId),
-        ),
-    ),
-  ];
+async function validateSingleImageAsset({
+  assetId,
+  expectedPurpose,
+  fieldName,
+  errorMessage,
+}: {
+  assetId?:
+    | string
+    | null;
 
-  if (uniqueAssetIds.length === 0) {
+  expectedPurpose:
+    MediaAssetPurpose;
+
+  fieldName: string;
+  errorMessage: string;
+}): Promise<void> {
+  const normalizedAssetId =
+    assetId?.trim();
+
+  if (!normalizedAssetId) {
     return;
   }
 
-  const existingAssets =
-    await prisma.mediaAsset.findMany({
+  const asset =
+    await prisma.mediaAsset.findFirst({
       where: {
-        id: {
-          in: uniqueAssetIds,
-        },
-        type: MediaAssetType.IMAGE,
+        id: normalizedAssetId,
+
+        type:
+          MediaAssetType.IMAGE,
+
         enabled: true,
         deletedAt: null,
+
+        /*
+         * GENERAL 用于兼容迁移前的旧素材。
+         * 新上传素材必须使用对应的业务用途。
+         */
+        purpose: {
+          in: [
+            expectedPurpose,
+            MediaAssetPurpose.GENERAL,
+          ],
+        },
       },
+
       select: {
         id: true,
       },
     });
 
-  const existingAssetIds = new Set(
-    existingAssets.map((asset) => asset.id),
-  );
-
-  if (
-    coverImageAssetId &&
-    !existingAssetIds.has(coverImageAssetId)
-  ) {
+  if (!asset) {
     throw new ApiError(
       "BAD_REQUEST",
-      "产品封面图片不存在、已停用或文件类型不正确",
+      errorMessage,
       400,
       {
-        coverImageAssetId: [
-          "产品封面图片不存在、已停用或文件类型不正确",
+        [fieldName]: [
+          errorMessage,
         ],
       },
     );
   }
+}
 
-  const invalidAssetIds =
-    uniqueAssetIds.filter(
-      (assetId) =>
-        !existingAssetIds.has(assetId),
+async function validateImageAssetList({
+  items,
+  expectedPurpose,
+  fieldName,
+  errorMessage,
+}: {
+  items?:
+    ProductImageReference[];
+
+  expectedPurpose:
+    MediaAssetPurpose;
+
+  fieldName: string;
+  errorMessage: string;
+}): Promise<void> {
+  const assetIds = [
+    ...new Set(
+      (items ?? [])
+        .map((item) =>
+          item.assetId.trim(),
+        )
+        .filter(Boolean),
+    ),
+  ];
+
+  if (
+    assetIds.length === 0
+  ) {
+    return;
+  }
+
+  const assets =
+    await prisma.mediaAsset.findMany({
+      where: {
+        id: {
+          in: assetIds,
+        },
+
+        type:
+          MediaAssetType.IMAGE,
+
+        enabled: true,
+        deletedAt: null,
+
+        purpose: {
+          in: [
+            expectedPurpose,
+            MediaAssetPurpose.GENERAL,
+          ],
+        },
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+  const validAssetIds =
+    new Set(
+      assets.map(
+        (asset) => asset.id,
+      ),
     );
 
-  if (invalidAssetIds.length > 0) {
+  const hasInvalidAsset =
+    assetIds.some(
+      (assetId) =>
+        !validAssetIds.has(
+          assetId,
+        ),
+    );
+
+  if (hasInvalidAsset) {
     throw new ApiError(
       "BAD_REQUEST",
-      "部分产品图片不存在、已停用或文件类型不正确",
+      errorMessage,
       400,
       {
-        assets: [
-          "部分产品图片不存在、已停用或文件类型不正确",
+        [fieldName]: [
+          errorMessage,
         ],
       },
     );
@@ -170,20 +315,30 @@ async function validateImageAssets(
 }
 
 async function validatePdfAsset(
-  detailPdfAssetId?: string | null,
+  detailPdfAssetId?:
+    | string
+    | null,
 ): Promise<void> {
-  if (!detailPdfAssetId) {
+  const normalizedAssetId =
+    detailPdfAssetId?.trim();
+
+  if (!normalizedAssetId) {
     return;
   }
 
   const asset =
     await prisma.mediaAsset.findFirst({
       where: {
-        id: detailPdfAssetId,
-        type: MediaAssetType.PDF,
+        id:
+          normalizedAssetId,
+
+        type:
+          MediaAssetType.PDF,
+
         enabled: true,
         deletedAt: null,
       },
+
       select: {
         id: true,
       },

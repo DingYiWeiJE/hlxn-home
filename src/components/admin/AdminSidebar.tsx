@@ -242,7 +242,7 @@ export default function AdminSidebar() {
         onClick={() => {
           setIsOpen((current) => !current);
         }}
-        className="fixed left-4 top-20 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition hover:bg-slate-50 md:hidden"
+        className="fixed right-4 top-4 z-[60] inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition hover:bg-slate-50 md:hidden"
         aria-label={
           isOpen
             ? "关闭后台导航菜单"
@@ -278,8 +278,8 @@ export default function AdminSidebar() {
       <aside
         id="admin-sidebar"
         className={[
-          "fixed bottom-0 left-0 top-16 z-50 flex w-72 flex-col border-r border-slate-800 bg-slate-950 text-white shadow-2xl transition-transform duration-300",
-          "md:sticky md:top-16 md:z-20 md:h-[calc(100vh-4rem)] md:w-72 md:shrink-0 md:translate-x-0 md:shadow-none",
+          "fixed bottom-0 left-0 top-0 z-50 flex w-72 flex-col border-r border-slate-800 bg-slate-950 text-white shadow-2xl transition-transform duration-300",
+          "md:sticky md:top-0 md:z-20 md:h-[calc(100vh)] md:w-72 md:shrink-0 md:translate-x-0 md:shadow-none",
           isOpen
             ? "translate-x-0"
             : "-translate-x-full",

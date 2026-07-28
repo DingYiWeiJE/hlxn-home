@@ -132,6 +132,18 @@ enum MediaAssetType {
   PDF
 }
 
+enum MediaAssetPurpose {
+  GENERAL
+
+  PRODUCT_COVER
+  PRODUCT_INTRO_BACKGROUND
+  PRODUCT_ADVANTAGE
+  PRODUCT_APPLICATION
+
+  NEWS_COVER
+  NEWS_CONTENT
+}
+
 model MediaAsset {
   id String @id @default(cuid())
 
@@ -151,10 +163,13 @@ model MediaAsset {
   height Int?
   alt    String?
 
+  purpose MediaAssetPurpose @default(GENERAL)
+
   enabled Boolean @default(true)
 
-  createdById String?
-  createdBy   User?   @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById             String?
+  createdBy               User?     @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  productIntroBackgrounds Product[] @relation("ProductIntroBackgroundImage")
 
   advantages   ProductAdvantage[]
   applications ProductApplication[]
@@ -171,6 +186,7 @@ model MediaAsset {
   @@index([type, enabled, deletedAt])
   @@index([createdById])
   @@index([deletedAt])
+  @@index([purpose, createdAt])
 }
 
 // ============================================================
@@ -248,13 +264,15 @@ model Product {
   // 产品详情 PDF
   detailPdfAssetId String?
 
-  status    ProductStatus @default(DRAFT)
-  sortOrder Int           @default(0)
+  status                      ProductStatus @default(DRAFT)
+  sortOrder                   Int           @default(0)
+  introBackgroundImageAssetId String?
 
   secondaryCategory Category @relation(fields: [secondaryCategoryId], references: [id], onDelete: Restrict)
 
-  coverImageAsset MediaAsset? @relation("ProductCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
-  detailPdfAsset  MediaAsset? @relation("ProductDetailPdf", fields: [detailPdfAssetId], references: [id], onDelete: SetNull)
+  coverImageAsset           MediaAsset? @relation("ProductCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
+  detailPdfAsset            MediaAsset? @relation("ProductDetailPdf", fields: [detailPdfAssetId], references: [id], onDelete: SetNull)
+  introBackgroundImageAsset MediaAsset? @relation("ProductIntroBackgroundImage", fields: [introBackgroundImageAssetId], references: [id], onDelete: SetNull)
 
   advantages   ProductAdvantage[]
   applications ProductApplication[]

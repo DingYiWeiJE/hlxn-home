@@ -9,11 +9,11 @@ import {
   Trash2,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
 import MediaAssetPicker, {
   type ProductMediaAsset,
+  type ProductMediaPurpose,
 } from "@/components/admin/products/MediaAssetPicker";
 
 export type ProductImageAsset = {
@@ -55,13 +55,27 @@ export type ProductImageListItem = {
   asset: ProductImageAsset | null;
 };
 
+type ProductImagePurpose =
+  | "PRODUCT_ADVANTAGE"
+  | "PRODUCT_APPLICATION";
+
 type ProductImageItemsEditorProps = {
   label: string;
   description?: string;
+
+  /**
+   * 用于隔离素材：
+   * 产品优势只能看到 PRODUCT_ADVANTAGE；
+   * 应用场景只能看到 PRODUCT_APPLICATION。
+   */
+  purpose: ProductImagePurpose;
+
   items: ProductImageListItem[];
+
   onChange: (
     items: ProductImageListItem[],
   ) => void;
+
   addButtonText?: string;
   titlePlaceholder?: string;
   emptyText?: string;
@@ -86,10 +100,12 @@ function createClientId(): string {
 function normalizeSortOrder(
   items: ProductImageListItem[],
 ): ProductImageListItem[] {
-  return items.map((item, index) => ({
-    ...item,
-    sortOrder: index,
-  }));
+  return items.map(
+    (item, index) => ({
+      ...item,
+      sortOrder: index,
+    }),
+  );
 }
 
 function formatFileSize(
@@ -107,9 +123,9 @@ function formatFileSize(
   }
 
   if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(
-      1,
-    )} KB`;
+    return `${(
+      bytes / 1024
+    ).toFixed(1)} KB`;
   }
 
   return `${(
@@ -122,6 +138,7 @@ function formatFileSize(
 export default function ProductImageItemsEditor({
   label,
   description,
+  purpose,
   items,
   onChange,
   addButtonText = "添加一项",
@@ -133,43 +150,62 @@ export default function ProductImageItemsEditor({
   const [
     pickerItemIndex,
     setPickerItemIndex,
-  ] = useState<number | null>(null);
+  ] = useState<number | null>(
+    null,
+  );
 
   function addItem() {
     if (items.length >= maxItems) {
       return;
     }
 
-    const nextIndex = items.length;
+    const nextIndex =
+      items.length;
 
     onChange([
       ...items,
       {
-        clientId: createClientId(),
+        clientId:
+          createClientId(),
         assetId: "",
         title: "",
-        sortOrder: nextIndex,
+        sortOrder:
+          nextIndex,
         asset: null,
       },
     ]);
 
-    setPickerItemIndex(nextIndex);
+    /*
+     * 新增项目后直接打开素材弹窗。
+     * 用户可以选择已有图片，也可以直接上传新图片。
+     */
+    setPickerItemIndex(
+      nextIndex,
+    );
   }
 
-  function removeItem(index: number) {
-    const nextItems = items.filter(
-      (_item, itemIndex) =>
-        itemIndex !== index,
-    );
+  function removeItem(
+    index: number,
+  ) {
+    const nextItems =
+      items.filter(
+        (_item, itemIndex) =>
+          itemIndex !== index,
+      );
 
     onChange(
-      normalizeSortOrder(nextItems),
+      normalizeSortOrder(
+        nextItems,
+      ),
     );
 
     if (
-      pickerItemIndex === index
+      pickerItemIndex ===
+      index
     ) {
-      setPickerItemIndex(null);
+      setPickerItemIndex(
+        null,
+      );
     }
   }
 
@@ -178,13 +214,14 @@ export default function ProductImageItemsEditor({
     title: string,
   ) {
     onChange(
-      items.map((item, itemIndex) =>
-        itemIndex === index
-          ? {
-              ...item,
-              title,
-            }
-          : item,
+      items.map(
+        (item, itemIndex) =>
+          itemIndex === index
+            ? {
+                ...item,
+                title,
+              }
+            : item,
       ),
     );
   }
@@ -194,28 +231,35 @@ export default function ProductImageItemsEditor({
     asset: ProductMediaAsset,
   ) {
     onChange(
-      items.map((item, itemIndex) =>
-        itemIndex === index
-          ? {
-              ...item,
-              assetId: asset.id,
+      items.map(
+        (item, itemIndex) =>
+          itemIndex === index
+            ? {
+                ...item,
+                assetId:
+                  asset.id,
 
-              asset: {
-                id: asset.id,
-                url: asset.url,
-                filename:
-                  asset.filename,
-                originalName:
-                  asset.originalName,
-                mimeType:
-                  asset.mimeType,
-                size: asset.size,
-                width: asset.width,
-                height: asset.height,
-                alt: asset.alt,
-              },
-            }
-          : item,
+                asset: {
+                  id: asset.id,
+                  url:
+                    asset.url,
+                  filename:
+                    asset.filename,
+                  originalName:
+                    asset.originalName,
+                  mimeType:
+                    asset.mimeType,
+                  size:
+                    asset.size,
+                  width:
+                    asset.width,
+                  height:
+                    asset.height,
+                  alt:
+                    asset.alt,
+                },
+              }
+            : item,
       ),
     );
   }
@@ -229,12 +273,15 @@ export default function ProductImageItemsEditor({
 
     if (
       nextIndex < 0 ||
-      nextIndex >= items.length
+      nextIndex >=
+        items.length
     ) {
       return;
     }
 
-    const nextItems = [...items];
+    const nextItems = [
+      ...items,
+    ];
 
     [
       nextItems[index],
@@ -245,13 +292,17 @@ export default function ProductImageItemsEditor({
     ];
 
     onChange(
-      normalizeSortOrder(nextItems),
+      normalizeSortOrder(
+        nextItems,
+      ),
     );
   }
 
   const selectedPickerItem =
     pickerItemIndex !== null
-      ? items[pickerItemIndex]
+      ? items[
+          pickerItemIndex
+        ]
       : null;
 
   return (
@@ -282,7 +333,8 @@ export default function ProductImageItemsEditor({
             type="button"
             onClick={addItem}
             disabled={
-              items.length >= maxItems
+              items.length >=
+              maxItems
             }
             className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -303,7 +355,7 @@ export default function ProductImageItemsEditor({
               </h4>
 
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                图片从素材库中选择，标题在当前产品中独立填写。
+                可以选择已有图片，也可以在当前页面直接上传新图片。
               </p>
 
               <button
@@ -317,15 +369,21 @@ export default function ProductImageItemsEditor({
             </div>
           ) : (
             items.map(
-              (item, index) => {
+              (
+                item,
+                index,
+              ) => {
                 const fileSize =
                   formatFileSize(
-                    item.asset?.size,
+                    item.asset
+                      ?.size,
                   );
 
                 return (
                   <article
-                    key={item.clientId}
+                    key={
+                      item.clientId
+                    }
                     className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row">
@@ -333,10 +391,13 @@ export default function ProductImageItemsEditor({
                         {item.asset ? (
                           <Image
                             src={
-                              item.asset.url
+                              item
+                                .asset
+                                .url
                             }
                             alt={
-                              item.asset
+                              item
+                                .asset
                                 .alt ||
                               item.title ||
                               `${label}图片`
@@ -372,9 +433,15 @@ export default function ProductImageItemsEditor({
 
                           <input
                             id={`${item.clientId}-title`}
-                            value={item.title}
-                            required={required}
-                            maxLength={200}
+                            value={
+                              item.title
+                            }
+                            required={
+                              required
+                            }
+                            maxLength={
+                              200
+                            }
                             onChange={(
                               event,
                             ) =>
@@ -394,7 +461,8 @@ export default function ProductImageItemsEditor({
                           <div className="mt-1 flex justify-end">
                             <span className="text-xs tabular-nums text-slate-400">
                               {
-                                item.title
+                                item
+                                  .title
                                   .length
                               }{" "}
                               / 200
@@ -460,21 +528,13 @@ export default function ProductImageItemsEditor({
                               <Images className="h-4 w-4" />
 
                               {item.asset
-                                ? "更换图片"
-                                : "选择图片"}
+                                ? "更换或上传图片"
+                                : "选择或上传图片"}
                             </button>
                           </div>
                         </div>
 
-                        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                          <Link
-                            href="/admin/assets"
-                            target="_blank"
-                            className="text-xs font-semibold text-blue-600 transition hover:text-blue-700 hover:underline"
-                          >
-                            前往素材库上传新图片
-                          </Link>
-
+                        <div className="mt-4 flex justify-end">
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
@@ -485,7 +545,8 @@ export default function ProductImageItemsEditor({
                                 )
                               }
                               disabled={
-                                index === 0
+                                index ===
+                                0
                               }
                               className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-30"
                               aria-label={`上移第 ${
@@ -543,7 +604,8 @@ export default function ProductImageItemsEditor({
           {items.length > 0 ? (
             <footer className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-slate-400">
-                已添加 {items.length} 项，最多{" "}
+                已添加{" "}
+                {items.length} 项，最多{" "}
                 {maxItems} 项
               </p>
 
@@ -566,16 +628,27 @@ export default function ProductImageItemsEditor({
 
       <MediaAssetPicker
         open={
-          pickerItemIndex !== null
+          pickerItemIndex !==
+          null
         }
         type="IMAGE"
-        title={`选择${label}图片`}
+        purpose={
+          purpose as ProductMediaPurpose
+        }
+        title={`选择或上传${label}图片`}
         selectedAssetId={
-          selectedPickerItem?.assetId
+          selectedPickerItem
+            ?.assetId
+        }
+        uploadAlt={
+          selectedPickerItem
+            ?.title ||
+          label
         }
         onSelect={(asset) => {
           if (
-            pickerItemIndex === null
+            pickerItemIndex ===
+            null
           ) {
             return;
           }
@@ -586,7 +659,9 @@ export default function ProductImageItemsEditor({
           );
         }}
         onClose={() =>
-          setPickerItemIndex(null)
+          setPickerItemIndex(
+            null,
+          )
         }
       />
     </>

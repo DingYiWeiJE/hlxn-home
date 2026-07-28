@@ -299,6 +299,9 @@ export async function POST(request: Request) {
       coverImageAssetId:
         body.coverImageAssetId,
 
+      introBackgroundImageAssetId:
+        body.introBackgroundImageAssetId,
+
       advantages:
         body.advantages,
 
@@ -387,6 +390,9 @@ export async function POST(request: Request) {
               coverImageAssetId:
                 body.coverImageAssetId ??
                 null,
+
+              introBackgroundImageAssetId:
+                body.introBackgroundImageAssetId,
 
               detailPdfAssetId:
                 body.detailPdfAssetId ??
@@ -486,6 +492,21 @@ export async function POST(request: Request) {
                   id: true,
                   url: true,
                   originalName: true,
+                  width: true,
+                  height: true,
+                  alt: true,
+                },
+              },
+
+              introBackgroundImageAsset: {
+                select: {
+                  id: true,
+                  type: true,
+                  url: true,
+                  filename: true,
+                  originalName: true,
+                  mimeType: true,
+                  size: true,
                   width: true,
                   height: true,
                   alt: true,

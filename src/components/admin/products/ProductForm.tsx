@@ -89,6 +89,9 @@ export type ProductFormInitialData = {
   coverImageAssetId: string | null;
   coverImage: SelectedAsset | null;
 
+  introBackgroundImageAssetId?: string | null;
+  introBackgroundImageAsset?: SelectedAsset | null;
+
   advantages: Array<{
     id: string;
     title: string;
@@ -398,8 +401,28 @@ export default function ProductForm({
 
   const [coverImage, setCoverImage] =
     useState<SelectedAsset | null>(
-      initialData?.coverImage ?? null,
+      initialData?.coverImage ??
+        (initialData?.coverImageAssetId
+          ? {
+              id: initialData.coverImageAssetId,
+              type: "IMAGE",
+            }
+          : null),
     );
+
+  const [
+    introBackgroundImage,
+    setIntroBackgroundImage,
+  ] = useState<SelectedAsset | null>(
+    initialData?.introBackgroundImageAsset ??
+      (initialData?.introBackgroundImageAssetId
+        ? {
+            id:
+              initialData.introBackgroundImageAssetId,
+            type: "IMAGE",
+          }
+        : null),
+  );
 
   const [advantages, setAdvantages] =
     useState<ProductImageListItem[]>(
@@ -485,7 +508,10 @@ export default function ProductForm({
     pickerTarget,
     setPickerTarget,
   ] = useState<
-    "COVER" | "PDF" | null
+    | "COVER"
+    | "INTRO_BACKGROUND"
+    | "PDF"
+    | null
   >(null);
 
   const loadCategories =
@@ -736,9 +762,11 @@ export default function ProductForm({
         );
       }
 
-      if (!secondaryCategoryId) {
+      if (
+        !introBackgroundImage?.id
+      ) {
         throw new Error(
-          "请选择产品所属的二级分类",
+          "请选择产品介绍背景图",
         );
       }
 
@@ -781,6 +809,9 @@ export default function ProductForm({
 
         coverImageAssetId:
           coverImage?.id ?? null,
+
+        introBackgroundImageAssetId:
+          introBackgroundImage.id,
 
         advantages:
           advantages.map(
@@ -1200,7 +1231,8 @@ export default function ProductForm({
 
             <ProductImageItemsEditor
               label="产品优势"
-              description="每项选择一张素材图片，并为当前产品填写独立标题。"
+              description="每项可选择已有优势图片，也可直接上传新的优势图片。"
+              purpose="PRODUCT_ADVANTAGE"
               items={advantages}
               onChange={setAdvantages}
               addButtonText="添加产品优势"
@@ -1218,11 +1250,10 @@ export default function ProductForm({
 
             <ProductImageItemsEditor
               label="应用场景"
-              description="每项选择一张素材图片，并填写对应的应用场景标题。"
+              description="每项可选择已有应用场景图片，也可直接上传新的应用场景图片。"
+              purpose="PRODUCT_APPLICATION"
               items={applications}
-              onChange={
-                setApplications
-              }
+              onChange={setApplications}
               addButtonText="添加应用场景"
               titlePlaceholder="例如：工商业园区"
               emptyText="暂未添加应用场景"
@@ -1367,17 +1398,109 @@ export default function ProductForm({
                   <ImageIcon className="h-4 w-4" />
 
                   {coverImage
-                    ? "更换封面图片"
-                    : "选择封面图片"}
+                    ? "更换或上传封面图片"
+                    : "选择或上传封面图片"}
                 </button>
 
-                <Link
-                  href="/admin/assets"
-                  target="_blank"
-                  className="mt-3 block text-center text-xs font-semibold text-blue-600 transition hover:underline"
+              </div>
+            </section>
+
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                <h2 className="text-sm font-bold text-slate-900">
+                  产品介绍背景图
+                  <span className="ml-1 text-red-500">
+                    *
+                  </span>
+                </h2>
+
+                {introBackgroundImage ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIntroBackgroundImage(
+                        null,
+                      )
+                    }
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                    aria-label="移除产品介绍背景图"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="p-5">
+                <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                  {introBackgroundImage?.url ? (
+                    <Image
+                      src={
+                        introBackgroundImage.url
+                      }
+                      alt={
+                        introBackgroundImage.alt ||
+                        name ||
+                        "产品介绍背景图"
+                      }
+                      fill
+                      unoptimized
+                      sizes="360px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center px-4 text-center text-slate-400">
+                      <ImageIcon className="h-10 w-10" />
+
+                      <p className="mt-3 text-xs font-medium">
+                        尚未选择产品介绍背景图
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {introBackgroundImage ? (
+                  <div className="mt-3 text-xs text-slate-500">
+                    <p className="truncate font-medium text-slate-700">
+                      {introBackgroundImage.originalName ||
+                        introBackgroundImage.filename ||
+                        "已选择背景图"}
+                    </p>
+
+                    <p className="mt-1">
+                      {introBackgroundImage.width &&
+                      introBackgroundImage.height
+                        ? `${introBackgroundImage.width} × ${introBackgroundImage.height}`
+                        : "尺寸未知"}
+
+                      {introBackgroundImage.size !==
+                      undefined
+                        ? ` · ${formatFileSize(
+                            introBackgroundImage.size,
+                          )}`
+                        : ""}
+                    </p>
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPickerTarget(
+                      "INTRO_BACKGROUND",
+                    )
+                  }
+                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                 >
-                  前往素材库上传图片
-                </Link>
+                  <ImageIcon className="h-4 w-4" />
+
+                  {introBackgroundImage
+                    ? "更换或上传背景图"
+                    : "选择或上传背景图"}
+                </button>
+
+                <p className="mt-3 text-center text-xs leading-5 text-slate-400">
+                  该图片用于产品详情页的产品介绍背景区域，创建产品时必须选择。
+                </p>
               </div>
             </section>
 
@@ -1439,17 +1562,10 @@ export default function ProductForm({
                   <FileText className="h-4 w-4" />
 
                   {detailPdf
-                    ? "更换 PDF"
-                    : "选择 PDF"}
+                    ? "更换或上传 PDF"
+                    : "选择或上传 PDF"}
                 </button>
 
-                <Link
-                  href="/admin/assets"
-                  target="_blank"
-                  className="mt-3 block text-center text-xs font-semibold text-blue-600 transition hover:underline"
-                >
-                  前往素材库上传 PDF
-                </Link>
               </div>
             </section>
 
@@ -1484,15 +1600,37 @@ export default function ProductForm({
             ? "PDF"
             : "IMAGE"
         }
+        purpose={
+          pickerTarget === "COVER"
+            ? "PRODUCT_COVER"
+            : pickerTarget ===
+                "INTRO_BACKGROUND"
+              ? "PRODUCT_INTRO_BACKGROUND"
+              : "GENERAL"
+        }
         title={
           pickerTarget === "PDF"
-            ? "选择产品 PDF"
-            : "选择产品封面图片"
+            ? "选择或上传产品 PDF"
+            : pickerTarget ===
+                "INTRO_BACKGROUND"
+              ? "选择或上传产品介绍背景图"
+              : "选择或上传产品封面图片"
         }
         selectedAssetId={
           pickerTarget === "PDF"
             ? detailPdf?.id
-            : coverImage?.id
+            : pickerTarget ===
+                "INTRO_BACKGROUND"
+              ? introBackgroundImage?.id
+              : coverImage?.id
+        }
+        uploadAlt={
+          pickerTarget === "COVER"
+            ? `${name || "产品"}封面`
+            : pickerTarget ===
+                "INTRO_BACKGROUND"
+              ? `${name || "产品"}介绍背景图`
+              : undefined
         }
         onSelect={(asset) => {
           if (
@@ -1501,11 +1639,24 @@ export default function ProductForm({
             setDetailPdf(
               normalizeAsset(asset),
             );
-          } else {
-            setCoverImage(
+
+            return;
+          }
+
+          if (
+            pickerTarget ===
+            "INTRO_BACKGROUND"
+          ) {
+            setIntroBackgroundImage(
               normalizeAsset(asset),
             );
+
+            return;
           }
+
+          setCoverImage(
+            normalizeAsset(asset),
+          );
         }}
         onClose={() =>
           setPickerTarget(null)

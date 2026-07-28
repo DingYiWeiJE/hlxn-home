@@ -20,9 +20,7 @@ export default function AdminLayout({
 }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <AdminNavigation />
-
-      <div className="flex min-h-[calc(100vh-4rem)]">
+      <div className="flex min-h-[calc(100vh)]">
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
