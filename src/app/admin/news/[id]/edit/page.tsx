@@ -1,100 +1,271 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import NewsForm from "@/components/admin/NewsForm";
-import type { TiptapNode } from "@/lib/news/tiptap";
+import {
+  useEffect,
+  useState,
+} from "react";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 
-type NewsData = {
+import NewsForm, {
+  type NewsFormInitialValue,
+} from "@/components/admin/NewsForm";
+
+type NewsDetail = {
   id: string;
   title: string;
   slug: string;
   locale: "zh" | "en";
   summary: string | null;
-  coverImage: string | null;
+
+  coverImageAssetId: string | null;
+
+  coverImageAsset: {
+    id: string;
+    url: string;
+    filename?: string | null;
+    originalName?: string | null;
+    mimeType?: string | null;
+    size?: number | null;
+    width?: number | null;
+    height?: number | null;
+    alt?: string | null;
+  } | null;
+
   coverImageAlt: string | null;
+
+  content: NewsFormInitialValue["content"];
+
   authorName: string | null;
   status: "DRAFT" | "PUBLISHED";
   isFeatured: boolean;
   publishedAt: string | null;
-  content: TiptapNode;
+
+  sourceType: "MANUAL" | "WECHAT";
+  sourceUrl: string | null;
+  sourceAccountName: string | null;
+  sourceArticleId: string | null;
+  sourcePublishedAt: string | null;
+  importMeta: unknown;
+};
+
+type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: {
+    code?: string;
+    message?: string;
+  };
 };
 
 export default function AdminEditNewsPage() {
-  const router = useRouter();
-  const params = useParams();
-  const id = params.id as string;
+  const params = useParams<{
+    id: string;
+  }>();
 
-  const [news, setNews] = useState<NewsData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const [news, setNews] =
+    useState<NewsDetail | null>(
+      null,
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
-    const loadNews = async () => {
+    const controller =
+      new AbortController();
+
+    async function loadNews() {
+      setLoading(true);
+      setError("");
+
       try {
-        const url = new URL(`/api/admin/news/${id}`, window.location.origin);
-        const response = await fetch(url.toString());
-        if (response.status === 401) {
-          router.replace("/admin/login");
+        const response =
+          await fetch(
+            `/api/news/${params.id}`,
+            {
+              credentials:
+                "include",
+              cache: "no-store",
+              signal:
+                controller.signal,
+            },
+          );
+
+        const result =
+          (await response.json()) as ApiResponse<NewsDetail>;
+
+        if (
+          response.status === 401
+        ) {
+          router.replace(
+            "/admin/login",
+          );
+
           return;
         }
-        if (!response.ok) {
-          if (response.status === 404) {
-            router.replace("/admin/news");
-          } else {
-            throw new Error(`HTTP ${response.status}`);
-          }
+
+        if (
+          response.status === 404
+        ) {
+          setError(
+            "新闻不存在或已被删除",
+          );
+
           return;
         }
-        const data = (await response.json()) as { success: boolean; data?: NewsData };
-        if (data.success && data.data) {
-          setNews(data.data);
+
+        if (
+          !response.ok ||
+          !result.success ||
+          !result.data
+        ) {
+          setError(
+            result.error?.message ??
+              "新闻加载失败",
+          );
+
+          return;
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "加载失败");
+
+        setNews(result.data);
+      } catch (requestError) {
+        if (
+          requestError instanceof
+            Error &&
+          requestError.name ===
+            "AbortError"
+        ) {
+          return;
+        }
+
+        setError(
+          "新闻加载失败，请稍后重试",
+        );
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
+    }
+
+    void loadNews();
+
+    return () => {
+      controller.abort();
     };
-    loadNews();
-  }, [id, router]);
+  }, [params.id, router]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <div className="text-center text-slate-600">加载中...</div>
+        <div className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center text-sm text-slate-500">
+          正在加载新闻...
+        </div>
       </main>
     );
   }
 
-  if (error) {
+  if (error || !news) {
     return (
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <div className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-sm text-red-700">
+          {error || "新闻不存在"}
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            router.push(
+              "/admin/news",
+            )
+          }
+          className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+        >
+          返回新闻列表
+        </button>
       </main>
     );
   }
-
-  if (!news) return null;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">编辑新闻</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-slate-900">
+          编辑新闻
+        </h1>
+
+        <p className="mt-1 text-sm text-slate-500">
+          修改新闻内容不会改变现有页面地址。
+        </p>
+      </div>
+
       <NewsForm
         mode="edit"
-        id={id}
+        id={news.id}
         initialValue={{
-          title: news.title,
-          slug: news.slug,
-          locale: news.locale,
-          summary: news.summary ?? "",
-          coverImage: news.coverImage ?? "",
-          coverImageAlt: news.coverImageAlt ?? "",
-          authorName: news.authorName ?? "",
-          status: news.status,
-          isFeatured: news.isFeatured,
-          publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString().slice(0, 16) : "",
-          content: news.content,
+          title:
+            news.title,
+
+          locale:
+            news.locale,
+
+          summary:
+            news.summary ?? "",
+
+          /*
+           * 这里必须同时传素材 ID 和素材对象。
+           * 素材 ID 用于保存，素材对象用于显示封面预览。
+           */
+          coverImageAssetId:
+            news.coverImageAssetId,
+
+          coverImageAsset:
+            news.coverImageAsset,
+
+          coverImageAlt:
+            news.coverImageAlt ?? "",
+
+          content:
+            news.content,
+
+          authorName:
+            news.authorName ?? "",
+
+          status:
+            news.status,
+
+          isFeatured:
+            news.isFeatured,
+
+          publishedAt:
+            news.publishedAt ?? "",
+
+          sourceType:
+            news.sourceType,
+
+          sourceUrl:
+            news.sourceUrl ?? "",
+
+          sourceAccountName:
+            news.sourceAccountName ??
+            "",
+
+          sourceArticleId:
+            news.sourceArticleId ??
+            "",
+
+          sourcePublishedAt:
+            news.sourcePublishedAt ??
+            "",
+
+          importMeta:
+            news.importMeta,
         }}
       />
     </main>
