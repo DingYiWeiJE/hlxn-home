@@ -1,23 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 
-export type NewsItem = {
-  id: string | number;
+type Locale = "zh" | "en";
+
+type ApiNewsItem = {
+  id: string;
   title: string;
-  image: string;
-  publishedAt: string;
-  href?: string;
+  slug: string;
+  locale?: Locale;
+
+  publishedAt?: string | null;
+  createdAt?: string | null;
+
+  coverImageAsset?: {
+    id?: string;
+    url?: string | null;
+  } | null;
+
+  coverImage?:
+    | string
+    | {
+        url?: string | null;
+      }
+    | null;
+
+  coverImageUrl?: string | null;
+};
+
+type ApiNewsListData = {
+  items?: ApiNewsItem[];
+  news?: ApiNewsItem[];
+  list?: ApiNewsItem[];
 };
 
 type NewsApiResponse = {
-  success: boolean;
-  data: {
-    items: NewsItem[];
-    pagination: {
-      total: number;
-    };
+  success?: boolean;
+
+  data?:
+    | ApiNewsItem[]
+    | ApiNewsListData;
+
+  error?: {
+    code?: string;
+    message?: string;
   };
+};
+
+export type NewsItem = {
+  id: string;
+  title: string;
+  slug: string;
+  image: string | null;
+  publishedAt: string;
+  href: string;
 };
 
 type NewsCenterProps = {
@@ -26,50 +63,107 @@ type NewsCenterProps = {
   className?: string;
 };
 
-async function fetchNews(locale: string, maxItems: number = 3): Promise<NewsItem[]> {
+async function fetchNews(
+  locale: Locale,
+  maxItems = 3,
+): Promise<NewsItem[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-    const url = `${baseUrl}/api/news?pageSize=${maxItems}&locale=${locale}`;
-    console.log(`[NewsCenter] Fetching news from: ${url}`);
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      next: { revalidate: 3600 },
+    const pageSize = Math.min(
+      Math.max(Math.trunc(maxItems), 1),
+      12,
+    );
+
+    const origin = await getSiteOrigin();
+
+    const query = new URLSearchParams({
+      locale,
+      page: "1",
+      pageSize: String(pageSize),
     });
 
-    if (!response.ok) {
-      throw new Error(`获取新闻失败：${response.status}`);
+    const response = await fetch(
+      `${origin}/api/news?${query.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+
+        /*
+         * 新闻发布或修改后首页立即更新。
+         * 功能稳定后可改成 revalidate 缓存。
+         */
+        cache: "no-store",
+      },
+    );
+
+    const result =
+      (await response.json()) as NewsApiResponse;
+
+    if (
+      !response.ok ||
+      result.success === false
+    ) {
+      throw new Error(
+        result.error?.message ??
+          `获取新闻失败：${response.status}`,
+      );
     }
 
-    const data = (await response.json()) as NewsApiResponse;
-    const items = Array.isArray(data.data.items) ? data.data.items.slice(0, maxItems) : [];
-    console.log(`[NewsCenter] Successfully fetched ${items.length} news items`);
-    return items;
-  } catch (err) {
-    console.error("[NewsCenter] Failed to fetch news:", err);
+    const sourceItems =
+      parseApiItems(result.data);
+
+    return sourceItems
+      .slice(0, pageSize)
+      .map((item) =>
+        normalizeNewsItem(
+          item,
+          locale,
+        ),
+      )
+      .filter(
+        (
+          item,
+        ): item is NewsItem =>
+          item !== null,
+      );
+  } catch (error) {
+    console.error(
+      "[NewsCenter] 获取新闻失败：",
+      error,
+    );
+
     return [];
   }
 }
 
 export default async function NewsCenter({
-  locale,
+  locale: localeValue,
   maxItems = 3,
   className = "",
 }: NewsCenterProps) {
-  const t = await getTranslations({ locale });
-  const newsList = await fetchNews(locale, maxItems);
+  const locale =
+    normalizeLocale(localeValue);
 
-  const moreText = t("newsCenter.moreText");
-  const moreHref = `/${locale}/news`;
-  const noNewsText = t("newsCenter.noNews");
+  const t = await getTranslations({
+    locale,
+  });
 
-  // 添加 locale 前缀到每个新闻项的 href
-  const newsListWithLocale = newsList.map((item) => ({
-    ...item,
-    href: item.href ? `/${locale}${item.href}` : undefined,
-  }));
+  const newsList = await fetchNews(
+    locale,
+    maxItems,
+  );
+
+  const moreText = t(
+    "newsCenter.moreText",
+  );
+
+  const noNewsText = t(
+    "newsCenter.noNews",
+  );
+
+  const moreHref =
+    `/${locale}/news`;
 
   return (
     <section
@@ -83,7 +177,9 @@ export default async function NewsCenter({
       <div className="mx-auto max-w-[1440px]">
         <div className="flex items-center justify-between gap-6">
           <h2 className="text-3xl font-bold tracking-wide text-[#2f67bd] sm:text-4xl">
-            {t("newsCenter.title")}
+            {t(
+              "newsCenter.title",
+            )}
           </h2>
 
           <Link
@@ -106,17 +202,21 @@ export default async function NewsCenter({
         </div>
 
         <div className="mt-10 sm:mt-12">
-          {newsList.length === 0 && (
+          {newsList.length === 0 ? (
             <div className="flex min-h-48 items-center justify-center rounded-xl bg-slate-50 px-6 text-center text-sm text-slate-500">
               {noNewsText}
             </div>
-          )}
-
-          {newsList.length > 0 && (
+          ) : (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {newsListWithLocale.map((item) => (
-                <NewsCard key={item.id} item={item} locale={locale} />
-              ))}
+              {newsList.map(
+                (item) => (
+                  <NewsCard
+                    key={item.id}
+                    item={item}
+                    locale={locale}
+                  />
+                ),
+              )}
             </div>
           )}
         </div>
@@ -144,57 +244,242 @@ export default async function NewsCenter({
   );
 }
 
-function NewsCard({ item, locale }: { item: NewsItem; locale: string }) {
-  const content = (
-    <article
-      className="
-        group h-full overflow-hidden rounded-lg bg-white
-        shadow-[0_2px_10px_rgba(15,23,42,0.12)]
-        transition duration-300
-        hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(15,23,42,0.16)]
-      "
-    >
-      <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-        <Image
-          src={item.image}
-          alt={item.title}
-          fill
-          sizes="
-            (min-width: 1280px) 31vw,
-            (min-width: 768px) 48vw,
-            100vw
-          "
-          className="object-cover transition duration-500 group-hover:scale-105"
-        />
-      </div>
-
-      <div className="px-4 py-4 sm:px-5">
-        <h3 className="line-clamp-2 text-base font-semibold leading-7 text-slate-800 sm:text-[17px]">
-          {item.title}
-        </h3>
-
-        <time
-          dateTime={item.publishedAt}
-          className="mt-2 block text-sm text-slate-400"
-        >
-          {formatNewsDate(item.publishedAt, locale)}
-        </time>
-      </div>
-    </article>
-  );
-
-  if (!item.href) {
-    return content;
-  }
-
+function NewsCard({
+  item,
+  locale,
+}: {
+  item: NewsItem;
+  locale: Locale;
+}) {
   return (
     <Link
       href={item.href}
-      className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+      aria-label={
+        locale === "zh"
+          ? `查看新闻：${item.title}`
+          : `View news: ${item.title}`
+      }
+      className="
+        block h-full rounded-lg
+        focus-visible:outline-none
+        focus-visible:ring-4
+        focus-visible:ring-blue-200
+      "
     >
-      {content}
+      <article
+        className="
+          group flex h-full flex-col overflow-hidden rounded-lg bg-white
+          shadow-[0_2px_10px_rgba(15,23,42,0.12)]
+          transition duration-300
+          hover:-translate-y-1
+          hover:shadow-[0_8px_24px_rgba(15,23,42,0.16)]
+        "
+      >
+        <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+          {item.image ? (
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+
+              /*
+               * 新闻图片来自本地媒体存储，
+               * 不通过 Next.js 图片优化代理，避免刷新后图片失效。
+               */
+              unoptimized
+
+              sizes="
+                (min-width: 1280px) 31vw,
+                (min-width: 768px) 48vw,
+                100vw
+              "
+              className="
+                object-cover
+                transition
+                duration-500
+                group-hover:scale-105
+              "
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-sm font-medium tracking-widest text-slate-400">
+              HANLY NEWS
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col px-4 py-4 sm:px-5">
+          <h3 className="line-clamp-2 text-base font-semibold leading-7 text-slate-800 sm:text-[17px]">
+            {item.title}
+          </h3>
+
+          <time
+            dateTime={
+              item.publishedAt ||
+              undefined
+            }
+            className="mt-auto block pt-2 text-sm text-slate-400"
+          >
+            {formatNewsDate(
+              item.publishedAt,
+              locale,
+            )}
+          </time>
+        </div>
+      </article>
     </Link>
   );
+}
+
+function parseApiItems(
+  data:
+    | ApiNewsItem[]
+    | ApiNewsListData
+    | undefined,
+): ApiNewsItem[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  return (
+    data.items ??
+    data.news ??
+    data.list ??
+    []
+  );
+}
+
+function normalizeNewsItem(
+  item: ApiNewsItem,
+  locale: Locale,
+): NewsItem | null {
+  const id =
+    typeof item.id === "string"
+      ? item.id.trim()
+      : "";
+
+  const title =
+    typeof item.title === "string"
+      ? item.title.trim()
+      : "";
+
+  const slug =
+    typeof item.slug === "string"
+      ? item.slug.trim()
+      : "";
+
+  if (!id || !title || !slug) {
+    return null;
+  }
+
+  const publishedAt =
+    item.publishedAt ??
+    item.createdAt ??
+    "";
+
+  return {
+    id,
+    title,
+    slug,
+    image:
+      resolveCoverImage(item),
+    publishedAt,
+
+    /*
+     * 不再依赖接口返回 href，
+     * 避免语言前缀重复或详情地址缺失。
+     */
+    href:
+      `/${locale}/news/${encodeURIComponent(
+        slug,
+      )}`,
+  };
+}
+
+function resolveCoverImage(
+  item: ApiNewsItem,
+): string | null {
+  const compatibilityCover =
+    typeof item.coverImage ===
+    "string"
+      ? item.coverImage
+      : item.coverImage?.url;
+
+  const value =
+    item.coverImageAsset?.url ??
+    item.coverImageUrl ??
+    compatibilityCover ??
+    null;
+
+  if (
+    typeof value !== "string"
+  ) {
+    return null;
+  }
+
+  const trimmed =
+    value.trim();
+
+  return trimmed || null;
+}
+
+async function getSiteOrigin(): Promise<string> {
+  const configuredOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.APP_ORIGIN ??
+    process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (configuredOrigin) {
+    return configuredOrigin.replace(
+      /\/+$/,
+      "",
+    );
+  }
+
+  const requestHeaders =
+    await headers();
+
+  const host =
+    requestHeaders.get(
+      "x-forwarded-host",
+    ) ??
+    requestHeaders.get("host");
+
+  if (!host) {
+    return "http://localhost:3000";
+  }
+
+  const forwardedProtocol =
+    requestHeaders.get(
+      "x-forwarded-proto",
+    );
+
+  const isLocal =
+    host.startsWith(
+      "localhost",
+    ) ||
+    host.startsWith(
+      "127.0.0.1",
+    );
+
+  const protocol =
+    forwardedProtocol ??
+    (isLocal
+      ? "http"
+      : "https");
+
+  return `${protocol}://${host}`;
+}
+
+function normalizeLocale(
+  value: string,
+): Locale {
+  return value === "en"
+    ? "en"
+    : "zh";
 }
 
 function ArrowIcon() {
@@ -216,19 +501,41 @@ function ArrowIcon() {
   );
 }
 
-function formatNewsDate(value: string, locale: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
+function formatNewsDate(
+  value: string,
+  locale: Locale,
+) {
+  if (!value) {
+    return "";
   }
 
-  const localeCode = locale === "zh" ? "zh-CN" : "en-US";
-  return new Intl.DateTimeFormat(localeCode, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
+    return value.slice(
+      0,
+      10,
+    );
+  }
+
+  const localeCode =
+    locale === "zh"
+      ? "zh-CN"
+      : "en-US";
+
+  return new Intl.DateTimeFormat(
+    localeCode,
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    },
+  )
     .format(date)
     .replaceAll("/", "-");
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import CustomContactBar from "@/components/CustomContactBar";
 import BackToTop from "@/components/BackToTop";
 
 export const metadata: Metadata = {
@@ -38,7 +37,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html className="h-full antialiased">
       <body className="min-h-full flex flex-col">{children}
-        <CustomContactBar />
+        
         <BackToTop />
       </body>
     </html>
