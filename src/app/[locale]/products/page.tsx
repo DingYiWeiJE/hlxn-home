@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
+import Image from "next/image";
 import ProductCatalog from "../../../components/admin/products/ProductCatalog";
+import { DownloadBanner } from "@/components/DownloadBanner";
 
 type Props = {
   params: Promise<{
@@ -29,22 +31,28 @@ async function ProductsContent({ locale }: { locale: string }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div
-        className="relative h-[60vh] bg-cover bg-center flex flex-col"
-        style={{
-          backgroundImage: "url('/images/products/product_bg.jpg')",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <div className="absolute inset-0 bg-[#001524C9] opacity-50"></div>
-        <div className="relative flex flex-col h-full">
+      <div className="relative flex h-[60vh] flex-col overflow-hidden">
+        <Image
+          src="/images/products/product_bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+
+        <div className="absolute inset-0 bg-[#001524]/50" />
+
+        <div className="relative z-10 flex h-full flex-col">
           <Navigation />
-          <div className="flex-1 flex flex-col items-start justify-center">
-            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+
+          <div className="flex flex-1 flex-col items-start justify-center">
+            <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
+              <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
                 {page.heroTitle}
               </h1>
-              <p className="text-lg md:text-xl text-white max-w-2xl">
+
+              <p className="max-w-2xl text-lg text-white md:text-xl">
                 {page.heroSubtitle}
               </p>
             </div>
@@ -92,77 +100,23 @@ async function ProductsContent({ locale }: { locale: string }) {
         </section>
 
         <ProductCatalog />
+<DownloadBanner
+  image="/images/products/dy.jpg"
+  title={page.downloadProductTitle}
+  buttonText={t("focusSection.moreText")}
+/>
 
-        <div
-          className="h-[350px] relative bg-cover bg-center flex flex-col items-center justify-center"
-          style={{
-            backgroundImage: "url('/images/products/dy.jpg')",
-          }}
-        >
-          <div className="absolute inset-0" style={{ backgroundColor: '#1A589BA6' }}></div>
-          <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-            <h2 className="text-[2.25rem] font-bold text-white">
-              {page.downloadProductTitle}
-            </h2>
-            <a
-              href="#"
-              className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-3 text-base font-medium text-slate-600 shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md"
-            >
-              <span>{t("focusSection.moreText")}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="m13 6 6 6-6 6" />
-              </svg>
-            </a>
-          </div>
-        </div>
+<DownloadBanner
+  image="/images/products/yj.jpg"
+  title={page.downloadBrochureTitle}
+  buttonText={t("focusSection.moreText")}
+/>
 
-        <div
-          className="h-[350px] relative bg-cover bg-center flex flex-col items-center justify-center"
-          style={{
-            backgroundImage: "url('/images/products/yj.jpg')",
-          }}
-        >
-          <div className="absolute inset-0" style={{ backgroundColor: '#1A589BA6' }}></div>
-          <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-            <h2 className="text-[2.25rem] font-bold text-white">
-              {page.downloadBrochureTitle}
-            </h2>
-            <a
-              href="#"
-              className="inline-flex items-center gap-3 rounded-full bg-white px-7 py-3 text-base font-medium text-slate-600 shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md"
-            >
-              <span>{t("focusSection.moreText")}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="m13 6 6 6-6 6" />
-              </svg>
-            </a>
-          </div>
-        </div>
       </main>
 
       <Footer locale={locale} />
+      
+
     </div>
   );
 }

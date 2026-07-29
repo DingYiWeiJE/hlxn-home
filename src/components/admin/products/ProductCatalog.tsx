@@ -203,6 +203,51 @@ export default function ProductCatalog() {
   const sectionRef =
     useRef<HTMLElement>(null);
 
+  const [shouldLoad, setShouldLoad] =
+    useState(false);
+
+  /*
+  * 产品目录距离视口约 1200px 时再开始请求数据。
+  * 防止用户还在浏览上方内容时，就开始解析产品图片。
+  */
+  useEffect(() => {
+    const element =
+      sectionRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    if (
+      !("IntersectionObserver" in window)
+    ) {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer =
+      new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) {
+            return;
+          }
+
+          setShouldLoad(true);
+          observer.disconnect();
+        },
+        {
+          rootMargin:
+            "1200px 0px",
+        },
+      );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const [
     primaryCategories,
     setPrimaryCategories,
@@ -314,6 +359,10 @@ export default function ProductCatalog() {
    * 因此直接读取全部启用分类。
    */
   useEffect(() => {
+    if (!shouldLoad) {
+      return;
+    }
+
     const controller =
       new AbortController();
 
@@ -403,12 +452,16 @@ export default function ProductCatalog() {
     return () => {
       controller.abort();
     };
-  }, [text.loadFailed]);
+  }, [shouldLoad,text.loadFailed]);
 
   /*
    * 根据语言、分类、关键词和页码查询产品。
    */
   useEffect(() => {
+    if (!shouldLoad) {
+      return;
+    }
+
     const controller =
       new AbortController();
 
@@ -562,6 +615,7 @@ export default function ProductCatalog() {
     selectedPrimaryCategoryId,
     selectedSecondaryCategoryId,
     text.loadFailed,
+    shouldLoad
   ]);
 
   function selectPrimaryCategory(
@@ -653,7 +707,11 @@ export default function ProductCatalog() {
   return (
     <section
       ref={sectionRef}
-      className="w-full scroll-mt-20 bg-[#eef8ff] py-12 sm:py-16 lg:py-20"
+      style={{
+        contain:
+          "layout paint style",
+      }}
+      className="w-full scroll-mt-20 overflow-clip bg-[#eef8ff] py-12 sm:py-16 lg:py-20"
     >
       <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <header className="text-center">
@@ -1019,29 +1077,25 @@ function ProductCard({
     <Link
       href={detailUrl}
       aria-label={`${detailLabel}：${product.name}`}
-      className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+      className="group block h-full rounded-2xl [content-visibility:auto] [contain-intrinsic-size:420px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
     >
-      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
+      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
         <div className="relative aspect-[4/3] overflow-hidden bg-[#f7fafc]">
           {product.coverImage?.url ? (
             <Image
-              src={
-                product.coverImage
-                  .url
-              }
+              src={product.coverImage.url}
               alt={
-                product.coverImage
-                  .alt ||
+                product.coverImage.alt ||
                 product.name
               }
               fill
-              unoptimized
+              loading="lazy"
               sizes="
                 (max-width: 639px) 100vw,
                 (max-width: 1279px) 50vw,
                 33vw
               "
-              className="object-contain p-6 transition duration-500 group-hover:scale-105 sm:p-8"
+              className="object-contain p-6 transition-transform duration-300 group-hover:scale-[1.03] sm:p-8"
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center px-5 text-center text-slate-400">
