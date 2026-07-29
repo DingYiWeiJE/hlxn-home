@@ -299,6 +299,34 @@
     "mapTitle": "Controller Production Workshop",
     "mapDescription": "Covering SMT placement, DIP insertion, program burning, aging testing, function verification and other full processes, achieving one-stop production from PCB to finished product."
   },
+  "productsPageContent": {
+    "heroTitle": "Products",
+    "heroSubtitle": "Zero-pollution, high-efficiency, multi-protection energy solutions for the green shipping industry.",
+    "introTitle": "Product Overview",
+    "introText1": "Our core products and services span green marine power system integration, multi-fuel hybrid engine R&D, multi-fuel supply systems, and ship energy storage systems. We possess the capability to adapt engines to diverse clean fuels including methanol, ammonia, and hydrogen, enabling a smooth transition of marine power from traditional fuels to low-carbon and zero-carbon energy. Leveraging our advantages in modular and integrated system design, combined with our international technical team's professional expertise and localized implementation experience, we can provide customers with customized, high-performance, and highly reliable comprehensive power solutions tailored to different vessel types, operational scenarios, and environmental requirements.",
+    "introText2": "Against the backdrop of the dual-carbon goals and the global green transformation of shipping, Hanli New Energy drives technological innovation, actively responding to national green shipping policies and helping vessel owners and builders navigate increasingly stringent environmental regulations. We are committed to empowering the low-carbon and zero-carbon transformation of inland and coastal shipping in China and globally, striving to become a leading global provider of comprehensive new energy marine power system solutions and a core driving force for industry transformation.",
+    "productsSeriesTitle": "Main Product Series",
+    "productSeries": [
+      {
+        "title": "Ship/Shore Photovoltaic Energy Storage, Charging and Discharging Product Series",
+        "desc": "Targeting inland, near-coastal vessel navigation energy storage, tourism, anchoring, agricultural and forestry operations, emergency power supply, and port shore-based energy scenarios. Providing ship photovoltaic energy storage, domestic power supply, emergency power sources, charging/discharging systems, and integrated ship-shore zero-carbon energy storage and supply solutions. Supports intelligent charge/discharge management, enabling self-generation and self-consumption for vessels, green electricity supply for ports, and reduced port berthing energy costs."
+      },
+      {
+        "title": "Fuel Supply Product Series",
+        "desc": "Targeting new construction and retrofitting of inland, near-coastal, and ocean-going vessels, providing fuel supply system modules (including methanol-powered ships, hydrogen demonstration ships, ammonia-powered ships, and multi-fuel hybrid ships). Covering comprehensive zero-carbon fuel solutions for methanol, hydrogen, and ammonia including ship-based 'storage-transportation-supply-recovery' safety solutions, adapting to different power routes and vessel zero-carbon requirements."
+      },
+      {
+        "title": "Hybrid Power Product Series",
+        "desc": "Providing low-carbon/zero-carbon power solutions for multi-energy synergistic marine propulsion, covering all scenarios from 'short-distance high-frequency→medium-long range cruising→special operations'. Precisely matching different vessel types' power requirements. Hybrid power systems come in three configurations: series, parallel, and power-split, enabling flexible combinations of multiple energy and power sources to adapt to different application scenarios, improving vessel economics and flexibility while reducing energy consumption and emissions."
+      },
+      {
+        "title": "Ship/Shore Energy Control Product Series",
+        "desc": "Targeting marine power distribution systems (DC + AC distribution cabinets), port shore power pedestals, and ship shore power connection devices. As the 'energy distribution hub' of ship electrical systems, providing safe and efficient power distribution and management solutions for ship propulsion systems, energy storage equipment, and electrical terminals, along with shore power connection and intelligent power management solutions for ship berthing."
+      }
+    ],
+    "downloadProductTitle": "Download Product Sheet",
+    "downloadBrochureTitle": "Download Company Brochure"
+  },
   "siteFooter": {
     "company": "About Hanli",
     "companyLinks": [
