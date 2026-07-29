@@ -6,7 +6,8 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import TiptapContent from "@/components/news/TiptapContent";
 import type { TiptapNode } from "@/lib/news/tiptap";
-import Link from "next/link";
+import Footer from "@/components/SiteFooter";
+import Navigation from "@/components/Navigation";
 
 type Props = {
   params: Promise<{
@@ -96,13 +97,11 @@ export default async function NewsDetail({ params }: Props) {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <Link
-        href={`/${locale}/news`}
-        className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800"
-      >
-        ← {t("news.back")}
-      </Link>
+    <div className="flex min-h-screen flex-col bg-[#e7f6ff]">
+      <div className="border-b border-slate-100 bg-white">
+        <Navigation hasbg/>
+      </div>
+    <main className="mx-auto max-w-4xl px-4 py-30 bg-white">
 
       {news.coverImageAsset?.url && (
         <div className="mb-8 overflow-hidden rounded-lg">
@@ -138,15 +137,8 @@ export default async function NewsDetail({ params }: Props) {
           </div>
         )}
       </article>
-
-      <nav className="mt-12 border-t border-slate-200 pt-8">
-        <Link
-          href={`/${locale}/news`}
-          className="inline-flex items-center text-blue-600 hover:text-blue-800"
-        >
-          ← {t("news.back")}
-        </Link>
-      </nav>
     </main>
+      <Footer locale={locale} />
+    </div>
   );
 }

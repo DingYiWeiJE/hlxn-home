@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
-import ProductCatalog from "./components/ProductCatalog";
+import ProductCatalog from "../../../components/admin/products/ProductCatalog";
 
 type Props = {
   params: Promise<{

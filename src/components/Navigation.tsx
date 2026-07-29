@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-export default function Navigation() {
+export default function Navigation({hasbg}: {hasbg?: boolean}) {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -45,7 +45,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`} style={{ backgroundColor: scrolledPast ? "#2a62bb" : "transparent" }}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`} style={{ backgroundColor: hasbg ? "#2a62bb" : scrolledPast ? "#2a62bb" : "transparent" }}>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -88,7 +88,7 @@ export default function Navigation() {
               {t("nav.contact")}
             </Link>
             {/* Language Dropdown */}
-            <div
+            {!hasbg && <div
               className="relative group"
               onMouseEnter={() => setLanguageDropdownOpen(true)}
               onMouseLeave={() => setLanguageDropdownOpen(false)}
@@ -136,7 +136,7 @@ export default function Navigation() {
                   </div>
                 </div>
               )}
-            </div>
+            </div>}
           </div>
 
           {/* Mobile Menu Button */}

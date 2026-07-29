@@ -75,6 +75,21 @@ const productDetailSelect = {
     },
   },
 
+  introBackgroundImageAsset: {
+  select: {
+    id: true,
+    type: true,
+    url: true,
+    originalName: true,
+    mimeType: true,
+    width: true,
+    height: true,
+    alt: true,
+    enabled: true,
+    deletedAt: true,
+  },
+},
+
   advantages: {
     where: {
       asset: {
@@ -198,6 +213,36 @@ function formatProductDetail(
         }
       : null;
 
+  const introBackgroundImage =
+  product.introBackgroundImageAsset &&
+  product.introBackgroundImageAsset.type ===
+    MediaAssetType.IMAGE &&
+  product.introBackgroundImageAsset.enabled &&
+  product.introBackgroundImageAsset.deletedAt === null
+    ? {
+        id:
+          product.introBackgroundImageAsset.id,
+
+        url:
+          product.introBackgroundImageAsset.url,
+
+        originalName:
+          product.introBackgroundImageAsset.originalName,
+
+        mimeType:
+          product.introBackgroundImageAsset.mimeType,
+
+        width:
+          product.introBackgroundImageAsset.width,
+
+        height:
+          product.introBackgroundImageAsset.height,
+
+        alt:
+          product.introBackgroundImageAsset.alt,
+      }
+    : null;
+
   const detailPdf =
     product.detailPdfAsset &&
     product.detailPdfAsset.type ===
@@ -251,6 +296,7 @@ function formatProductDetail(
       product.introductionParagraphs,
 
     coverImage,
+    introBackgroundImage,
 
     advantages:
       product.advantages.map((item) => ({
