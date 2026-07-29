@@ -353,5 +353,26 @@
     "copyright": "Copyright © 2026 Hanly Energy. All Rights Reserved",
     "companyName": "Hanli New Energy (Beijing) Technology Co., Ltd. All Rights Reserved",
     "icp": "京ICP备2026001017号-1"
+  },
+  "solutionsPageContent": {
+    "heroTitle": "Solutions",
+    "heroSubtitle": "Hanli New Energy - Full-Range Electric Propulsion System Solution Provider, Empowering Zero-Emission Ship Transformation",
+    "sectionTitle": "Solutions",
+    "sectionSubtitle": "Hanli New Energy provides comprehensive battery-powered and hybrid propulsion system solutions for all types of vessels, compatible with diverse energy forms, supporting the shipping industry's zero-emission upgrade",
+    "learnMore": "Learn More",
+    "solutions": [
+      {
+        "title": "Pure Electric Propulsion Solution",
+        "desc": "The pure electric configuration is centered on battery power + electric propulsion systems, with propulsion energy independent of fuel generators. Through shore power replenishment or battery swapping, it meets operational scenarios with fixed routes, short-to-medium range, and high noise reduction requirements."
+      },
+      {
+        "title": "Series Hybrid Propulsion Solution",
+        "desc": "This configuration uses an engine directly connected to the propulsion shaft as the main power path, while simultaneously arranging shaft-mounted motors (which can operate as motor/generator) on the shaft system, achieving 'engine direct propulsion, shaft power generation, and electric-assist combined propulsion' under different operating conditions."
+      },
+      {
+        "title": "Parallel Hybrid Propulsion Solution",
+        "desc": "Engines and motors are connected in parallel to the propulsion chain, with propulsion torque coming from either engine direct drive, motor drive, or combined propulsion from both. The battery and power distribution system supply energy to the motors and ship loads, achieving comprehensive optimization of efficiency and comfort through energy management."
+      }
+    ]
   }
 }
