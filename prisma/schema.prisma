@@ -208,6 +208,7 @@ enum CategoryLevel {
 model Category {
   id        String        @id @default(cuid())
   name      String
+  nameEn    String        @default("")
   slug      String        @unique
   level     CategoryLevel
   parentId  String?

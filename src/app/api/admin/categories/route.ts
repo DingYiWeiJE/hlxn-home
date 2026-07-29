@@ -40,6 +40,12 @@ const createCategorySchema = z
       .min(1, "请输入分类名称")
       .max(100, "分类名称不能超过 100 个字符"),
 
+    nameEn: z
+      .string()
+      .trim()
+      .min(1, "Please enter the English category name")
+      .max(100, "English category name cannot exceed 100 characters"),
+
     level: z.enum(["LEVEL_ONE", "LEVEL_TWO"]),
 
     parentId: z
@@ -120,10 +126,20 @@ export async function GET(request: NextRequest) {
 
       ...(query.keyword
         ? {
-            name: {
-              contains: query.keyword,
-              mode: "insensitive",
-            },
+            OR: [
+              {
+                name: {
+                  contains: query.keyword,
+                  mode: "insensitive",
+                },
+              },
+              {
+                nameEn: {
+                  contains: query.keyword,
+                  mode: "insensitive",
+                },
+              },
+            ],
           }
         : {}),
     };
@@ -141,6 +157,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         name: true,
+        nameEn: true,
         slug: true,
         level: true,
         parentId: true,
@@ -153,6 +170,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
+            nameEn: true,
             slug: true,
           },
         },
@@ -170,6 +188,7 @@ export async function GET(request: NextRequest) {
       items: items.map((item) => ({
         id: item.id,
         name: item.name,
+        nameEn: item.nameEn,
         slug: item.slug,
         level: item.level,
         parentId: item.parentId,
@@ -285,6 +304,7 @@ export async function POST(request: Request) {
         return transaction.category.create({
           data: {
             name: body.name,
+            nameEn: body.nameEn,
             slug,
             level: body.level,
             parentId,
@@ -295,6 +315,7 @@ export async function POST(request: Request) {
           select: {
             id: true,
             name: true,
+            nameEn: true,
             slug: true,
             level: true,
             parentId: true,
@@ -307,6 +328,7 @@ export async function POST(request: Request) {
               select: {
                 id: true,
                 name: true,
+                nameEn: true,
                 slug: true,
               },
             },

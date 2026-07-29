@@ -173,12 +173,14 @@ export async function GET(
               select: {
                 id: true,
                 name: true,
+                nameEn: true,
                 slug: true,
 
                 parent: {
                   select: {
                     id: true,
                     name: true,
+                    nameEn: true,
                     slug: true,
                   },
                 },
@@ -217,15 +219,25 @@ export async function GET(
             item.coverImageAsset,
 
           category: {
-            primary:
-              item.secondaryCategory.parent,
+            primary: {
+              id:
+                item.secondaryCategory.parent!.id,
+              name: getCategoryName(
+                item.secondaryCategory.parent!,
+                locale,
+              ),
+              slug:
+                item.secondaryCategory.parent!.slug,
+            },
 
             secondary: {
               id:
                 item.secondaryCategory.id,
 
-              name:
-                item.secondaryCategory.name,
+              name: getCategoryName(
+                item.secondaryCategory,
+                locale,
+              ),
 
               slug:
                 item.secondaryCategory.slug,
@@ -262,4 +274,18 @@ export async function GET(
   } catch (error) {
     return fail(error);
   }
+}
+
+function getCategoryName(
+  category: {
+    name: string;
+    nameEn: string;
+  },
+  locale: ProductLocale,
+) {
+  if (locale === "en") {
+    return category.nameEn.trim() || category.name;
+  }
+
+  return category.name;
 }

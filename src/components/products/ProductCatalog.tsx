@@ -23,6 +23,8 @@ type ProductLocale = "zh" | "en";
 type PrimaryCategory = {
   id: string;
   name: string;
+  nameZh: string;
+  nameEn: string;
   slug: string;
   sortOrder: number;
   secondaryCategoryCount: number;
@@ -31,6 +33,8 @@ type PrimaryCategory = {
 type SecondaryCategory = {
   id: string;
   name: string;
+  nameZh: string;
+  nameEn: string;
   slug: string;
   parentId: string;
   sortOrder: number;
@@ -38,6 +42,8 @@ type SecondaryCategory = {
   primaryCategory: {
     id: string;
     name: string;
+    nameZh: string;
+    nameEn: string;
     slug: string;
   };
 
@@ -328,11 +334,18 @@ export default function ProductCatalog() {
         (a, b) =>
           a.sortOrder -
             b.sortOrder ||
-          a.name.localeCompare(
-            b.name,
+          getCategoryTitle(
+            a,
+            locale,
+          ).localeCompare(
+            getCategoryTitle(
+              b,
+              locale,
+            ),
           ),
       );
     }, [
+      locale,
       secondaryCategories,
       selectedPrimaryCategoryId,
     ]);
@@ -374,7 +387,9 @@ export default function ProductCatalog() {
       try {
         const response =
           await fetch(
-            "/api/categories",
+            `/api/categories?${new URLSearchParams({
+              locale,
+            }).toString()}`,
             {
               method: "GET",
               cache: "no-store",
@@ -406,8 +421,14 @@ export default function ProductCatalog() {
             (a, b) =>
               a.sortOrder -
                 b.sortOrder ||
-              a.name.localeCompare(
-                b.name,
+              getCategoryTitle(
+                a,
+                locale,
+              ).localeCompare(
+                getCategoryTitle(
+                  b,
+                  locale,
+                ),
               ),
           ),
         );
@@ -452,7 +473,7 @@ export default function ProductCatalog() {
     return () => {
       controller.abort();
     };
-  }, [shouldLoad,text.loadFailed]);
+  }, [locale, shouldLoad,text.loadFailed]);
 
   /*
    * 根据语言、分类、关键词和页码查询产品。
@@ -754,7 +775,10 @@ export default function ProductCatalog() {
                     )
                   }
                 >
-                  {category.name}
+                  {getCategoryTitle(
+                    category,
+                    locale,
+                  )}
                 </CategoryButton>
               ),
             )}
@@ -844,7 +868,10 @@ export default function ProductCatalog() {
                     }
                   >
                     {
-                      category.name
+                      getCategoryTitle(
+                        category,
+                        locale,
+                      )
                     }
                   </option>
                 ),
@@ -890,7 +917,10 @@ export default function ProductCatalog() {
                       )
                     }
                   >
-                    {category.name}
+                    {getCategoryTitle(
+                      category,
+                      locale,
+                    )}
                   </SecondaryCategoryButton>
                 ),
               )}
@@ -1287,6 +1317,27 @@ function normalizeLocale(
   return value === "en"
     ? "en"
     : "zh";
+}
+
+function getCategoryTitle(
+  category: {
+    name: string;
+    nameZh?: string;
+    nameEn?: string;
+  },
+  locale: ProductLocale,
+) {
+  if (locale === "en") {
+    return (
+      category.nameEn?.trim() ||
+      category.name
+    );
+  }
+
+  return (
+    category.nameZh?.trim() ||
+    category.name
+  );
 }
 
 function getApiErrorMessage(

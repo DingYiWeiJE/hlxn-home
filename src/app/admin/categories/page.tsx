@@ -19,12 +19,14 @@ type CategoryLevel = "LEVEL_ONE" | "LEVEL_TWO";
 type CategoryItem = {
   id: string;
   name: string;
+  nameEn: string;
   slug: string;
   level: CategoryLevel;
   parentId: string | null;
   parent: {
     id: string;
     name: string;
+    nameEn: string;
     slug: string;
   } | null;
   sortOrder: number;
@@ -64,6 +66,7 @@ type CategoryMutationResponse =
 
 type CategoryFormState = {
   name: string;
+  nameEn: string;
   level: CategoryLevel;
   parentId: string;
   sortOrder: string;
@@ -72,6 +75,7 @@ type CategoryFormState = {
 
 const emptyForm: CategoryFormState = {
   name: "",
+  nameEn: "",
   level: "LEVEL_ONE",
   parentId: "",
   sortOrder: "0",
@@ -197,8 +201,12 @@ export default function AdminCategoriesPage() {
 
         return (
           item.name.toLowerCase().includes(normalizedKeyword) ||
+          item.nameEn.toLowerCase().includes(normalizedKeyword) ||
           item.slug.toLowerCase().includes(normalizedKeyword) ||
           item.parent?.name
+            .toLowerCase()
+            .includes(normalizedKeyword) ||
+          item.parent?.nameEn
             .toLowerCase()
             .includes(normalizedKeyword)
         );
@@ -237,6 +245,7 @@ export default function AdminCategoriesPage() {
     setFormError("");
     setForm({
       name: category.name,
+      nameEn: category.nameEn,
       level: category.level,
       parentId: category.parentId ?? "",
       sortOrder: String(category.sortOrder),
@@ -267,6 +276,7 @@ export default function AdminCategoriesPage() {
     try {
       const payload = {
         name: form.name.trim(),
+        nameEn: form.nameEn.trim(),
 
         parentId:
           form.level === "LEVEL_TWO"
@@ -564,6 +574,10 @@ export default function AdminCategoriesPage() {
                         {category.name}
                       </div>
 
+                      <div className="mt-1 text-sm text-slate-500">
+                        {category.nameEn}
+                      </div>
+
                       <div className="mt-1 font-mono text-xs text-slate-400">
                         {category.slug}
                       </div>
@@ -801,7 +815,7 @@ export default function AdminCategoriesPage() {
                     htmlFor="categoryName"
                     className="text-sm font-semibold text-slate-700"
                   >
-                    分类名称
+                    中文名称
                   </label>
 
                   <input
@@ -820,6 +834,30 @@ export default function AdminCategoriesPage() {
                   />
                 </div>
 
+
+                <div>
+                  <label
+                    htmlFor="categoryNameEn"
+                    className="text-sm font-semibold text-slate-700"
+                  >
+                    英文名称
+                  </label>
+
+                  <input
+                    id="categoryNameEn"
+                    value={form.nameEn}
+                    required
+                    maxLength={100}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        nameEn: event.target.value,
+                      }))
+                    }
+                    placeholder="For example: Energy Storage Products"
+                    className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+                </div>
 
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>

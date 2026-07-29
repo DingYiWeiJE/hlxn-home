@@ -24,6 +24,13 @@ const updateCategorySchema = z
       .max(100, "分类名称不能超过 100 个字符")
       .optional(),
 
+    nameEn: z
+      .string()
+      .trim()
+      .min(1, "Please enter the English category name")
+      .max(100, "English category name cannot exceed 100 characters")
+      .optional(),
+
     parentId: z
       .string()
       .trim()
@@ -68,6 +75,7 @@ export async function GET(
       select: {
         id: true,
         name: true,
+        nameEn: true,
         slug: true,
         level: true,
         parentId: true,
@@ -80,6 +88,7 @@ export async function GET(
           select: {
             id: true,
             name: true,
+            nameEn: true,
             slug: true,
             enabled: true,
           },
@@ -100,6 +109,7 @@ export async function GET(
           select: {
             id: true,
             name: true,
+            nameEn: true,
             slug: true,
             enabled: true,
             sortOrder: true,
@@ -179,6 +189,7 @@ export async function PATCH(
         select: {
           id: true,
           name: true,
+          nameEn: true,
           slug: true,
           level: true,
           parentId: true,
@@ -307,6 +318,12 @@ export async function PATCH(
               }
             : {}),
 
+          ...(body.nameEn !== undefined
+            ? {
+                nameEn: body.nameEn,
+              }
+            : {}),
+
           ...(existingCategory.level ===
             CategoryLevel.LEVEL_TWO
             ? {
@@ -329,6 +346,7 @@ export async function PATCH(
         select: {
           id: true,
           name: true,
+          nameEn: true,
           slug: true,
           level: true,
           parentId: true,
@@ -341,6 +359,7 @@ export async function PATCH(
             select: {
               id: true,
               name: true,
+              nameEn: true,
               slug: true,
             },
           },

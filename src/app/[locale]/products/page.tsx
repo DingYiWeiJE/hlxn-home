@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import Image from "next/image";
-import ProductCatalog from "../../../components/admin/products/ProductCatalog";
+import ProductCatalog from "../../../components/products/ProductCatalog";
 import { DownloadBanner } from "@/components/DownloadBanner";
 
 type Props = {
