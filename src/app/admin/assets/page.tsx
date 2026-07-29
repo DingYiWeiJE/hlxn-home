@@ -43,7 +43,12 @@ type AssetItem = {
     advantages: number;
     applications: number;
     productCovers: number;
+    productIntroBackgrounds: number;
     productPdfs: number;
+    newsCovers: number;
+    solutionWorkingPrincipleBackgrounds: number;
+    solutionUsageScenarios: number;
+    solutionCustomerValues: number;
     total: number;
   };
 };

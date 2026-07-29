@@ -18,6 +18,9 @@ const purposeValues = [
   "PRODUCT_INTRO_BACKGROUND",
   "PRODUCT_ADVANTAGE",
   "PRODUCT_APPLICATION",
+  "SOLUTION_WORKING_PRINCIPLE_BACKGROUND",
+  "SOLUTION_USAGE_SCENARIO",
+  "SOLUTION_CUSTOMER_VALUE",
   "NEWS_COVER",
   "NEWS_CONTENT",
 ] as const;
@@ -163,6 +166,10 @@ export async function GET(
                 productCovers: true,
                 productIntroBackgrounds:
                   true,
+                solutionWorkingPrincipleBackgrounds:
+                  true,
+                solutionUsageScenarios: true,
+                solutionCustomerValues: true,
                 productPdfs: true,
                 newsCovers: true,
               },
@@ -189,6 +196,12 @@ export async function GET(
             item._count.productCovers +
             item._count
               .productIntroBackgrounds +
+            item._count
+              .solutionWorkingPrincipleBackgrounds +
+            item._count
+              .solutionUsageScenarios +
+            item._count
+              .solutionCustomerValues +
             item._count.productPdfs +
             item._count.newsCovers;
 
@@ -242,6 +255,18 @@ export async function GET(
               newsCovers:
                 item._count
                   .newsCovers,
+
+              solutionWorkingPrincipleBackgrounds:
+                item._count
+                  .solutionWorkingPrincipleBackgrounds,
+
+              solutionUsageScenarios:
+                item._count
+                  .solutionUsageScenarios,
+
+              solutionCustomerValues:
+                item._count
+                  .solutionCustomerValues,
 
               total:
                 totalUsage,

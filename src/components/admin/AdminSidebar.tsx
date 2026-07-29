@@ -8,6 +8,7 @@ import {
   Menu,
   Newspaper,
   Package,
+  Puzzle,
   Users,
   X,
   type LucideIcon,
@@ -41,6 +42,12 @@ const navigationItems: NavigationItem[] = [
     label: "产品管理",
     description: "创建和维护产品内容",
     icon: Package,
+  },
+  {
+    href: "/admin/solutions",
+    label: "解决方案管理",
+    description: "创建和维护解决方案内容",
+    icon: Puzzle,
   },
   {
     href: "/admin/categories",

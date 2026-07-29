@@ -140,6 +140,10 @@ enum MediaAssetPurpose {
   PRODUCT_ADVANTAGE
   PRODUCT_APPLICATION
 
+  SOLUTION_WORKING_PRINCIPLE_BACKGROUND
+  SOLUTION_USAGE_SCENARIO
+  SOLUTION_CUSTOMER_VALUE
+
   NEWS_COVER
   NEWS_CONTENT
 }
@@ -167,12 +171,15 @@ model MediaAsset {
 
   enabled Boolean @default(true)
 
-  createdById             String?
-  createdBy               User?     @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  productIntroBackgrounds Product[] @relation("ProductIntroBackgroundImage")
+  createdById                         String?
+  createdBy                           User?      @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  productIntroBackgrounds             Product[]  @relation("ProductIntroBackgroundImage")
+  solutionWorkingPrincipleBackgrounds Solution[] @relation("SolutionWorkingPrincipleBackgroundImage")
 
-  advantages   ProductAdvantage[]
-  applications ProductApplication[]
+  advantages             ProductAdvantage[]
+  applications           ProductApplication[]
+  solutionUsageScenarios SolutionUsageScenario[]
+  solutionCustomerValues SolutionCustomerValue[]
 
   productPdfs   Product[] @relation("ProductDetailPdf")
   productCovers Product[] @relation("ProductCoverImage")
@@ -237,6 +244,16 @@ enum ProductStatus {
 }
 
 enum ProductLocale {
+  zh
+  en
+}
+
+enum SolutionStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum SolutionLocale {
   zh
   en
 }
@@ -334,4 +351,83 @@ model ProductApplication {
 
   @@index([productId, sortOrder])
   @@index([assetId])
+}
+
+// ============================================================
+// 瑙ｅ喅鏂规鐩稿叧
+// ============================================================
+
+model Solution {
+  id     String         @id @default(cuid())
+  locale SolutionLocale @default(zh)
+  name   String
+  slug   String
+
+  status    SolutionStatus @default(DRAFT)
+  sortOrder Int            @default(0)
+
+  summaryParagraphs                 Json    @default("[]")
+  highlights                        Json    @default("[]")
+  workingPrincipleParagraphs        Json    @default("[]")
+  workingPrincipleBackgroundAssetId String?
+  systemCompositionParagraphs       Json    @default("[]")
+
+  translationKey String?
+
+  createdBy String?
+  updatedBy String?
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  workingPrincipleBackgroundAsset MediaAsset? @relation("SolutionWorkingPrincipleBackgroundImage", fields: [workingPrincipleBackgroundAssetId], references: [id], onDelete: SetNull)
+
+  usageScenarios SolutionUsageScenario[]
+  customerValues SolutionCustomerValue[]
+
+  @@unique([locale, slug])
+  @@unique([translationKey, locale])
+  @@index([translationKey])
+  @@index([locale, status, sortOrder])
+  @@index([status, sortOrder])
+  @@index([workingPrincipleBackgroundAssetId])
+  @@index([deletedAt])
+}
+
+model SolutionUsageScenario {
+  id               String @id @default(cuid())
+  solutionId       String
+  imageAssetId     String
+  title            String
+  detailParagraphs Json   @default("[]")
+  sortOrder        Int    @default(0)
+
+  solution   Solution   @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  imageAsset MediaAsset @relation(fields: [imageAssetId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([solutionId, sortOrder])
+  @@index([imageAssetId])
+}
+
+model SolutionCustomerValue {
+  id               String @id @default(cuid())
+  solutionId       String
+  imageAssetId     String
+  title            String
+  detailParagraphs Json   @default("[]")
+  sortOrder        Int    @default(0)
+
+  solution   Solution   @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  imageAsset MediaAsset @relation(fields: [imageAssetId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([solutionId, sortOrder])
+  @@index([imageAssetId])
 }

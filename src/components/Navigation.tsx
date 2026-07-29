@@ -6,7 +6,13 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-export default function Navigation({hasbg}: {hasbg?: boolean}) {
+export default function Navigation({
+  hasbg,
+  localeSwitchUrls,
+}: {
+  hasbg?: boolean;
+  localeSwitchUrls?: Partial<Record<"zh" | "en", string>>;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -38,6 +44,16 @@ export default function Navigation({hasbg}: {hasbg?: boolean}) {
   };
 
   const switchLanguage = (lang: string) => {
+    const targetUrl =
+      (lang === "zh" || lang === "en") ? localeSwitchUrls?.[lang] : undefined;
+
+    if (targetUrl) {
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      router.push(`${targetUrl}${hash}`);
+      setLanguageDropdownOpen(false);
+      return;
+    }
+
     const pathWithoutLocale = pathname.replace(`/${locale}`, "");
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     router.push(`/${lang}${pathWithoutLocale}${hash}`);

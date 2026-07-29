@@ -62,7 +62,12 @@ export async function GET(
             advantages: true,
             applications: true,
             productCovers: true,
+            productIntroBackgrounds: true,
             productPdfs: true,
+            newsCovers: true,
+            solutionWorkingPrincipleBackgrounds: true,
+            solutionUsageScenarios: true,
+            solutionCustomerValues: true,
           },
         },
       },
@@ -80,7 +85,12 @@ export async function GET(
       asset._count.advantages +
       asset._count.applications +
       asset._count.productCovers +
-      asset._count.productPdfs;
+      asset._count.productIntroBackgrounds +
+      asset._count.productPdfs +
+      asset._count.newsCovers +
+      asset._count.solutionWorkingPrincipleBackgrounds +
+      asset._count.solutionUsageScenarios +
+      asset._count.solutionCustomerValues;
 
     return ok({
       id: asset.id,
@@ -110,8 +120,23 @@ export async function GET(
         productCovers:
           asset._count.productCovers,
 
+        productIntroBackgrounds:
+          asset._count.productIntroBackgrounds,
+
         productPdfs:
           asset._count.productPdfs,
+
+        newsCovers:
+          asset._count.newsCovers,
+
+        solutionWorkingPrincipleBackgrounds:
+          asset._count.solutionWorkingPrincipleBackgrounds,
+
+        solutionUsageScenarios:
+          asset._count.solutionUsageScenarios,
+
+        solutionCustomerValues:
+          asset._count.solutionCustomerValues,
 
         total: totalUsage,
       },
@@ -160,7 +185,12 @@ export async function DELETE(
             advantages: true,
             applications: true,
             productCovers: true,
+            productIntroBackgrounds: true,
             productPdfs: true,
+            newsCovers: true,
+            solutionWorkingPrincipleBackgrounds: true,
+            solutionUsageScenarios: true,
+            solutionCustomerValues: true,
           },
         },
       },
@@ -184,15 +214,35 @@ export async function DELETE(
       productCovers:
         asset._count.productCovers,
 
+      productIntroBackgrounds:
+        asset._count.productIntroBackgrounds,
+
       productPdfs:
         asset._count.productPdfs,
+
+      newsCovers:
+        asset._count.newsCovers,
+
+      solutionWorkingPrincipleBackgrounds:
+        asset._count.solutionWorkingPrincipleBackgrounds,
+
+      solutionUsageScenarios:
+        asset._count.solutionUsageScenarios,
+
+      solutionCustomerValues:
+        asset._count.solutionCustomerValues,
     };
 
     const totalUsage =
       usage.advantages +
       usage.applications +
       usage.productCovers +
-      usage.productPdfs;
+      usage.productIntroBackgrounds +
+      usage.productPdfs +
+      usage.newsCovers +
+      usage.solutionWorkingPrincipleBackgrounds +
+      usage.solutionUsageScenarios +
+      usage.solutionCustomerValues;
 
     if (totalUsage > 0) {
       const usageDescriptions: string[] = [];
@@ -200,6 +250,12 @@ export async function DELETE(
       if (usage.productCovers > 0) {
         usageDescriptions.push(
           `${usage.productCovers} 个产品封面`,
+        );
+      }
+
+      if (usage.productIntroBackgrounds > 0) {
+        usageDescriptions.push(
+          `${usage.productIntroBackgrounds} 个产品介绍背景图`,
         );
       }
 
@@ -218,6 +274,30 @@ export async function DELETE(
       if (usage.productPdfs > 0) {
         usageDescriptions.push(
           `${usage.productPdfs} 个产品 PDF`,
+        );
+      }
+
+      if (usage.newsCovers > 0) {
+        usageDescriptions.push(
+          `${usage.newsCovers} 个新闻封面`,
+        );
+      }
+
+      if (usage.solutionWorkingPrincipleBackgrounds > 0) {
+        usageDescriptions.push(
+          `${usage.solutionWorkingPrincipleBackgrounds} 个解决方案工作原理背景图`,
+        );
+      }
+
+      if (usage.solutionUsageScenarios > 0) {
+        usageDescriptions.push(
+          `${usage.solutionUsageScenarios} 个解决方案使用场景`,
+        );
+      }
+
+      if (usage.solutionCustomerValues > 0) {
+        usageDescriptions.push(
+          `${usage.solutionCustomerValues} 个解决方案客户价值`,
         );
       }
 

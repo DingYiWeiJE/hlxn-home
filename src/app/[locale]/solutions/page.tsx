@@ -1,8 +1,10 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import Image from "next/image";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
-import type { Metadata } from "next";
-import SolutionSection from "../../../components/solutions/SolutionSection";
+import SolutionCatalog from "@/components/solutions/SolutionCatalog";
 
 type Props = {
   params: Promise<{
@@ -12,52 +14,59 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
+  const normalizedLocale = locale === "en" ? "en" : "zh";
+  const t = await getTranslations({ locale: normalizedLocale });
 
   return {
-    title: `${t("solutionsPageContent.heroTitle")} | ${locale === "zh" ? "汉理新能源" : "Hanli New Energy"}`,
+    title: `${t("solutionsPageContent.heroTitle")} | ${
+      normalizedLocale === "zh" ? "汉理楚能" : "Hanli Chuneng"
+    }`,
     description: t("solutionsPageContent.heroSubtitle"),
+    alternates: {
+      canonical: `/${normalizedLocale}/solutions`,
+    },
   };
 }
 
-async function SolutionsContent({ locale }: { locale: string }) {
-  const t = await getTranslations({ locale });
-  const heroTitle = t("solutionsPageContent.heroTitle");
-  const heroSubtitle = t("solutionsPageContent.heroSubtitle");
+export default async function SolutionsPage({ params }: Props) {
+  const { locale } = await params;
+  const normalizedLocale = locale === "en" ? "en" : "zh";
+  setRequestLocale(normalizedLocale);
+
+  const t = await getTranslations({ locale: normalizedLocale });
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <div
-        className="relative h-[60vh] bg-cover bg-center flex flex-col"
-        style={{
-          backgroundImage: "url('/images/solutions/solutions-bg.jpg')",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <div className="absolute inset-0 bg-[#001524C9] opacity-50"></div>
-        <div className="relative flex flex-col h-full">
+    <div className="flex min-h-screen flex-col bg-white">
+      <section className="relative flex h-[60vh] min-h-[420px] flex-col overflow-hidden">
+        <Image
+          src="/images/solutions/solutions-bg.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-[#001524]/60" />
+        <div className="relative z-10 flex h-full flex-col">
           <Navigation />
-          <div className="flex-1 flex flex-col items-start justify-center">
-            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-                {heroTitle}
+          <div className="flex flex-1 items-center">
+            <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
+              <h1 className="max-w-3xl text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+                {t("solutionsPageContent.heroTitle")}
               </h1>
-              <p className="text-lg md:text-xl text-white max-w-2xl">
-                {heroSubtitle}
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-white md:text-xl">
+                {t("solutionsPageContent.heroSubtitle")}
               </p>
             </div>
           </div>
         </div>
-      </div>
-      <SolutionSection locale={locale} />
-      <Footer locale={locale} />
+      </section>
+
+      <main className="flex-1">
+        <SolutionCatalog locale={normalizedLocale} />
+      </main>
+
+      <Footer locale={normalizedLocale} />
     </div>
   );
-}
-
-export default async function Solutions({ params }: Props) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  return <SolutionsContent locale={locale} />;
 }

@@ -23,7 +23,10 @@ export type ProductMediaPurpose =
   | "PRODUCT_COVER"
   | "PRODUCT_INTRO_BACKGROUND"
   | "PRODUCT_ADVANTAGE"
-  | "PRODUCT_APPLICATION";
+  | "PRODUCT_APPLICATION"
+  | "SOLUTION_WORKING_PRINCIPLE_BACKGROUND"
+  | "SOLUTION_USAGE_SCENARIO"
+  | "SOLUTION_CUSTOMER_VALUE";
 
 export type ProductMediaAsset = {
   id: string;
@@ -47,6 +50,9 @@ export type ProductMediaAsset = {
     productIntroBackgrounds: number;
     productPdfs: number;
     newsCovers: number;
+    solutionWorkingPrincipleBackgrounds: number;
+    solutionUsageScenarios: number;
+    solutionCustomerValues: number;
     total: number;
   };
 };
@@ -135,6 +141,9 @@ const emptyUsage: ProductMediaAsset["usage"] =
     productIntroBackgrounds: 0,
     productPdfs: 0,
     newsCovers: 0,
+    solutionWorkingPrincipleBackgrounds: 0,
+    solutionUsageScenarios: 0,
+    solutionCustomerValues: 0,
     total: 0,
   };
 
