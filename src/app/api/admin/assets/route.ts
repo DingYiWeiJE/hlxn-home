@@ -21,6 +21,8 @@ const purposeValues = [
   "SOLUTION_WORKING_PRINCIPLE_BACKGROUND",
   "SOLUTION_USAGE_SCENARIO",
   "SOLUTION_CUSTOMER_VALUE",
+  "APPLICATION_CASE_IMAGE",
+  "COMPANY_HISTORY_IMAGE",
   "NEWS_COVER",
   "NEWS_CONTENT",
 ] as const;
@@ -172,6 +174,8 @@ export async function GET(
                 solutionCustomerValues: true,
                 productPdfs: true,
                 newsCovers: true,
+                applicationCaseImages: true,
+                companyHistoryImages: true,
               },
             },
           },
@@ -203,7 +207,9 @@ export async function GET(
             item._count
               .solutionCustomerValues +
             item._count.productPdfs +
-            item._count.newsCovers;
+            item._count.newsCovers +
+            item._count.applicationCaseImages +
+            item._count.companyHistoryImages;
 
           return {
             id: item.id,
@@ -255,6 +261,14 @@ export async function GET(
               newsCovers:
                 item._count
                   .newsCovers,
+
+              applicationCaseImages:
+                item._count
+                  .applicationCaseImages,
+
+              companyHistoryImages:
+                item._count
+                  .companyHistoryImages,
 
               solutionWorkingPrincipleBackgrounds:
                 item._count

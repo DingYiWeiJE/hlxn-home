@@ -2,6 +2,7 @@
 
 import {
   FolderTree,
+  History,
   Images,
   LayoutDashboard,
   LogOut,
@@ -67,6 +68,12 @@ const navigationItems: NavigationItem[] = [
     label: "应用案例",
     description: "管理应用案例内容",
     icon: Package,
+  },
+  {
+    href: "/admin/company-history",
+    label: "公司发展历程",
+    description: "管理 About 页面时间轴内容",
+    icon: History,
   },
   // {
   //   href: "/admin/assets",

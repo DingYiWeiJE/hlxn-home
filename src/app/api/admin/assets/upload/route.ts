@@ -28,6 +28,7 @@ const imagePurposeValues = [
   "SOLUTION_USAGE_SCENARIO",
   "SOLUTION_CUSTOMER_VALUE",
   "APPLICATION_CASE_IMAGE",
+  "COMPANY_HISTORY_IMAGE",
 ] as const;
 
 const formSchema = z.object({
@@ -112,6 +113,8 @@ export async function POST(
                 ? "solutions"
                 : fields.purpose === "APPLICATION_CASE_IMAGE"
                   ? "application-cases"
+                  : fields.purpose === "COMPANY_HISTORY_IMAGE"
+                    ? "company-history"
                   : "products",
             alt: fields.alt,
             createdById:

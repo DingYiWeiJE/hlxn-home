@@ -2,9 +2,11 @@
 import { requireAdmin } from "@/lib/admin-auth/require-admin";
 import { getUserAuthConfig } from "@/lib/user-auth/config";
 import { getUserSession } from "@/lib/user-auth/session";
+import type { UserRole } from "@prisma/client";
 
 export type AdminActor = {
   userId: string | null;
+  role: UserRole | "LEGACY_ADMIN";
   legacyAdmin: boolean;
 };
 
@@ -22,12 +24,14 @@ export async function requireAdminActor(): Promise<AdminActor> {
         },
         select: {
           id: true,
+          role: true,
         },
       });
 
       if (user) {
         return {
           userId: user.id,
+          role: user.role,
           legacyAdmin: false,
         };
       }
@@ -36,10 +40,11 @@ export async function requireAdminActor(): Promise<AdminActor> {
     // 新用户鉴权不可用时，继续兼容旧版管理员鉴权
   }
 
-  await requireAdminActor();
+  await requireAdmin();
 
   return {
     userId: null,
+    role: "LEGACY_ADMIN",
     legacyAdmin: true,
   };
 }

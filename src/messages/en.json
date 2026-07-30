@@ -276,7 +276,17 @@
     ],
     "honorTitle": "Company Honors",
     "mapTitle": "Controller Production Workshop",
-    "mapDescription": "Covering SMT placement, DIP insertion, program burning, aging testing, function verification and other full processes, achieving one-stop production from PCB to finished product."
+    "mapDescription": "Covering SMT placement, DIP insertion, program burning, aging testing, function verification and other full processes, achieving one-stop production from PCB to finished product.",
+    "history": {
+      "title": "Our Journey",
+      "previous": "Previous milestone",
+      "next": "Next milestone",
+      "scrollHint": "Drag horizontally or use the arrow keys after focusing the timeline.",
+      "emptyTitle": "Our story continues to unfold",
+      "emptyDescription": "More milestones are on the way. Please stay tuned.",
+      "timelineLabel": "Company history timeline",
+      "itemLabel": "Milestone"
+    }
   },
   "productsPageContent": {
     "heroTitle": "Products",

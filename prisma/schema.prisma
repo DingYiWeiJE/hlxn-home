@@ -145,6 +145,7 @@ enum MediaAssetPurpose {
   SOLUTION_CUSTOMER_VALUE
 
   APPLICATION_CASE_IMAGE
+  COMPANY_HISTORY_IMAGE
 
   NEWS_COVER
   NEWS_CONTENT
@@ -183,10 +184,11 @@ model MediaAsset {
   solutionUsageScenarios SolutionUsageScenario[]
   solutionCustomerValues SolutionCustomerValue[]
 
-  productPdfs           Product[]         @relation("ProductDetailPdf")
-  productCovers         Product[]         @relation("ProductCoverImage")
-  newsCovers            News[]            @relation("NewsCoverImage")
-  applicationCaseImages ApplicationCase[] @relation("ApplicationCaseImage")
+  productPdfs           Product[]            @relation("ProductDetailPdf")
+  productCovers         Product[]            @relation("ProductCoverImage")
+  newsCovers            News[]               @relation("NewsCoverImage")
+  applicationCaseImages ApplicationCase[]    @relation("ApplicationCaseImage")
+  companyHistoryImages  CompanyHistoryItem[] @relation("CompanyHistoryImage")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -197,6 +199,40 @@ model MediaAsset {
   @@index([createdById])
   @@index([deletedAt])
   @@index([purpose, createdAt])
+}
+
+// ============================================================
+// 公司发展历程相关
+// ============================================================
+
+enum CompanyHistoryLocale {
+  zh
+  en
+}
+
+model CompanyHistoryItem {
+  id     String               @id @default(cuid())
+  locale CompanyHistoryLocale
+
+  displayTime String
+  sortDate    DateTime
+  sortOrder   Int      @default(0)
+
+  title            String?
+  detailParagraphs Json    @default("[]")
+
+  imageAssetId String?
+  imageAsset   MediaAsset? @relation("CompanyHistoryImage", fields: [imageAssetId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  updatedById String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locale, sortDate, sortOrder])
+  @@index([createdAt])
+  @@index([imageAssetId])
 }
 
 // ============================================================

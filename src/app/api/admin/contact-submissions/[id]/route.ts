@@ -10,6 +10,25 @@ import {
 
 export const runtime = "nodejs";
 
+function normalizeRiskReasons(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === "string")
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -47,9 +66,7 @@ export async function GET(
 
     return ok({
       ...submission,
-      riskReasons: Array.isArray(submission.riskReasons)
-        ? submission.riskReasons
-        : JSON.parse(submission.riskReasons || "[]"),
+      riskReasons: normalizeRiskReasons(submission.riskReasons),
     });
   } catch (error) {
     return fail(error);

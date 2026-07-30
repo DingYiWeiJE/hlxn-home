@@ -12,15 +12,25 @@ type RouteContext = {
   }>;
 };
 
-/**
- * 查询单个素材
- *
- * GET /api/admin/assets/:id
- */
-export async function GET(
-  _request: Request,
-  context: RouteContext,
-) {
+const usageCountSelect = {
+  advantages: true,
+  applications: true,
+  productCovers: true,
+  productIntroBackgrounds: true,
+  productPdfs: true,
+  newsCovers: true,
+  applicationCaseImages: true,
+  companyHistoryImages: true,
+  solutionWorkingPrincipleBackgrounds: true,
+  solutionUsageScenarios: true,
+  solutionCustomerValues: true,
+} as const;
+
+function getTotalUsage(counts: Record<keyof typeof usageCountSelect, number>) {
+  return Object.values(counts).reduce((total, count) => total + count, 0);
+}
+
+export async function GET(_request: Request, context: RouteContext) {
   try {
     await requireAdminActor();
 
@@ -31,10 +41,10 @@ export async function GET(
         id,
         deletedAt: null,
       },
-
       select: {
         id: true,
         type: true,
+        purpose: true,
         url: true,
         relativePath: true,
         filename: true,
@@ -48,7 +58,6 @@ export async function GET(
         enabled: true,
         createdAt: true,
         updatedAt: true,
-
         createdBy: {
           select: {
             id: true,
@@ -56,45 +65,20 @@ export async function GET(
             email: true,
           },
         },
-
         _count: {
-          select: {
-            advantages: true,
-            applications: true,
-            productCovers: true,
-            productIntroBackgrounds: true,
-            productPdfs: true,
-            newsCovers: true,
-            solutionWorkingPrincipleBackgrounds: true,
-            solutionUsageScenarios: true,
-            solutionCustomerValues: true,
-          },
+          select: usageCountSelect,
         },
       },
     });
 
     if (!asset) {
-      throw new ApiError(
-        "MEDIA_NOT_FOUND",
-        "素材不存在",
-        404,
-      );
+      throw new ApiError("MEDIA_NOT_FOUND", "素材不存在", 404);
     }
-
-    const totalUsage =
-      asset._count.advantages +
-      asset._count.applications +
-      asset._count.productCovers +
-      asset._count.productIntroBackgrounds +
-      asset._count.productPdfs +
-      asset._count.newsCovers +
-      asset._count.solutionWorkingPrincipleBackgrounds +
-      asset._count.solutionUsageScenarios +
-      asset._count.solutionCustomerValues;
 
     return ok({
       id: asset.id,
       type: asset.type,
+      purpose: asset.purpose,
       url: asset.url,
       relativePath: asset.relativePath,
       filename: asset.filename,
@@ -109,36 +93,9 @@ export async function GET(
       createdAt: asset.createdAt,
       updatedAt: asset.updatedAt,
       createdBy: asset.createdBy,
-
       usage: {
-        advantages:
-          asset._count.advantages,
-
-        applications:
-          asset._count.applications,
-
-        productCovers:
-          asset._count.productCovers,
-
-        productIntroBackgrounds:
-          asset._count.productIntroBackgrounds,
-
-        productPdfs:
-          asset._count.productPdfs,
-
-        newsCovers:
-          asset._count.newsCovers,
-
-        solutionWorkingPrincipleBackgrounds:
-          asset._count.solutionWorkingPrincipleBackgrounds,
-
-        solutionUsageScenarios:
-          asset._count.solutionUsageScenarios,
-
-        solutionCustomerValues:
-          asset._count.solutionCustomerValues,
-
-        total: totalUsage,
+        ...asset._count,
+        total: getTotalUsage(asset._count),
       },
     });
   } catch (error) {
@@ -146,23 +103,7 @@ export async function GET(
   }
 }
 
-/**
- * 删除素材
- *
- * DELETE /api/admin/assets/:id
- *
- * 当前采用软删除：
- * - enabled 设置为 false；
- * - deletedAt 写入删除时间；
- * - 文件暂时保留在磁盘。
- *
- * 后续可以增加定期清理任务，在再次确认没有引用后，
- * 再从服务器硬盘物理删除文件。
- */
-export async function DELETE(
-  request: Request,
-  context: RouteContext,
-) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     await requireAdminActor();
     assertSameOriginRequest(request);
@@ -174,132 +115,40 @@ export async function DELETE(
         id,
         deletedAt: null,
       },
-
       select: {
         id: true,
         type: true,
         originalName: true,
-
         _count: {
-          select: {
-            advantages: true,
-            applications: true,
-            productCovers: true,
-            productIntroBackgrounds: true,
-            productPdfs: true,
-            newsCovers: true,
-            solutionWorkingPrincipleBackgrounds: true,
-            solutionUsageScenarios: true,
-            solutionCustomerValues: true,
-          },
+          select: usageCountSelect,
         },
       },
     });
 
     if (!asset) {
-      throw new ApiError(
-        "MEDIA_NOT_FOUND",
-        "素材不存在",
-        404,
-      );
+      throw new ApiError("MEDIA_NOT_FOUND", "素材不存在", 404);
     }
 
-    const usage = {
-      advantages:
-        asset._count.advantages,
-
-      applications:
-        asset._count.applications,
-
-      productCovers:
-        asset._count.productCovers,
-
-      productIntroBackgrounds:
-        asset._count.productIntroBackgrounds,
-
-      productPdfs:
-        asset._count.productPdfs,
-
-      newsCovers:
-        asset._count.newsCovers,
-
-      solutionWorkingPrincipleBackgrounds:
-        asset._count.solutionWorkingPrincipleBackgrounds,
-
-      solutionUsageScenarios:
-        asset._count.solutionUsageScenarios,
-
-      solutionCustomerValues:
-        asset._count.solutionCustomerValues,
-    };
-
-    const totalUsage =
-      usage.advantages +
-      usage.applications +
-      usage.productCovers +
-      usage.productIntroBackgrounds +
-      usage.productPdfs +
-      usage.newsCovers +
-      usage.solutionWorkingPrincipleBackgrounds +
-      usage.solutionUsageScenarios +
-      usage.solutionCustomerValues;
+    const totalUsage = getTotalUsage(asset._count);
 
     if (totalUsage > 0) {
-      const usageDescriptions: string[] = [];
+      const labels: Array<[keyof typeof usageCountSelect, string]> = [
+        ["productCovers", "产品封面"],
+        ["productIntroBackgrounds", "产品介绍背景图"],
+        ["advantages", "产品优势图"],
+        ["applications", "产品应用场景图"],
+        ["productPdfs", "产品 PDF"],
+        ["newsCovers", "新闻封面"],
+        ["applicationCaseImages", "应用案例图片"],
+        ["companyHistoryImages", "公司发展历程图片"],
+        ["solutionWorkingPrincipleBackgrounds", "解决方案工作原理背景图"],
+        ["solutionUsageScenarios", "解决方案使用场景图"],
+        ["solutionCustomerValues", "解决方案客户价值图"],
+      ];
 
-      if (usage.productCovers > 0) {
-        usageDescriptions.push(
-          `${usage.productCovers} 个产品封面`,
-        );
-      }
-
-      if (usage.productIntroBackgrounds > 0) {
-        usageDescriptions.push(
-          `${usage.productIntroBackgrounds} 个产品介绍背景图`,
-        );
-      }
-
-      if (usage.advantages > 0) {
-        usageDescriptions.push(
-          `${usage.advantages} 个产品优势`,
-        );
-      }
-
-      if (usage.applications > 0) {
-        usageDescriptions.push(
-          `${usage.applications} 个应用场景`,
-        );
-      }
-
-      if (usage.productPdfs > 0) {
-        usageDescriptions.push(
-          `${usage.productPdfs} 个产品 PDF`,
-        );
-      }
-
-      if (usage.newsCovers > 0) {
-        usageDescriptions.push(
-          `${usage.newsCovers} 个新闻封面`,
-        );
-      }
-
-      if (usage.solutionWorkingPrincipleBackgrounds > 0) {
-        usageDescriptions.push(
-          `${usage.solutionWorkingPrincipleBackgrounds} 个解决方案工作原理背景图`,
-        );
-      }
-
-      if (usage.solutionUsageScenarios > 0) {
-        usageDescriptions.push(
-          `${usage.solutionUsageScenarios} 个解决方案使用场景`,
-        );
-      }
-
-      if (usage.solutionCustomerValues > 0) {
-        usageDescriptions.push(
-          `${usage.solutionCustomerValues} 个解决方案客户价值`,
-        );
-      }
+      const usageDescriptions = labels
+        .filter(([key]) => asset._count[key] > 0)
+        .map(([key, label]) => `${asset._count[key]} 个${label}`);
 
       throw new ApiError(
         "BAD_REQUEST",
@@ -314,7 +163,6 @@ export async function DELETE(
       where: {
         id,
       },
-
       data: {
         enabled: false,
         deletedAt,

@@ -5,13 +5,18 @@ import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import CompanyHistorySection from "@/components/about/CompanyHistorySection";
 import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
+import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
+import type { CompanyHistoryLocale } from "@/lib/company-history/types";
 
 type Props = {
   params: Promise<{
     locale: string;
   }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -93,13 +98,34 @@ function ValuesIcon() {
   );
 }
 
-function AboutContent({ locale }: { locale: string }) {
+async function AboutContent({
+  locale,
+  historyItems,
+}: {
+  locale: string;
+  historyItems: Awaited<ReturnType<typeof getCompanyHistoryByLocale>>;
+}) {
+  const t = await getTranslations({ locale });
+
   return (
     <div className="flex min-h-screen flex-col">
       <HeaderSection locale={locale} />
       <main>
         <CompanyIntroSection locale={locale} />
         <VisionMissionSection locale={locale} />
+        <CompanyHistorySection
+          items={historyItems}
+          labels={{
+            title: t("aboutPage.history.title"),
+            previous: t("aboutPage.history.previous"),
+            next: t("aboutPage.history.next"),
+            scrollHint: t("aboutPage.history.scrollHint"),
+            emptyTitle: t("aboutPage.history.emptyTitle"),
+            emptyDescription: t("aboutPage.history.emptyDescription"),
+            timelineLabel: t("aboutPage.history.timelineLabel"),
+            itemLabel: t("aboutPage.history.itemLabel"),
+          }}
+        />
         <PatentSection locale={locale} />
         <MapSection locale={locale} />
       </main>
@@ -116,7 +142,6 @@ async function HeaderSection({ locale }: { locale: string }) {
       className="relative h-[60vh] bg-cover bg-center flex flex-col"
       style={{
         backgroundImage: "url('/images/about/about-background.jpeg')",
-        backgroundAttachment: "fixed",
       }}
     >
       <div className="absolute inset-0 bg-[#001524C9] opacity-50"></div>
@@ -313,8 +338,11 @@ async function MapSection({ locale }: { locale: string }) {
 
 export default async function About({ params }: Props) {
   const { locale } = await params;
+  const normalizedLocale: CompanyHistoryLocale = locale === "en" ? "en" : "zh";
 
   setRequestLocale(locale);
 
-  return <AboutContent locale={locale} />;
+  const historyItems = await getCompanyHistoryByLocale(normalizedLocale);
+
+  return <AboutContent locale={locale} historyItems={historyItems} />;
 }
