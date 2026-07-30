@@ -353,5 +353,156 @@
         "desc": "发动机与电机并行接入推进链路，推进扭矩既可来自发动机直驱，也可来自电机驱动，或二者叠加联合推进；电池与配电系统为电机与船舶负载供能，并通过能量管理实现效率与舒适性的综合优化。"
       }
     ]
+  },
+  "contactPage": {
+    "tabs": {
+      "customer": "我是客户",
+      "media": "我是媒体",
+      "eventOrganizer": "我是活动主办方",
+      "contactInfo": "联系方式"
+    },
+    "customer": {
+      "title": "客户咨询",
+      "companyName": "公司名称",
+      "companyNamePlaceholder": "请输入公司名称",
+      "mainBusiness": "主营业务",
+      "mainBusinessPlaceholder": "请描述您的主营业务",
+      "regionDetail": "详细地址",
+      "regionDetailPlaceholder": "请输入国家、地区和详细信息",
+      "contactName": "联系人姓名",
+      "contactNamePlaceholder": "请输入您的名字",
+      "jobTitle": "职务",
+      "jobTitlePlaceholder": "可选：请输入您的职务",
+      "phone": "电话",
+      "phonePlaceholder": "请输入电话号码（支持国际格式）",
+      "email": "邮箱",
+      "emailPlaceholder": "请输入公司邮箱",
+      "applicationType": "应用类型",
+      "productType": "产品类型",
+      "chemicalSystem": "化学体系",
+      "cellShape": "电芯形态",
+      "specificScenario": "具体应用场景",
+      "specificScenarioPlaceholder": "可选：请描述您的应用场景",
+      "unitPackCapacity": "单元电池组容量（kWh）",
+      "unitPackCapacityPlaceholder": "可选：请输入容量",
+      "unitPackVoltage": "单元电池组电压（V）",
+      "unitPackVoltagePlaceholder": "可选：请输入电压",
+      "spaceDimensions": "空间尺寸（mm）",
+      "spaceDimensionsPlaceholder": "可选：长×宽×高或其他说明",
+      "annualElectricity": "年用电量（kWh）",
+      "annualElectricityPlaceholder": "可选：请输入年用电量",
+      "chargingHours": "充电时间（小时）",
+      "chargingHoursPlaceholder": "可选：请输入充电时间",
+      "otherRequirements": "其他需求描述",
+      "otherRequirementsPlaceholder": "可选：请输入其他需求（最多2000字）"
+    },
+    "media": {
+      "title": "媒体咨询",
+      "mediaName": "媒体名称",
+      "mediaNamePlaceholder": "请输入您的媒体名称",
+      "contactName": "联系人姓名",
+      "contactNamePlaceholder": "请输入您的名字",
+      "phone": "电话",
+      "phonePlaceholder": "请输入联系电话",
+      "email": "邮箱",
+      "emailPlaceholder": "请输入邮箱地址",
+      "inquiryPurpose": "来函目的",
+      "details": "详细需求",
+      "detailsPlaceholder": "请详细描述您的需求"
+    },
+    "eventOrganizer": {
+      "title": "活动主办方咨询",
+      "eventName": "会议或会展名称",
+      "eventNamePlaceholder": "请输入会议或会展名称",
+      "organizerName": "主办单位",
+      "organizerNamePlaceholder": "请输入主办单位名称",
+      "location": "举办地点",
+      "locationPlaceholder": "请输入举办地点",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "contactName": "联系人姓名",
+      "contactNamePlaceholder": "请输入您的名字",
+      "phone": "电话",
+      "phonePlaceholder": "请输入联系电话",
+      "email": "邮箱",
+      "emailPlaceholder": "请输入邮箱地址",
+      "inquiryPurpose": "活动类型",
+      "details": "活动详情",
+      "detailsPlaceholder": "请描述活动的内容、规模和影响力"
+    },
+    "contactInfo": {
+      "title": "联系方式",
+      "generalPhone": "总机",
+      "salesPhone": "销售电话",
+      "supplyChainProcurement": "供应链采购",
+      "afterSalesService": "售后服务",
+      "recruitment": "招聘电话",
+      "brandMedia": "品牌与媒体",
+      "feedbackPhone": "反馈电话",
+      "feedbackEmail": "反馈邮箱",
+      "antiCorruption": "反腐监察电话",
+      "antiCorruptionEmail": "反腐监察邮箱"
+    },
+    "common": {
+      "requiredField": "必填项",
+      "optionalField": "可选",
+      "atLeastOneContact": "电话和邮箱至少填写一个",
+      "submit": "提交",
+      "submitting": "提交中...",
+      "reset": "重置",
+      "privacy": "我已阅读并同意",
+      "privacyPolicy": "隐私政策",
+      "privacyRequired": "必须同意隐私政策才能提交",
+      "success": "感谢您的提交！我们会尽快与您联系。",
+      "error": "提交失败，请检查表单信息后重试",
+      "phoneOrEmailRequired": "电话和邮箱至少填写一个",
+      "endDateAfterStart": "结束日期不能早于开始日期"
+    },
+    "options": {
+      "applicationTypes": {
+        "PASSENGER_VEHICLE": "乘用车",
+        "BUS": "客车",
+        "LOGISTICS_VEHICLE": "物流车",
+        "ENERGY_STORAGE": "储能",
+        "OTHER": "其他"
+      },
+      "productTypes": {
+        "CELL": "电芯",
+        "MODULE": "模组",
+        "BATTERY_PACK": "电池包",
+        "BMS": "电池管理系统",
+        "OTHER": "其他"
+      },
+      "chemicalSystems": {
+        "TERNARY": "三元",
+        "LFP": "磷酸铁锂",
+        "EITHER": "两者皆可"
+      },
+      "cellShapes": {
+        "PRISMATIC": "方形",
+        "OTHER": "其他"
+      },
+      "mediaPurposes": {
+        "ADVERTISING": "广告投放",
+        "INTERVIEW": "采访",
+        "VISIT": "参观",
+        "EVENT": "活动",
+        "OTHER": "其他"
+      },
+      "eventPurposes": {
+        "EXHIBITION": "展会",
+        "FORUM": "论坛",
+        "ASSOCIATION": "协会",
+        "OTHER": "其他"
+      }
+    },
+    "validation": {
+      "phoneInvalid": "电话号码格式不正确",
+      "emailInvalid": "邮箱格式不正确",
+      "required": "此项必填",
+      "maxLength": "输入过长",
+      "minLength": "输入过短",
+      "invalidNumber": "请输入有效的数字"
+    }
   }
 }

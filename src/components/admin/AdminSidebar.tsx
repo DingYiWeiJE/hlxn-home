@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   Newspaper,
   Package,
   Puzzle,
@@ -36,6 +37,12 @@ const navigationItems: NavigationItem[] = [
     label: "仪表板",
     description: "系统概览和统计",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/admin/contact-submissions",
+    label: "客户线索",
+    description: "管理联系表单提交",
+    icon: MessageSquare,
   },
   {
     href: "/admin/categories",

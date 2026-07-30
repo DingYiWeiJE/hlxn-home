@@ -353,5 +353,156 @@
         "desc": "Engines and motors are connected in parallel to the propulsion chain, with propulsion torque coming from either engine direct drive, motor drive, or combined propulsion from both. The battery and power distribution system supply energy to the motors and ship loads, achieving comprehensive optimization of efficiency and comfort through energy management."
       }
     ]
+  },
+  "contactPage": {
+    "tabs": {
+      "customer": "Customer Inquiry",
+      "media": "Media Inquiry",
+      "eventOrganizer": "Event Organizer",
+      "contactInfo": "Contact Information"
+    },
+    "customer": {
+      "title": "Customer Inquiry",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Enter your company name",
+      "mainBusiness": "Main Business",
+      "mainBusinessPlaceholder": "Please describe your main business",
+      "regionDetail": "Address",
+      "regionDetailPlaceholder": "Please enter country, region, and detailed address",
+      "contactName": "Contact Person",
+      "contactNamePlaceholder": "Please enter your name",
+      "jobTitle": "Job Title",
+      "jobTitlePlaceholder": "Optional: Please enter your job title",
+      "phone": "Phone",
+      "phonePlaceholder": "Please enter phone number (international format supported)",
+      "email": "Email",
+      "emailPlaceholder": "Please enter company email",
+      "applicationType": "Application Type",
+      "productType": "Product Type",
+      "chemicalSystem": "Chemical System",
+      "cellShape": "Cell Shape",
+      "specificScenario": "Specific Application Scenario",
+      "specificScenarioPlaceholder": "Optional: Please describe your application scenario",
+      "unitPackCapacity": "Unit Pack Capacity (kWh)",
+      "unitPackCapacityPlaceholder": "Optional: Please enter capacity",
+      "unitPackVoltage": "Unit Pack Voltage (V)",
+      "unitPackVoltagePlaceholder": "Optional: Please enter voltage",
+      "spaceDimensions": "Space Dimensions (mm)",
+      "spaceDimensionsPlaceholder": "Optional: Length × Width × Height or other specifications",
+      "annualElectricity": "Annual Electricity Usage (kWh)",
+      "annualElectricityPlaceholder": "Optional: Please enter annual electricity usage",
+      "chargingHours": "Charging Time (Hours)",
+      "chargingHoursPlaceholder": "Optional: Please enter charging time",
+      "otherRequirements": "Other Requirements",
+      "otherRequirementsPlaceholder": "Optional: Please enter other requirements (up to 2000 characters)"
+    },
+    "media": {
+      "title": "Media Inquiry",
+      "mediaName": "Media Name",
+      "mediaNamePlaceholder": "Please enter your media name",
+      "contactName": "Contact Person",
+      "contactNamePlaceholder": "Please enter your name",
+      "phone": "Phone",
+      "phonePlaceholder": "Please enter contact phone",
+      "email": "Email",
+      "emailPlaceholder": "Please enter email address",
+      "inquiryPurpose": "Purpose of Inquiry",
+      "details": "Details",
+      "detailsPlaceholder": "Please describe your requirements in detail"
+    },
+    "eventOrganizer": {
+      "title": "Event Organizer Inquiry",
+      "eventName": "Conference or Exhibition Name",
+      "eventNamePlaceholder": "Please enter conference or exhibition name",
+      "organizerName": "Organizing Unit",
+      "organizerNamePlaceholder": "Please enter organizing unit name",
+      "location": "Location",
+      "locationPlaceholder": "Please enter event location",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "contactName": "Contact Person",
+      "contactNamePlaceholder": "Please enter your name",
+      "phone": "Phone",
+      "phonePlaceholder": "Please enter contact phone",
+      "email": "Email",
+      "emailPlaceholder": "Please enter email address",
+      "inquiryPurpose": "Event Type",
+      "details": "Event Details",
+      "detailsPlaceholder": "Please describe the event content, scale, and impact"
+    },
+    "contactInfo": {
+      "title": "Contact Information",
+      "generalPhone": "General Phone",
+      "salesPhone": "Sales Phone",
+      "supplyChainProcurement": "Supply Chain Procurement",
+      "afterSalesService": "After-Sales Service",
+      "recruitment": "Recruitment Phone",
+      "brandMedia": "Brand & Media",
+      "feedbackPhone": "Feedback Phone",
+      "feedbackEmail": "Feedback Email",
+      "antiCorruption": "Anti-Corruption Hotline",
+      "antiCorruptionEmail": "Anti-Corruption Email"
+    },
+    "common": {
+      "requiredField": "Required",
+      "optionalField": "Optional",
+      "atLeastOneContact": "Please provide at least phone or email",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "reset": "Reset",
+      "privacy": "I have read and agree to",
+      "privacyPolicy": "Privacy Policy",
+      "privacyRequired": "You must agree to the privacy policy to submit",
+      "success": "Thank you for your submission! We will contact you shortly.",
+      "error": "Submission failed. Please check the form and try again",
+      "phoneOrEmailRequired": "Please provide at least phone or email",
+      "endDateAfterStart": "End date cannot be earlier than start date"
+    },
+    "options": {
+      "applicationTypes": {
+        "PASSENGER_VEHICLE": "Passenger Vehicle",
+        "BUS": "Bus",
+        "LOGISTICS_VEHICLE": "Logistics Vehicle",
+        "ENERGY_STORAGE": "Energy Storage",
+        "OTHER": "Other"
+      },
+      "productTypes": {
+        "CELL": "Cell",
+        "MODULE": "Module",
+        "BATTERY_PACK": "Battery Pack",
+        "BMS": "Battery Management System",
+        "OTHER": "Other"
+      },
+      "chemicalSystems": {
+        "TERNARY": "Ternary",
+        "LFP": "LFP",
+        "EITHER": "Either"
+      },
+      "cellShapes": {
+        "PRISMATIC": "Prismatic",
+        "OTHER": "Other"
+      },
+      "mediaPurposes": {
+        "ADVERTISING": "Advertising",
+        "INTERVIEW": "Interview",
+        "VISIT": "Visit",
+        "EVENT": "Event",
+        "OTHER": "Other"
+      },
+      "eventPurposes": {
+        "EXHIBITION": "Exhibition",
+        "FORUM": "Forum",
+        "ASSOCIATION": "Association",
+        "OTHER": "Other"
+      }
+    },
+    "validation": {
+      "phoneInvalid": "Invalid phone number format",
+      "emailInvalid": "Invalid email format",
+      "required": "This field is required",
+      "maxLength": "Input is too long",
+      "minLength": "Input is too short",
+      "invalidNumber": "Please enter a valid number"
+    }
   }
 }

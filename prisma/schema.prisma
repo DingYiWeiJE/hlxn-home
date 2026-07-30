@@ -470,3 +470,182 @@ model ApplicationCase {
   @@index([createdAt])
   @@index([imageAssetId])
 }
+
+// ============================================================
+// 联系我们相关
+// ============================================================
+
+enum ContactSubmissionType {
+  CUSTOMER
+  MEDIA
+  EVENT_ORGANIZER
+}
+
+enum ContactSubmissionStatus {
+  PENDING
+  FOLLOWING_UP
+  CONTACTED
+  COMPLETED
+  INVALID
+  SPAM
+}
+
+enum ContactSubmissionRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  BLOCKED
+}
+
+enum ContactSubmissionNotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model ContactSubmission {
+  id     String                @id @default(cuid())
+  type   ContactSubmissionType
+  locale String // zh or en
+
+  contactName     String
+  phone           String?
+  phoneNormalized String?
+  email           String?
+  emailNormalized String?
+
+  status      ContactSubmissionStatus    @default(PENDING)
+  riskLevel   ContactSubmissionRiskLevel @default(LOW)
+  riskReasons Json                       @default("[]") // array of strings
+
+  isDuplicate     Boolean             @default(false)
+  duplicateOfId   String?
+  duplicateReason String?
+  duplicateOf     ContactSubmission?  @relation("Duplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates      ContactSubmission[] @relation("Duplicates")
+
+  contentFingerprint String?
+  idempotencyKey     String?
+
+  sourcePath String?
+  referrer   String?
+  ipHash     String?
+  userAgent  String?
+
+  consentAt            DateTime?
+  privacyPolicyVersion String?
+
+  notificationStatus ContactSubmissionNotificationStatus @default(PENDING)
+  notificationError  String?
+
+  submittedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  customerInquiry       CustomerInquiry?
+  mediaInquiry          MediaInquiry?
+  eventOrganizerInquiry EventOrganizerInquiry?
+  notes                 ContactSubmissionNote[]
+
+  @@unique([idempotencyKey])
+  @@index([type])
+  @@index([locale])
+  @@index([status])
+  @@index([riskLevel])
+  @@index([isDuplicate])
+  @@index([duplicateOfId])
+  @@index([emailNormalized])
+  @@index([phoneNormalized])
+  @@index([contentFingerprint])
+  @@index([submittedAt])
+  @@index([deletedAt])
+  @@index([notificationStatus])
+}
+
+model CustomerInquiry {
+  id           String            @id @default(cuid())
+  submissionId String            @unique
+  submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  companyName  String
+  mainBusiness String
+  regionDetail String
+
+  jobTitle String?
+
+  applicationType String? // PASSENGER_VEHICLE, BUS, LOGISTICS_VEHICLE, ENERGY_STORAGE, OTHER
+  productType     String? // CELL, MODULE, BATTERY_PACK, BMS, OTHER
+  chemicalSystem  String? // TERNARY, LFP, EITHER
+  cellShape       String? // PRISMATIC, OTHER
+
+  specificScenario     String?
+  unitPackCapacityKwh  Decimal?
+  unitPackVoltageV     Decimal?
+  spaceDimensions      String?
+  annualElectricityKwh Decimal?
+  chargingHours        Decimal?
+  otherRequirements    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([submissionId])
+}
+
+model MediaInquiry {
+  id           String            @id @default(cuid())
+  submissionId String            @unique
+  submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  mediaName String
+
+  inquiryPurpose String? // ADVERTISING, INTERVIEW, VISIT, EVENT, OTHER
+  details        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([submissionId])
+}
+
+model EventOrganizerInquiry {
+  id           String            @id @default(cuid())
+  submissionId String            @unique
+  submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  eventName     String
+  organizerName String
+  location      String
+
+  startAt DateTime
+  endAt   DateTime
+
+  inquiryPurpose String? // EXHIBITION, FORUM, ASSOCIATION, OTHER
+  details        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([submissionId])
+  @@index([startAt])
+  @@index([endAt])
+}
+
+model ContactSubmissionNote {
+  id           String            @id @default(cuid())
+  submissionId String
+  submission   ContactSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  content     String
+  createdById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([submissionId])
+  @@index([createdById])
+  @@index([deletedAt])
+}
