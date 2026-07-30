@@ -1,9 +1,6 @@
-import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
-import type { Metadata } from "next";
-import CaseList from "./components/CaseList";
+import CasesClient from "@/components/CasesClient";
 
 type Props = {
   params: Promise<{
@@ -11,55 +8,44 @@ type Props = {
   }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export default async function Cases({ params }: Props) {
   const { locale } = await params;
 
-  return {
-    title:
-      locale === "zh"
-        ? "应用案例 | 汉理楚能"
-        : "Cases | Hanli Chuneng",
-    description:
-      locale === "zh"
-        ? "查看汉理楚能的客户成功案例"
-        : "View Hanli Chuneng's customer success stories",
-  };
-}
-
-function CasesContent({ locale }: { locale: string }) {
-  const t = useTranslations();
-  const page = t.raw("casesPage");
-
-    return (
-      <div className="flex min-h-screen flex-col">
-        <div
-          className="relative h-[60vh] bg-cover bg-center flex flex-col"
-          style={{
-            backgroundImage: "url('/images/cases/cases-bg.jpg')",
-            backgroundAttachment: "fixed",
-          }}
-        >
-          <div className="absolute inset-0 bg-[#001524C9] opacity-60"></div>
-          <div className="relative flex flex-col h-full">
-            <Navigation />
-            <div className="flex-1 flex flex-col items-start justify-center">
-              <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-                  应用案例
-                </h1>
-              </div>
+  return (
+    <div className="flex min-h-screen flex-col">
+      <div
+        className="relative h-[60vh] bg-cover bg-center flex flex-col"
+        style={{
+          backgroundImage: "url('/images/cases/cases-bg.jpg')",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div className="absolute inset-0 bg-[#001524C9] opacity-60"></div>
+        <div className="relative flex flex-col h-full">
+          <Navigation />
+          <div className="flex-1 flex flex-col items-start justify-center">
+            <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+                {locale === "zh" ? "应用案例" : "Cases"}
+              </h1>
             </div>
           </div>
         </div>
-        <CaseList/>
-        <Footer locale={locale} />
       </div>
-    );
-}
 
-export default async function Cases({ params }: Props) {
-  const { locale } = await params;
-  setRequestLocale(locale);
+      <section className="w-full bg-[#eef8ff] py-16 md:py-20">
+        <div className="mx-auto max-w-[1280px] px-5 md:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-[#2463c5] md:text-4xl">
+              {locale === "zh" ? "应用案例" : "Cases"}
+            </h2>
+          </div>
 
-  return <CasesContent locale={locale} />;
+          <CasesClient locale={locale} />
+        </div>
+      </section>
+
+      <Footer locale={locale} />
+    </div>
+  );
 }

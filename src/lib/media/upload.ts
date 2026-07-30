@@ -20,7 +20,7 @@ const allowedImageMimeTypes = new Set([
   "image/gif",
 ]);
 
-export type MediaUploadScope = "news" | "products" | "solutions";
+export type MediaUploadScope = "news" | "products" | "solutions" | "application-cases";
 
 export type UploadedMediaAsset = {
   id: string;

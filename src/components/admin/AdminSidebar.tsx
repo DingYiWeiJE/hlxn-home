@@ -50,6 +50,12 @@ const navigationItems: NavigationItem[] = [
     icon: Puzzle,
   },
   {
+    href: "/admin/application-cases",
+    label: "应用案例",
+    description: "管理应用案例内容",
+    icon: Package,
+  },
+  {
     href: "/admin/categories",
     label: "产品分类",
     description: "管理一级和二级分类",

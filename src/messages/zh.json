@@ -85,27 +85,6 @@
       }
     ]
   },
-  "casesPage": {
-    "title": "应用案例",
-    "subtitle": "客户成功案例",
-    "cases": [
-      {
-        "title": "大型制造企业",
-        "company": "财富500强企业",
-        "result": "能源成本降低30%"
-      },
-      {
-        "title": "商业综合体",
-        "company": "房地产开发商",
-        "result": "峰值负荷降低40%"
-      },
-      {
-        "title": "数据中心运维",
-        "company": "科技公司",
-        "result": "能效提升25%"
-      }
-    ]
-  },
   "news": {
     "title": "新闻",
     "back": "返回新闻列表"

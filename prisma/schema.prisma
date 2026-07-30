@@ -144,6 +144,8 @@ enum MediaAssetPurpose {
   SOLUTION_USAGE_SCENARIO
   SOLUTION_CUSTOMER_VALUE
 
+  APPLICATION_CASE_IMAGE
+
   NEWS_COVER
   NEWS_CONTENT
 }
@@ -181,9 +183,10 @@ model MediaAsset {
   solutionUsageScenarios SolutionUsageScenario[]
   solutionCustomerValues SolutionCustomerValue[]
 
-  productPdfs   Product[] @relation("ProductDetailPdf")
-  productCovers Product[] @relation("ProductCoverImage")
-  newsCovers    News[]    @relation("NewsCoverImage")
+  productPdfs           Product[]         @relation("ProductDetailPdf")
+  productCovers         Product[]         @relation("ProductCoverImage")
+  newsCovers            News[]            @relation("NewsCoverImage")
+  applicationCaseImages ApplicationCase[] @relation("ApplicationCaseImage")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -255,6 +258,11 @@ enum SolutionStatus {
 }
 
 enum SolutionLocale {
+  zh
+  en
+}
+
+enum ApplicationCaseLocale {
   zh
   en
 }
@@ -430,5 +438,35 @@ model SolutionCustomerValue {
   updatedAt DateTime @updatedAt
 
   @@index([solutionId, sortOrder])
+  @@index([imageAssetId])
+}
+
+// ============================================================
+// 应用案例相关
+// ============================================================
+
+model ApplicationCase {
+  id     String                @id @default(cuid())
+  locale ApplicationCaseLocale
+  title  String
+  slug   String
+
+  contentParagraphs Json     @default("[]")
+  caseDate          DateTime
+
+  imageAssetId String
+  imageAsset   MediaAsset @relation("ApplicationCaseImage", fields: [imageAssetId], references: [id], onDelete: Restrict)
+
+  createdById String?
+  updatedById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([locale, slug])
+  @@index([locale, caseDate])
+  @@index([deletedAt, caseDate])
+  @@index([createdAt])
   @@index([imageAssetId])
 }

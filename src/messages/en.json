@@ -85,27 +85,6 @@
       }
     ]
   },
-  "casesPage": {
-    "title": "Case Studies",
-    "subtitle": "Success Stories from Our Clients",
-    "cases": [
-      {
-        "title": "Large Manufacturing Plant",
-        "company": "Fortune 500 Company",
-        "result": "30% energy cost reduction"
-      },
-      {
-        "title": "Commercial Building Complex",
-        "company": "Real Estate Developer",
-        "result": "40% peak load reduction"
-      },
-      {
-        "title": "Data Center Operations",
-        "company": "Tech Company",
-        "result": "25% energy efficiency improvement"
-      }
-    ]
-  },
   "news": {
     "title": "News",
     "back": "Back to News List"
