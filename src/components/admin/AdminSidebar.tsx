@@ -38,6 +38,12 @@ const navigationItems: NavigationItem[] = [
     icon: LayoutDashboard,
   },
   {
+    href: "/admin/categories",
+    label: "产品分类",
+    description: "管理一级和二级分类",
+    icon: FolderTree,
+  },
+  {
     href: "/admin/products",
     label: "产品管理",
     description: "创建和维护产品内容",
@@ -55,18 +61,12 @@ const navigationItems: NavigationItem[] = [
     description: "管理应用案例内容",
     icon: Package,
   },
-  {
-    href: "/admin/categories",
-    label: "产品分类",
-    description: "管理一级和二级分类",
-    icon: FolderTree,
-  },
-  {
-    href: "/admin/assets",
-    label: "素材库",
-    description: "管理产品图片和 PDF",
-    icon: Images,
-  },
+  // {
+  //   href: "/admin/assets",
+  //   label: "素材库",
+  //   description: "管理产品图片和 PDF",
+  //   icon: Images,
+  // },
   {
     href: "/admin/news",
     label: "新闻管理",

@@ -637,46 +637,145 @@ export default function ApplicationCaseListPage() {
         )}
       </div>
 
-      {pagination.totalPages > 1 && (
+      <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-slate-600">
-            第 {pagination.page} 页，共{" "}
-            {pagination.totalPages} 页
-          </p>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() =>
-                fetchList(
-                  pagination.page - 1,
-                )
-              }
-              disabled={
-                !pagination.hasPreviousPage ||
-                loading
-              }
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-            >
-              上一页
-            </button>
-
-            <button
-              onClick={() =>
-                fetchList(
-                  pagination.page + 1,
-                )
-              }
-              disabled={
-                !pagination.hasNextPage ||
-                loading
-              }
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-            >
-              下一页
-            </button>
+          <div className="text-sm text-slate-600">
+            <p>
+              第 <span className="font-semibold text-slate-900">{pagination.page}</span> 页，共{" "}
+              <span className="font-semibold text-slate-900">{pagination.totalPages}</span> 页
+              <span className="ml-2 text-slate-500">
+                （共 {pagination.total} 条记录）
+              </span>
+            </p>
           </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-slate-600">
+                跳转到
+              </label>
+
+              <input
+                type="number"
+                min="1"
+                max={pagination.totalPages}
+                defaultValue={pagination.page}
+                onChange={(e) => {
+                  const pageNum = parseInt(
+                    e.target.value,
+                    10,
+                  );
+
+                  if (
+                    pageNum >= 1 &&
+                    pageNum <=
+                      pagination.totalPages
+                  ) {
+                    fetchList(pageNum);
+                  }
+                }}
+                disabled={loading}
+                className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+
+              <span className="text-sm text-slate-600">
+                页
+              </span>
+            </div>
+          )}
         </div>
-      )}
+
+        {pagination.totalPages > 1 && (
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() =>
+                  fetchList(1)
+                }
+                disabled={
+                  !pagination.hasPreviousPage ||
+                  loading
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+                title="首页"
+              >
+                首页
+              </button>
+
+              <button
+                onClick={() =>
+                  fetchList(
+                    pagination.page - 1,
+                  )
+                }
+                disabled={
+                  !pagination.hasPreviousPage ||
+                  loading
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+                title="上一页"
+              >
+                ← 上一页
+              </button>
+
+              <button
+                onClick={() =>
+                  fetchList(
+                    pagination.page + 1,
+                  )
+                }
+                disabled={
+                  !pagination.hasNextPage ||
+                  loading
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+                title="下一页"
+              >
+                下一页 →
+              </button>
+
+              <button
+                onClick={() =>
+                  fetchList(
+                    pagination.totalPages,
+                  )
+                }
+                disabled={
+                  !pagination.hasNextPage ||
+                  loading
+                }
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+                title="末页"
+              >
+                末页
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">
+                每页显示
+              </span>
+
+              <select
+                value="20"
+                disabled
+                className="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-sm text-slate-600"
+                title="每页数量（当前固定为 20）"
+              >
+                <option value="20">20 条</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        <div className="text-xs text-slate-500">
+          {pagination.totalPages === 0
+            ? "暂无数据"
+            : pagination.hasNextPage
+              ? `还有 ${pagination.total - pagination.page * pagination.pageSize} 条记录`
+              : "已显示全部记录"}
+        </div>
+      </div>
     </div>
   );
 }
