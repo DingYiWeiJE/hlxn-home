@@ -7,6 +7,7 @@ import {
   Package,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Trash2,
 } from "lucide-react";
@@ -18,6 +19,11 @@ import {
   useMemo,
   useState,
 } from "react";
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTablePaginationProps,
+} from "@/components/admin/DataTable";
 
 type ApplicationCaseLocale = "zh" | "en";
 
@@ -243,6 +249,137 @@ export default function ApplicationCaseListPage() {
     [],
   );
 
+  const columns: DataTableColumn<ApplicationCaseItem>[] =
+    useMemo(
+      () => [
+        {
+          key: "image",
+          label: "图片",
+          render: (item) => (
+            <>
+              {item.imageAsset ? (
+                <div className="relative h-12 w-12 overflow-hidden rounded">
+                  <Image
+                    src={item.imageAsset.url}
+                    alt={
+                      item.imageAsset.alt ||
+                      item.title
+                    }
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded bg-slate-100">
+                  <Package className="h-6 w-6 text-slate-400" />
+                </div>
+              )}
+            </>
+          ),
+        },
+        {
+          key: "title",
+          label: "标题",
+          render: (item) => (
+            <div className="min-w-[200px]">
+              <p className="font-medium text-slate-900">
+                {item.title}
+              </p>
+
+              <p className="text-sm text-slate-500">
+                {item.slug}
+              </p>
+            </div>
+          ),
+        },
+        {
+          key: "locale",
+          label: "语言",
+          render: (item) => (
+            <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+              {item.locale === "zh"
+                ? "中文"
+                : "英文"}
+            </span>
+          ),
+        },
+        {
+          key: "caseDate",
+          label: "日期",
+          render: (item) => (
+            <p className="text-sm text-slate-600">
+              {dateFormatter(item.caseDate)}
+            </p>
+          ),
+        },
+        {
+          key: "contentParagraphCount",
+          label: "段落数",
+          render: (item) => (
+            <p className="text-sm text-slate-600">
+              {item.contentParagraphCount}
+            </p>
+          ),
+        },
+        {
+          key: "actions",
+          label: "操作",
+          className: "px-5 py-4 text-right",
+          render: (item) => (
+            <div className="flex justify-end gap-2">
+              {!showDeleted && (
+                <>
+                  <Link
+                    href={`/admin/application-cases/${item.id}/edit`}
+                    className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-blue-600 hover:bg-blue-50"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Link>
+
+                  <button
+                    onClick={() =>
+                      handleDelete(item.id)
+                    }
+                    disabled={
+                      actioningId === item.id
+                    }
+                    className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {actioningId === item.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                </>
+              )}
+
+              {showDeleted && (
+                <button
+                  onClick={() =>
+                    handleRestore(item.id)
+                  }
+                  disabled={
+                    actioningId === item.id
+                  }
+                  className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-green-600 hover:bg-green-50 disabled:opacity-50"
+                >
+                  {actioningId === item.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4" />
+                  )}
+                  恢复
+                </button>
+              )}
+            </div>
+          ),
+        },
+      ],
+      [showDeleted, actioningId],
+    );
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -267,515 +404,84 @@ export default function ApplicationCaseListPage() {
       </div>
 
       <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
-              搜索
-            </label>
+        <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-              <input
-                type="text"
-                value={searchKeyword}
-                onChange={(e) =>
-                  setSearchKeyword(
-                    e.target.value,
-                  )
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    fetchList(1);
-                  }
-                }}
-                placeholder="搜索标题或 Slug..."
-                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
-              语言
-            </label>
-
-            <select
-              value={selectedLocale}
-              onChange={(e) => {
-                setSelectedLocale(
-                  e.target
-                    .value as ApplicationCaseLocale | ""
-                );
-
-                fetchList(1);
-              }}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">
-                全部语言
-              </option>
-
-              <option value="zh">中文</option>
-
-              <option value="en">英文</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
-              状态
-            </label>
-
-            <button
-              onClick={() => {
-                setShowDeleted(
-                  !showDeleted,
-                );
-
-                fetchList(1);
-              }}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              {showDeleted
-                ? "回收站"
-                : "正常数据"}
-            </button>
-          </div>
-
-          <div className="flex items-end gap-2">
-            <button
-              onClick={() =>
-                fetchList(1)
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) =>
+                setSearchKeyword(
+                  e.target.value,
+                )
               }
-              disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-            >
-              <RefreshCw className="h-4 w-4" />
-              刷新
-            </button>
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchList(1);
+                }
+              }}
+              placeholder="搜索标题或 Slug..."
+              className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
           </div>
+
+          <select
+            value={selectedLocale}
+            onChange={(e) => {
+              setSelectedLocale(
+                e.target
+                  .value as ApplicationCaseLocale | ""
+              );
+
+              fetchList(1);
+            }}
+            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          >
+            <option value="">全部语言</option>
+
+            <option value="zh">中文</option>
+
+            <option value="en">英文</option>
+          </select>
+
+          <button
+            onClick={() => {
+              setShowDeleted(
+                !showDeleted,
+              );
+
+              fetchList(1);
+            }}
+            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition hover:bg-slate-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          >
+            {showDeleted
+              ? "回收站"
+              : "正常数据"}
+          </button>
+
+          <button
+            onClick={() => void fetchList(1)}
+            disabled={loading}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition hover:bg-slate-50 disabled:opacity-50 sm:col-span-2 lg:col-span-1"
+          >
+            <RefreshCw className="h-4 w-4" />
+            刷新
+          </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <div className="hidden md:block">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  图片
-                </th>
-
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  标题
-                </th>
-
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  语言
-                </th>
-
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  日期
-                </th>
-
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  段落数
-                </th>
-
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">
-                  操作
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {items.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-slate-200 hover:bg-slate-50"
-                >
-                  <td className="px-6 py-4">
-                    {item.imageAsset ? (
-                      <div className="relative h-12 w-12 overflow-hidden rounded">
-                        <Image
-                          src={
-                            item.imageAsset.url
-                          }
-                          alt={
-                            item.imageAsset.alt ||
-                            item.title
-                          }
-                          fill
-                          className="object-cover"
-                          sizes="48px"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded bg-slate-100">
-                        <Package className="h-6 w-6 text-slate-400" />
-                      </div>
-                    )}
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="font-medium text-slate-900">
-                        {item.title}
-                      </p>
-
-                      <p className="text-sm text-slate-500">
-                        {item.slug}
-                      </p>
-                    </div>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-                      {
-                        localeLabel[
-                          item.locale
-                        ]
-                      }
-                    </span>
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {dateFormatter(
-                      item.caseDate,
-                    )}
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    {
-                      item.contentParagraphCount
-                    }
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      {!showDeleted && (
-                        <>
-                          <Link
-                            href={`/admin/application-cases/${item.id}/edit`}
-                            className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-blue-600 hover:bg-blue-50"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Link>
-
-                          <button
-                            onClick={() =>
-                              handleDelete(
-                                item.id,
-                              )
-                            }
-                            disabled={
-                              actioningId ===
-                              item.id
-                            }
-                            className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                          >
-                            {actioningId ===
-                            item.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </button>
-                        </>
-                      )}
-
-                      {showDeleted && (
-                        <button
-                          onClick={() =>
-                            handleRestore(
-                              item.id,
-                            )
-                          }
-                          disabled={
-                            actioningId ===
-                            item.id
-                          }
-                          className="inline-flex items-center gap-1 rounded px-3 py-1 text-sm text-green-600 hover:bg-green-50 disabled:opacity-50"
-                        >
-                          {actioningId ===
-                          item.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="h-4 w-4" />
-                          )}
-                          恢复
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="space-y-4 p-4 md:hidden">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-lg border border-slate-200 p-4"
-            >
-              <div className="flex gap-4">
-                {item.imageAsset ? (
-                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded">
-                    <Image
-                      src={item.imageAsset.url}
-                      alt={
-                        item.imageAsset.alt ||
-                        item.title
-                      }
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded bg-slate-100">
-                    <Package className="h-8 w-8 text-slate-400" />
-                  </div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900">
-                    {item.title}
-                  </p>
-
-                  <p className="text-xs text-slate-500">
-                    {item.slug}
-                  </p>
-
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className="inline-block rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                      {
-                        localeLabel[
-                          item.locale
-                        ]
-                      }
-                    </span>
-
-                    <span className="text-xs text-slate-600">
-                      {dateFormatter(
-                        item.caseDate,
-                      )}
-                    </span>
-
-                    <span className="text-xs text-slate-600">
-                      {
-                        item.contentParagraphCount
-                      }
-                      {" "}
-                      段
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                {!showDeleted && (
-                  <>
-                    <Link
-                      href={`/admin/application-cases/${item.id}/edit`}
-                      className="flex-1 rounded bg-blue-50 py-2 text-center text-sm text-blue-600 hover:bg-blue-100"
-                    >
-                      编辑
-                    </Link>
-
-                    <button
-                      onClick={() =>
-                        handleDelete(item.id)
-                      }
-                      disabled={
-                        actioningId ===
-                        item.id
-                      }
-                      className="flex-1 rounded bg-red-50 py-2 text-sm text-red-600 hover:bg-red-100 disabled:opacity-50"
-                    >
-                      {actioningId ===
-                      item.id ? (
-                        <Loader2 className="inline-block h-4 w-4 animate-spin" />
-                      ) : (
-                        "删除"
-                      )}
-                    </button>
-                  </>
-                )}
-
-                {showDeleted && (
-                  <button
-                    onClick={() =>
-                      handleRestore(item.id)
-                    }
-                    disabled={
-                      actioningId === item.id
-                    }
-                    className="flex-1 rounded bg-green-50 py-2 text-sm text-green-600 hover:bg-green-100 disabled:opacity-50"
-                  >
-                    {actioningId === item.id ? (
-                      <Loader2 className="inline-block h-4 w-4 animate-spin" />
-                    ) : (
-                      "恢复"
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-            <Package className="mb-4 h-12 w-12 text-slate-400" />
-
-            <p>暂无应用案例</p>
-          </div>
-        )}
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <DataTable
+          data={items}
+          columns={columns}
+          isLoading={loading}
+          emptyMessage="暂无应用案例"
+          pagination={pagination}
+          onPageChange={fetchList}
+        />
       </div>
 
-      <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4">
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="text-sm text-slate-600">
-            <p>
-              第 <span className="font-semibold text-slate-900">{pagination.page}</span> 页，共{" "}
-              <span className="font-semibold text-slate-900">{pagination.totalPages}</span> 页
-              <span className="ml-2 text-slate-500">
-                （共 {pagination.total} 条记录）
-              </span>
-            </p>
-          </div>
-
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-slate-600">
-                跳转到
-              </label>
-
-              <input
-                type="number"
-                min="1"
-                max={pagination.totalPages}
-                defaultValue={pagination.page}
-                onChange={(e) => {
-                  const pageNum = parseInt(
-                    e.target.value,
-                    10,
-                  );
-
-                  if (
-                    pageNum >= 1 &&
-                    pageNum <=
-                      pagination.totalPages
-                  ) {
-                    fetchList(pageNum);
-                  }
-                }}
-                disabled={loading}
-                className="w-16 rounded border border-slate-300 bg-white px-2 py-1 text-center text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-
-              <span className="text-sm text-slate-600">
-                页
-              </span>
-            </div>
-          )}
-        </div>
-
-        {pagination.totalPages > 1 && (
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() =>
-                  fetchList(1)
-                }
-                disabled={
-                  !pagination.hasPreviousPage ||
-                  loading
-                }
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-                title="首页"
-              >
-                首页
-              </button>
-
-              <button
-                onClick={() =>
-                  fetchList(
-                    pagination.page - 1,
-                  )
-                }
-                disabled={
-                  !pagination.hasPreviousPage ||
-                  loading
-                }
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-                title="上一页"
-              >
-                ← 上一页
-              </button>
-
-              <button
-                onClick={() =>
-                  fetchList(
-                    pagination.page + 1,
-                  )
-                }
-                disabled={
-                  !pagination.hasNextPage ||
-                  loading
-                }
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-                title="下一页"
-              >
-                下一页 →
-              </button>
-
-              <button
-                onClick={() =>
-                  fetchList(
-                    pagination.totalPages,
-                  )
-                }
-                disabled={
-                  !pagination.hasNextPage ||
-                  loading
-                }
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50 disabled:opacity-50"
-                title="末页"
-              >
-                末页
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">
-                每页显示
-              </span>
-
-              <select
-                value="20"
-                disabled
-                className="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-sm text-slate-600"
-                title="每页数量（当前固定为 20）"
-              >
-                <option value="20">20 条</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        <div className="text-xs text-slate-500">
-          {pagination.totalPages === 0
-            ? "暂无数据"
-            : pagination.hasNextPage
-              ? `还有 ${pagination.total - pagination.page * pagination.pageSize} 条记录`
-              : "已显示全部记录"}
-        </div>
-      </div>
     </div>
   );
 }

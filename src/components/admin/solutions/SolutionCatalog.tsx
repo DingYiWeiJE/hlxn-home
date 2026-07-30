@@ -12,7 +12,12 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTablePaginationProps,
+} from "@/components/admin/DataTable";
 
 type SolutionLocale = "zh" | "en";
 type SolutionStatus = "DRAFT" | "PUBLISHED";
@@ -175,6 +180,159 @@ export default function SolutionCatalog() {
     setKeyword(keywordInput.trim());
   }
 
+  const columns: DataTableColumn<SolutionItem>[] =
+    useMemo(
+      () => [
+        {
+          key: "name",
+          label: "名称",
+          render: (item) => (
+            <div>
+              <div className="font-semibold text-slate-900">
+                {item.name}
+              </div>
+              {item.translationKey ? (
+                <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
+                  <Languages className="h-3.5 w-3.5" />
+                  {item.translationKey}
+                </div>
+              ) : null}
+            </div>
+          ),
+        },
+        {
+          key: "locale",
+          label: "语言",
+          render: (item) => (
+            <span className="text-sm">
+              {item.locale === "zh"
+                ? "中文"
+                : "English"}
+            </span>
+          ),
+        },
+        {
+          key: "slug",
+          label: "Slug",
+          render: (item) => (
+            <p className="font-mono text-xs text-slate-500">
+              {item.slug}
+            </p>
+          ),
+        },
+        {
+          key: "status",
+          label: "状态",
+          render: (item) => (
+            <span
+              className={
+                item.status === "PUBLISHED"
+                  ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                  : "rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+              }
+            >
+              {item.status === "PUBLISHED"
+                ? "已发布"
+                : "草稿"}
+            </span>
+          ),
+        },
+        {
+          key: "sortOrder",
+          label: "排序",
+          render: (item) => (
+            <p className="text-sm">
+              {item.sortOrder}
+            </p>
+          ),
+        },
+        {
+          key: "counts",
+          label: "子项",
+          render: (item) => (
+            <p className="text-sm text-slate-500">
+              场景 {item.counts.usageScenarios} /
+              价值 {item.counts.customerValues}
+            </p>
+          ),
+        },
+        {
+          key: "dates",
+          label: "发布/更新",
+          render: (item) => (
+            <div className="text-xs leading-6 text-slate-500">
+              <div>发布：{formatDate(item.publishedAt)}</div>
+              <div>更新：{formatDate(item.updatedAt)}</div>
+            </div>
+          ),
+        },
+        {
+          key: "actions",
+          label: "操作",
+          className: "px-5 py-4 text-right",
+          render: (item) => (
+            <div className="flex flex-wrap justify-end gap-2">
+              {!deleted ? (
+                <>
+                  <Link
+                    href={`/admin/solutions/${item.id}/edit`}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" />
+                    编辑
+                  </Link>
+                  {item.status === "PUBLISHED" ? (
+                    <Link
+                      href={item.detailUrl}
+                      target="_blank"
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-blue-200 px-3 text-xs font-semibold text-blue-600 transition hover:bg-blue-50"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      公开页
+                    </Link>
+                  ) : null}
+                  <button
+                    type="button"
+                    disabled={
+                      mutatingId === item.id
+                    }
+                    onClick={() =>
+                      void mutateSolution(
+                        item,
+                        "delete",
+                      )
+                    }
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-red-200 px-3 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    删除
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  disabled={
+                    mutatingId === item.id
+                  }
+                  onClick={() =>
+                    void mutateSolution(
+                      item,
+                      "restore",
+                    )
+                  }
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-emerald-200 px-3 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  恢复
+                </button>
+              )}
+            </div>
+          ),
+        },
+      ],
+      [deleted, mutatingId],
+    );
+
   async function mutateSolution(item: SolutionItem, action: "delete" | "restore") {
     if (mutatingId) {
       return;
@@ -239,22 +397,33 @@ export default function SolutionCatalog() {
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="grid gap-3 lg:grid-cols-[1fr_150px_160px_150px_auto]">
-          <form onSubmit={handleSearch} className="relative">
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-5"
+        >
+          <label className="relative block sm:col-span-2 lg:col-span-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               value={keywordInput}
-              onChange={(event) => setKeywordInput(event.target.value)}
+              onChange={(event) =>
+                setKeywordInput(event.target.value)
+              }
               placeholder="搜索名称或 Slug"
               className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
-          </form>
+          </label>
           <select
             value={locale}
             onChange={(event) =>
-              setLocale(event.target.value === "ALL" ? "ALL" : event.target.value === "en" ? "en" : "zh")
+              setLocale(
+                event.target.value === "ALL"
+                  ? "ALL"
+                  : event.target.value === "en"
+                    ? "en"
+                    : "zh",
+              )
             }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm"
+            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
           >
             <option value="ALL">全部语言</option>
             <option value="zh">中文</option>
@@ -263,9 +432,15 @@ export default function SolutionCatalog() {
           <select
             value={status}
             onChange={(event) =>
-              setStatus(event.target.value === "ALL" ? "ALL" : event.target.value === "PUBLISHED" ? "PUBLISHED" : "DRAFT")
+              setStatus(
+                event.target.value === "ALL"
+                  ? "ALL"
+                  : event.target.value === "PUBLISHED"
+                    ? "PUBLISHED"
+                    : "DRAFT",
+              )
             }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm"
+            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
           >
             <option value="ALL">全部状态</option>
             <option value="DRAFT">草稿</option>
@@ -273,21 +448,25 @@ export default function SolutionCatalog() {
           </select>
           <select
             value={deleted ? "true" : "false"}
-            onChange={(event) => setDeleted(event.target.value === "true")}
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm"
+            onChange={(event) =>
+              setDeleted(event.target.value === "true")
+            }
+            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
           >
             <option value="false">正常数据</option>
             <option value="true">回收站</option>
           </select>
           <button
             type="button"
-            onClick={() => void loadItems(pagination.page)}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            onClick={() =>
+              void loadItems(pagination.page)
+            }
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 sm:col-span-2 lg:col-span-1"
           >
             <RefreshCw className="h-4 w-4" />
             刷新
           </button>
-        </div>
+        </form>
       </section>
 
       {error ? (
@@ -297,143 +476,14 @@ export default function SolutionCatalog() {
       ) : null}
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        {isLoading ? (
-          <div className="flex min-h-72 items-center justify-center gap-3 text-sm text-slate-500">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            正在加载
-          </div>
-        ) : items.length === 0 ? (
-          <div className="flex min-h-72 flex-col items-center justify-center px-6 text-center text-slate-500">
-            暂无解决方案
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-[1120px] w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-4">名称</th>
-                  <th className="px-5 py-4">语言</th>
-                  <th className="px-5 py-4">Slug</th>
-                  <th className="px-5 py-4">状态</th>
-                  <th className="px-5 py-4">排序</th>
-                  <th className="px-5 py-4">子项</th>
-                  <th className="px-5 py-4">发布/更新</th>
-                  <th className="px-5 py-4">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {items.map((item) => (
-                  <tr key={item.id} className="align-top">
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-slate-900">
-                        {item.name}
-                      </div>
-                      {item.translationKey ? (
-                        <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
-                          <Languages className="h-3.5 w-3.5" />
-                          {item.translationKey}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td className="px-5 py-4">{item.locale}</td>
-                    <td className="px-5 py-4 font-mono text-xs text-slate-500">
-                      {item.slug}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={
-                          item.status === "PUBLISHED"
-                            ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-                            : "rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
-                        }
-                      >
-                        {item.status === "PUBLISHED" ? "已发布" : "草稿"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">{item.sortOrder}</td>
-                    <td className="px-5 py-4 text-slate-500">
-                      场景 {item.counts.usageScenarios} / 价值{" "}
-                      {item.counts.customerValues}
-                    </td>
-                    <td className="px-5 py-4 text-xs leading-6 text-slate-500">
-                      <div>发布：{formatDate(item.publishedAt)}</div>
-                      <div>更新：{formatDate(item.updatedAt)}</div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        {!deleted ? (
-                          <>
-                            <Link
-                              href={`/admin/solutions/${item.id}/edit`}
-                              className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                            >
-                              <Edit3 className="h-3.5 w-3.5" />
-                              编辑
-                            </Link>
-                            {item.status === "PUBLISHED" ? (
-                              <Link
-                                href={item.detailUrl}
-                                target="_blank"
-                                className="inline-flex h-9 items-center gap-1 rounded-lg border border-blue-200 px-3 text-xs font-semibold text-blue-600 transition hover:bg-blue-50"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                公开页
-                              </Link>
-                            ) : null}
-                            <button
-                              type="button"
-                              disabled={mutatingId === item.id}
-                              onClick={() => void mutateSolution(item, "delete")}
-                              className="inline-flex h-9 items-center gap-1 rounded-lg border border-red-200 px-3 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              删除
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={mutatingId === item.id}
-                            onClick={() => void mutateSolution(item, "restore")}
-                            className="inline-flex h-9 items-center gap-1 rounded-lg border border-emerald-200 px-3 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
-                          >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                            恢复
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-500">
-            共 {pagination.total} 条，第 {pagination.page} /{" "}
-            {Math.max(pagination.totalPages, 1)} 页
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={!pagination.hasPreviousPage}
-              onClick={() => void loadItems(pagination.page - 1)}
-              className="h-10 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 disabled:opacity-40"
-            >
-              上一页
-            </button>
-            <button
-              type="button"
-              disabled={!pagination.hasNextPage}
-              onClick={() => void loadItems(pagination.page + 1)}
-              className="h-10 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white disabled:opacity-40"
-            >
-              下一页
-            </button>
-          </div>
-        </div>
+        <DataTable
+          data={items}
+          columns={columns}
+          isLoading={isLoading}
+          emptyMessage="暂无解决方案"
+          pagination={pagination}
+          onPageChange={loadItems}
+        />
       </section>
     </div>
   );

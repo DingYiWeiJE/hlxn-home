@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Edit3, Search } from "lucide-react";
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTablePaginationProps,
+} from "@/components/admin/DataTable";
 
 type User = {
   id: string;
@@ -36,7 +42,9 @@ export default function AdminUsersPage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<DataTablePaginationProps>({
+    page: 1,
+    pageSize: 10,
     total: 0,
     totalPages: 0,
     hasNextPage: false,
@@ -62,7 +70,10 @@ export default function AdminUsersPage() {
 
         const data = (await response.json()) as {
           success: boolean;
-          data?: { users: User[]; pagination: typeof pagination };
+          data?: {
+            users: User[];
+            pagination: DataTablePaginationProps;
+          };
         };
         const result = data.data;
 
@@ -72,19 +83,129 @@ export default function AdminUsersPage() {
         }
         setError("");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "加载失败");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "加载失败",
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadUsers();
+    void loadUsers();
   }, [router, page, search]);
+
+  const columns: DataTableColumn<User>[] =
+    useMemo(
+      () => [
+        {
+          key: "username",
+          label: "用户名",
+          render: (user) => (
+            <div>
+              <p className="font-medium text-slate-900">
+                {user.username}
+              </p>
+
+              {user.email && (
+                <p className="mt-1 text-sm text-slate-500">
+                  {user.email}
+                </p>
+              )}
+            </div>
+          ),
+        },
+        {
+          key: "role",
+          label: "角色",
+          render: (user) => (
+            <span
+              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                roleBadgeColors[user.role]
+              }`}
+            >
+              {roleLabels[user.role]}
+            </span>
+          ),
+        },
+        {
+          key: "status",
+          label: "状态",
+          render: (user) => (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                user.isActive
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  user.isActive
+                    ? "bg-emerald-500"
+                    : "bg-slate-400"
+                }`}
+              />
+              {user.isActive
+                ? "启用"
+                : "禁用"}
+            </span>
+          ),
+        },
+        {
+          key: "lastLogin",
+          label: "最后登录",
+          render: (user) => (
+            <p className="text-sm text-slate-600">
+              {user.lastLogin
+                ? new Date(
+                    user.lastLogin,
+                  ).toLocaleDateString(
+                    "zh-CN",
+                  )
+                : "—"}
+            </p>
+          ),
+        },
+        {
+          key: "createdAt",
+          label: "创建时间",
+          render: (user) => (
+            <p className="text-sm text-slate-600">
+              {new Date(
+                user.createdAt,
+              ).toLocaleDateString(
+                "zh-CN",
+              )}
+            </p>
+          ),
+        },
+        {
+          key: "actions",
+          label: "操作",
+          className: "px-4 py-3 text-right",
+          render: (user) => (
+            <div className="flex justify-end gap-2">
+              <Link
+                href={`/admin/users/${user.id}/edit`}
+                className="inline-flex items-center gap-1 rounded px-2 py-1 text-sm text-blue-600 hover:bg-blue-50"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Link>
+            </div>
+          ),
+        },
+      ],
+      [],
+    );
 
   if (isLoading) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="text-center text-slate-600">加载中...</div>
+        <div className="text-center text-slate-600">
+          加载中...
+        </div>
       </main>
     );
   }
@@ -92,105 +213,49 @@ export default function AdminUsersPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold">用户管理</h1>
-        <Link href="/admin/users/create" className="rounded-md bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700">
+        <h1 className="text-2xl font-semibold">
+          用户管理
+        </h1>
+
+        <Link
+          href="/admin/users/create"
+          className="rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+        >
           创建用户
         </Link>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
       )}
 
       <div className="mb-4">
-        <input
-          type="text"
-          placeholder="搜索用户名或邮箱..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+        <label className="relative block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="搜索用户名或邮箱..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          />
+        </label>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <DataTable
+          data={users}
+          columns={columns}
+          isLoading={isLoading}
+          emptyMessage="暂无用户"
+          pagination={pagination}
+          onPageChange={setPage}
         />
-      </div>
-
-      <div className="hidden overflow-hidden rounded-lg border border-slate-200 bg-white lg:block">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-600">
-              <tr>
-                <th className="px-4 py-3">用户名</th>
-                <th className="px-4 py-3">邮箱</th>
-                <th className="px-4 py-3">角色</th>
-                <th className="px-4 py-3">状态</th>
-                <th className="px-4 py-3">最后登录</th>
-                <th className="px-4 py-3">创建时间</th>
-                <th className="px-4 py-3">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 font-medium">{user.username}</td>
-                  <td className="px-4 py-3">{user.email || "-"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2 py-1 text-xs font-medium ${roleBadgeColors[user.role]}`}>
-                      {roleLabels[user.role]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={user.isActive ? "text-green-600" : "text-red-600"}>
-                      {user.isActive ? "活跃" : "已禁用"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "-"}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {new Date(user.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <Link href={`/admin/users/${user.id}/edit`} className="text-blue-600 hover:text-blue-700">
-                        编辑
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {users.length === 0 && (
-        <div className="rounded-lg border border-slate-200 bg-white px-4 py-12 text-center text-slate-500">
-          未找到用户
-        </div>
-      )}
-
-      {/* Pagination */}
-      <div className="mt-6 flex items-center justify-between">
-        <div className="text-sm text-slate-600">
-          共 {pagination.total} 个用户，第 {page} / {pagination.totalPages} 页
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setPage(p => p - 1)}
-            disabled={!pagination.hasPreviousPage}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:bg-slate-100"
-          >
-            上一页
-          </button>
-          <button
-            onClick={() => setPage(p => p + 1)}
-            disabled={!pagination.hasNextPage}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:bg-slate-100"
-          >
-            下一页
-          </button>
-        </div>
       </div>
     </main>
   );

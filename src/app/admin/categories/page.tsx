@@ -1,18 +1,22 @@
 "use client";
 
 import {
-  Check,
   ChevronDown,
-  Edit3,
   FolderTree,
   Loader2,
   Plus,
   RefreshCw,
   Search,
-  Trash2,
   X,
+  Check,
+  Edit3,
+  Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/admin/DataTable";
 
 type CategoryLevel = "LEVEL_ONE" | "LEVEL_TWO";
 
@@ -115,6 +119,9 @@ export default function AdminCategoriesPage() {
     useState<CategoryItem | null>(null);
   const [form, setForm] = useState<CategoryFormState>(emptyForm);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
+
   const loadCategories = useCallback(async () => {
     setIsLoading(true);
     setPageError("");
@@ -145,6 +152,10 @@ export default function AdminCategoriesPage() {
   useEffect(() => {
     void loadCategories();
   }, [loadCategories]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeLevel, keyword, selectedPrimaryId]);
 
   const primaryCategories = useMemo(
     () =>
@@ -227,6 +238,169 @@ export default function AdminCategoriesPage() {
     keyword,
     selectedPrimaryId,
   ]);
+
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredCategories.slice(startIndex, endIndex);
+  }, [filteredCategories, currentPage, pageSize]);
+
+  const pagination = useMemo(
+    () => ({
+      page: currentPage,
+      pageSize,
+      total: filteredCategories.length,
+      totalPages: Math.ceil(
+        filteredCategories.length / pageSize,
+      ),
+      hasNextPage:
+        currentPage <
+        Math.ceil(
+          filteredCategories.length / pageSize,
+        ),
+      hasPreviousPage: currentPage > 1,
+    }),
+    [filteredCategories.length, currentPage, pageSize],
+  );
+
+  function handlePageChange(page: number) {
+    setCurrentPage(page);
+  }
+
+  const columns: DataTableColumn<CategoryItem>[] =
+    useMemo(
+      () => [
+        {
+          key: "name",
+          label: "分类",
+          render: (category) => (
+            <div>
+              <div className="font-semibold text-slate-900">
+                {category.name}
+              </div>
+
+              <div className="mt-1 text-sm text-slate-500">
+                {category.nameEn}
+              </div>
+
+              <div className="mt-1 font-mono text-xs text-slate-400">
+                {category.slug}
+              </div>
+            </div>
+          ),
+        },
+        {
+          key: "level",
+          label: "层级",
+          render: (category) => (
+            <span
+              className={[
+                "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+                category.level === "LEVEL_ONE"
+                  ? "bg-violet-50 text-violet-700"
+                  : "bg-blue-50 text-blue-700",
+              ].join(" ")}
+            >
+              {category.level === "LEVEL_ONE"
+                ? "一级分类"
+                : "二级分类"}
+            </span>
+          ),
+        },
+        {
+          key: "parent",
+          label: "所属一级分类",
+          render: (category) => (
+            <p className="text-sm text-slate-600">
+              {category.parent?.name ?? "—"}
+            </p>
+          ),
+        },
+        {
+          key: "counts",
+          label: "关联内容",
+          render: (category) => (
+            <div className="text-sm text-slate-700">
+              {category.level === "LEVEL_ONE"
+                ? `${category.counts.children} 个二级分类`
+                : `${category.counts.products} 个产品`}
+            </div>
+          ),
+        },
+        {
+          key: "sortOrder",
+          label: "排序",
+          render: (category) => (
+            <p className="text-sm tabular-nums text-slate-600">
+              {category.sortOrder}
+            </p>
+          ),
+        },
+        {
+          key: "enabled",
+          label: "状态",
+          render: (category) => (
+            <span
+              className={[
+                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                category.enabled
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-500",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "h-1.5 w-1.5 rounded-full",
+                  category.enabled
+                    ? "bg-emerald-500"
+                    : "bg-slate-400",
+                ].join(" ")}
+              />
+
+              {category.enabled ? "启用" : "停用"}
+            </span>
+          ),
+        },
+        {
+          key: "actions",
+          label: "操作",
+          className: "px-5 py-4 text-right",
+          render: (category) => (
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  openEditForm(category)
+                }
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                aria-label={`编辑 ${category.name}`}
+              >
+                <Edit3 className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  void handleDelete(category)
+                }
+                disabled={
+                  deletingId === category.id
+                }
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                aria-label={`删除 ${category.name}`}
+              >
+                {deletingId === category.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          ),
+        },
+      ],
+      [deletingId],
+    );
 
   function openCreateForm(level: CategoryLevel = "LEVEL_ONE") {
     setEditingCategory(null);
@@ -443,7 +617,7 @@ export default function AdminCategoriesPage() {
       </section>
 
       <section className="mt-7 rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-200 p-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-4 border-b border-slate-200 p-5">
           <div className="flex flex-wrap gap-2">
             {[
               { value: "ALL", label: "全部分类" },
@@ -483,7 +657,7 @@ export default function AdminCategoriesPage() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <label className="relative block">
+            <label className="relative block flex-1 sm:flex-initial">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
               <input
@@ -496,7 +670,7 @@ export default function AdminCategoriesPage() {
               />
             </label>
 
-            <label className="relative block">
+            <label className="relative block flex-1 sm:flex-initial">
               <select
                 value={selectedPrimaryId}
                 onChange={(event) =>
@@ -527,151 +701,14 @@ export default function AdminCategoriesPage() {
           </div>
         ) : null}
 
-        {isLoading ? (
-          <div className="flex min-h-80 items-center justify-center">
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-500">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              正在加载产品分类
-            </div>
-          </div>
-        ) : filteredCategories.length === 0 ? (
-          <div className="flex min-h-80 flex-col items-center justify-center px-5 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-              <FolderTree className="h-7 w-7" />
-            </div>
-
-            <h2 className="mt-4 text-base font-semibold text-slate-800">
-              暂无符合条件的分类
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              可以调整筛选条件或创建新的产品分类。
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
-                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="px-5 py-4">分类</th>
-                  <th className="px-5 py-4">层级</th>
-                  <th className="px-5 py-4">所属一级分类</th>
-                  <th className="px-5 py-4">关联内容</th>
-                  <th className="px-5 py-4">排序</th>
-                  <th className="px-5 py-4">状态</th>
-                  <th className="px-5 py-4 text-right">操作</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {filteredCategories.map((category) => (
-                  <tr
-                    key={category.id}
-                    className="transition hover:bg-slate-50/80"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-slate-900">
-                        {category.name}
-                      </div>
-
-                      <div className="mt-1 text-sm text-slate-500">
-                        {category.nameEn}
-                      </div>
-
-                      <div className="mt-1 font-mono text-xs text-slate-400">
-                        {category.slug}
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={[
-                          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-                          category.level === "LEVEL_ONE"
-                            ? "bg-violet-50 text-violet-700"
-                            : "bg-blue-50 text-blue-700",
-                        ].join(" ")}
-                      >
-                        {category.level === "LEVEL_ONE"
-                          ? "一级分类"
-                          : "二级分类"}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-sm text-slate-600">
-                      {category.parent?.name ?? "—"}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <div className="text-sm text-slate-700">
-                        {category.level === "LEVEL_ONE"
-                          ? `${category.counts.children} 个二级分类`
-                          : `${category.counts.products} 个产品`}
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-4 text-sm tabular-nums text-slate-600">
-                      {category.sortOrder}
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <span
-                        className={[
-                          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-                          category.enabled
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-500",
-                        ].join(" ")}
-                      >
-                        <span
-                          className={[
-                            "h-1.5 w-1.5 rounded-full",
-                            category.enabled
-                              ? "bg-emerald-500"
-                              : "bg-slate-400",
-                          ].join(" ")}
-                        />
-
-                        {category.enabled ? "启用" : "停用"}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openEditForm(category)
-                          }
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                          aria-label={`编辑 ${category.name}`}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            void handleDelete(category)
-                          }
-                          disabled={deletingId === category.id}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                          aria-label={`删除 ${category.name}`}
-                        >
-                          {deletingId === category.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable
+          data={paginatedCategories}
+          columns={columns}
+          isLoading={isLoading}
+          emptyMessage="暂无符合条件的分类"
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
       </section>
 
       {isFormOpen ? (
