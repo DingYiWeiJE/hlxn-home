@@ -403,10 +403,10 @@ export default function ApplicationCaseListPage() {
         </Link>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
-        <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-5">
+          <label className="relative block sm:col-span-2 lg:col-span-2">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <input
               type="text"
@@ -422,54 +422,74 @@ export default function ApplicationCaseListPage() {
                 }
               }}
               placeholder="搜索标题或 Slug..."
-              className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
-          </div>
+          </label>
 
-          <select
-            value={selectedLocale}
-            onChange={(e) => {
-              setSelectedLocale(
-                e.target
-                  .value as ApplicationCaseLocale | ""
-              );
+          <label className="relative block">
+            <select
+              value={selectedLocale}
+              onChange={(e) => {
+                setSelectedLocale(
+                  e.target
+                    .value as ApplicationCaseLocale | ""
+                );
 
-              fetchList(1);
-            }}
-            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-          >
-            <option value="">全部语言</option>
+                fetchList(1);
+              }}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">全部语言</option>
 
-            <option value="zh">中文</option>
+              <option value="zh">中文</option>
 
-            <option value="en">英文</option>
-          </select>
+              <option value="en">英文</option>
+            </select>
+
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
+
+          <label className="relative block">
+            <select
+              value={
+                showDeleted
+                  ? "true"
+                  : "false"
+              }
+              onChange={(e) => {
+                setShowDeleted(
+                  e.target.value ===
+                    "true",
+                );
+
+                fetchList(1);
+              }}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="false">
+                正常数据
+              </option>
+
+              <option value="true">
+                回收站
+              </option>
+            </select>
+
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
 
           <button
-            onClick={() => {
-              setShowDeleted(
-                !showDeleted,
-              );
-
-              fetchList(1);
-            }}
-            className="h-11 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition hover:bg-slate-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-          >
-            {showDeleted
-              ? "回收站"
-              : "正常数据"}
-          </button>
-
-          <button
-            onClick={() => void fetchList(1)}
+            onClick={() =>
+              void fetchList(1)
+            }
             disabled={loading}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition hover:bg-slate-50 disabled:opacity-50 sm:col-span-2 lg:col-span-1"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none transition hover:bg-slate-50 disabled:opacity-50"
           >
             <RefreshCw className="h-4 w-4" />
             刷新
           </button>
         </div>
-      </div>
+      </section>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
         <DataTable

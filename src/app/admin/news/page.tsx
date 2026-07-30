@@ -2,6 +2,15 @@
 
 import Link from "next/link";
 import {
+  ChevronDown,
+  Edit3,
+  Eye,
+  Loader2,
+  RefreshCw,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
+import {
   useCallback,
   useEffect,
   useState,
@@ -415,79 +424,87 @@ export default function AdminNewsPage() {
 
         <form
           onSubmit={submitSearch}
-          className="grid gap-3 p-4 md:grid-cols-[minmax(220px,1fr)_160px_160px_auto]"
+          className="flex flex-col gap-3 border-t border-slate-200 p-5 sm:grid sm:grid-cols-2 lg:grid-cols-5"
         >
-          <input
-            value={keywordInput}
-            onChange={(event) =>
-              setKeywordInput(
-                event.target.value,
-              )
-            }
-            placeholder="搜索标题、摘要或正文"
-            className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
+          <label className="relative block sm:col-span-2 lg:col-span-2">
+            <input
+              value={keywordInput}
+              onChange={(event) =>
+                setKeywordInput(
+                  event.target.value,
+                )
+              }
+              placeholder="搜索标题或摘要"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </label>
 
-          <select
-            value={locale}
-            onChange={(event) => {
-              setLocale(
-                event.target
-                  .value as
-                  | ""
-                  | NewsLocale,
-              );
-              setPage(1);
-            }}
-            className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="">
-              全部语言
-            </option>
-            <option value="zh">
-              中文
-            </option>
+          <label className="relative block">
+            <select
+              value={locale}
+              onChange={(event) => {
+                setLocale(
+                  (event.target
+                    .value as "") ||
+                  (event.target.value as NewsLocale),
+                );
+                setPage(1);
+              }}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">
+                全部语言
+              </option>
+              <option value="zh">
+                中文
+              </option>
             <option value="en">
               English
             </option>
-          </select>
+            </select>
 
-          <select
-            value={status}
-            onChange={(event) => {
-              setStatus(
-                event.target
-                  .value as
-                  | ""
-                  | NewsStatus,
-              );
-              setPage(1);
-            }}
-            className="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option value="">
-              全部状态
-            </option>
-            <option value="DRAFT">
-              草稿
-            </option>
-            <option value="PUBLISHED">
-              已发布
-            </option>
-          </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
 
-          <div className="flex gap-2">
+          <label className="relative block">
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(
+                  (event.target
+                    .value as "") ||
+                  (event.target.value as NewsStatus),
+                );
+                setPage(1);
+              }}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">
+                全部状态
+              </option>
+              <option value="DRAFT">
+                草稿
+              </option>
+              <option value="PUBLISHED">
+                已发布
+              </option>
+            </select>
+
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
+
+          <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
             <button
               type="submit"
-              className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm text-white transition hover:bg-slate-700"
+              className="h-11 flex-1 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
             >
-              搜索
+              查询
             </button>
 
             <button
               type="button"
               onClick={resetFilters}
-              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
+              className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               重置
             </button>

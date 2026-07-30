@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronDown,
   Edit3,
   Eye,
   Languages,
@@ -409,59 +410,72 @@ export default function SolutionCatalog() {
                 setKeywordInput(event.target.value)
               }
               placeholder="搜索名称或 Slug"
-              className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </label>
-          <select
-            value={locale}
-            onChange={(event) =>
-              setLocale(
-                event.target.value === "ALL"
-                  ? "ALL"
-                  : event.target.value === "en"
-                    ? "en"
-                    : "zh",
-              )
-            }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-          >
-            <option value="ALL">全部语言</option>
-            <option value="zh">中文</option>
-            <option value="en">English</option>
-          </select>
-          <select
-            value={status}
-            onChange={(event) =>
-              setStatus(
-                event.target.value === "ALL"
-                  ? "ALL"
-                  : event.target.value === "PUBLISHED"
-                    ? "PUBLISHED"
-                    : "DRAFT",
-              )
-            }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-          >
-            <option value="ALL">全部状态</option>
-            <option value="DRAFT">草稿</option>
-            <option value="PUBLISHED">已发布</option>
-          </select>
-          <select
-            value={deleted ? "true" : "false"}
-            onChange={(event) =>
-              setDeleted(event.target.value === "true")
-            }
-            className="h-11 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-          >
-            <option value="false">正常数据</option>
-            <option value="true">回收站</option>
-          </select>
+
+          <label className="relative block">
+            <select
+              value={locale}
+              onChange={(event) =>
+                setLocale(
+                  event.target.value === "ALL"
+                    ? "ALL"
+                    : event.target.value === "en"
+                      ? "en"
+                      : "zh",
+                )
+              }
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="ALL">全部语言</option>
+              <option value="zh">中文</option>
+              <option value="en">English</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
+
+          <label className="relative block">
+            <select
+              value={status}
+              onChange={(event) =>
+                setStatus(
+                  event.target.value === "ALL"
+                    ? "ALL"
+                    : event.target.value === "PUBLISHED"
+                      ? "PUBLISHED"
+                      : "DRAFT",
+                )
+              }
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="ALL">全部状态</option>
+              <option value="DRAFT">草稿</option>
+              <option value="PUBLISHED">已发布</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
+
+          <label className="relative block">
+            <select
+              value={deleted ? "true" : "false"}
+              onChange={(event) =>
+                setDeleted(event.target.value === "true")
+              }
+              className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="false">正常数据</option>
+              <option value="true">回收站</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </label>
+
           <button
             type="button"
             onClick={() =>
               void loadItems(pagination.page)
             }
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 sm:col-span-2 lg:col-span-1"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
             <RefreshCw className="h-4 w-4" />
             刷新
