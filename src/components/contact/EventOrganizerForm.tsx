@@ -74,7 +74,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || "提交失败");
+        throw new Error(error.error?.message || t("common.error"));
       }
 
       setSubmitStatus("success");
@@ -94,7 +94,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
     } catch (error) {
       setSubmitStatus("error");
       setErrorMessage(
-        error instanceof Error ? error.message : "提交出错，请稍后重试"
+        error instanceof Error ? error.message : t("common.submissionError")
       );
     } finally {
       setIsSubmitting(false);
@@ -117,7 +117,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
 
       {/* 活动信息 */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">活动信息</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.eventInfo")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -207,7 +207,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
 
       {/* 联系方式 */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">联系方式</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.contactWay")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -268,7 +268,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2463c5]"
             >
-              <option value="">请选择</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               <option value="EXHIBITION">
                 {t("options.eventPurposes.EXHIBITION")}
               </option>
@@ -320,7 +320,7 @@ export default function EventOrganizerForm({ locale }: EventOrganizerFormProps) 
           />
           <span className="text-sm text-gray-600">
             {t("common.privacy")}
-            <a href="/privacy" className="text-[#2463c5] hover:underline">
+            <a href={`/${locale}/privacy`} className="text-[#2463c5] hover:underline">
               {t("common.privacyPolicy")}
             </a>
           </span>

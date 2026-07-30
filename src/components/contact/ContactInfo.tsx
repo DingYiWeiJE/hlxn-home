@@ -68,13 +68,13 @@ export default function ContactInfo() {
 
       <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">
-          总部地址
+          {t("contactInfo.headquartersAddress")}
         </h3>
         <p className="text-gray-700 leading-relaxed">
-          湖北省武汉市武昌区友谊大道与铁机路交汇处北侧武汉中交大厦B座九层
+          {t("contactInfo.address")}
         </p>
         <p className="text-gray-700 mt-2">
-          周一至周五 09:00 - 18:00
+          {t("contactInfo.businessHours")}
         </p>
       </div>
     </div>

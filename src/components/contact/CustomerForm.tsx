@@ -143,7 +143,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
 
       {/* 企业信息 */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">企业信息</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.companyInfo")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -198,7 +198,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
 
       {/* 联系方式 */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">联系方式</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.contactWay")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -271,7 +271,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
 
       {/* 应用信息 */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">应用信息</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.applicationInfo")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -284,7 +284,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2463c5]"
             >
-              <option value="">请选择</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               <option value="PASSENGER_VEHICLE">
                 {t("options.applicationTypes.PASSENGER_VEHICLE")}
               </option>
@@ -313,7 +313,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2463c5]"
             >
-              <option value="">请选择</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               <option value="CELL">{t("options.productTypes.CELL")}</option>
               <option value="MODULE">
                 {t("options.productTypes.MODULE")}
@@ -338,7 +338,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2463c5]"
             >
-              <option value="">请选择</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               <option value="TERNARY">
                 {t("options.chemicalSystems.TERNARY")}
               </option>
@@ -361,7 +361,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2463c5]"
             >
-              <option value="">请选择</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               <option value="PRISMATIC">
                 {t("options.cellShapes.PRISMATIC")}
               </option>
@@ -375,7 +375,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
 
       {/* 技术需求 */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">技术需求</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("common.technicalRequirements")}</h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -487,7 +487,7 @@ export default function CustomerForm({ locale }: CustomerFormProps) {
           />
           <span className="text-sm text-gray-600">
             {t("common.privacy")}
-            <a href="/privacy" className="text-[#2463c5] hover:underline">
+            <a href={`/${locale}/privacy`} className="text-[#2463c5] hover:underline">
               {t("common.privacyPolicy")}
             </a>
           </span>

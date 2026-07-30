@@ -354,6 +354,91 @@
       }
     ]
   },
+  "privacyPolicy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新时间",
+    "introduction": "汉理新能源（北京）科技有限责任公司尊重您的隐私权。本隐私政策说明了我们如何收集、使用、共享和保护您的信息。",
+    "sections": {
+      "information": {
+        "title": "1. 我们收集的信息",
+        "content": [
+          "个人标识信息：当您联系我们或填写表单时，我们可能收集您的姓名、电子邮件地址、电话号码、公司名称、职位等信息。",
+          "业务信息：关于您的企业、运营场景、产品需求等信息。",
+          "使用信息：关于您如何与我们的网站互动的信息，包括IP地址、浏览器类型、访问时间等。",
+          "通信信息：您与我们之间的任何通信、查询或反馈。"
+        ]
+      },
+      "usage": {
+        "title": "2. 我们如何使用您的信息",
+        "content": [
+          "为您提供请求的产品和服务",
+          "回应您的查询和请求",
+          "改进我们的网站和服务质量",
+          "向您发送关于我们产品、服务或特别优惠的市场推广信息（如您已选择接收）",
+          "遵守法律和法规要求",
+          "防止欺诈并保护网站安全"
+        ]
+      },
+      "sharing": {
+        "title": "3. 信息共享",
+        "content": [
+          "我们不会向第三方出售或租赁您的个人信息。",
+          "我们可能与以下方面共享信息：",
+          "• 执行我们业务职能的服务提供商（如电子邮件提供商、数据分析提供商）",
+          "• 执法机构或政府机构，如法律要求或为保护我们的权利",
+          "• 业务合作伙伴，以便向您提供联合产品或服务（征得您同意的情况下）",
+          "• 继承人或受让人，在合并、收购或资产出售的情况下"
+        ]
+      },
+      "security": {
+        "title": "4. 数据安全",
+        "content": [
+          "我们实施合理的技术、物理和管理措施来保护您的个人信息免受未授权的访问、更改、泄露或破坏。",
+          "然而，互联网上的数据传输不是100%安全的。虽然我们尽一切努力保护您的信息，但我们无法保证绝对的安全。"
+        ]
+      },
+      "retention": {
+        "title": "5. 数据保留",
+        "content": [
+          "我们将根据收集您信息的目的以及法律要求的时间长度保留您的信息。",
+          "如果不再需要信息，我们将予以删除或匿名处理。"
+        ]
+      },
+      "rights": {
+        "title": "6. 您的权利",
+        "content": [
+          "访问权：您有权要求获得我们持有的关于您的个人信息的副本。",
+          "更正权：如果您认为我们持有的关于您的任何信息不准确，您可以要求更正。",
+          "删除权：在某些情况下，您可以要求删除您的个人信息。",
+          "选择退出权：您可以选择退出接收市场推广通信。"
+        ]
+      },
+      "cookies": {
+        "title": "7. Cookie 和追踪技术",
+        "content": [
+          "我们的网站使用 Cookie 和类似的追踪技术来改进您的用户体验。",
+          "您可以通过浏览器设置控制 Cookie。禁用 Cookie 可能会影响网站的某些功能。"
+        ]
+      },
+      "changes": {
+        "title": "8. 隐私政策的更改",
+        "content": [
+          "我们可能会不时更新本隐私政策。我们将在网站上发布任何更改，并在适用的情况下更新「最后更新时间」。"
+        ]
+      },
+      "contact": {
+        "title": "9. 联系我们",
+        "content": [
+          "如果您对本隐私政策或我们的隐私实践有任何疑问，请通过以下方式与我们联系：",
+          "电话：027-86660081",
+          "邮箱反馈：反馈邮箱",
+          "地址：湖北省武汉市武昌区武汉中央大厦B座九层"
+        ]
+      }
+    },
+    "backToContact": "返回联系页面",
+    "acceptanceNote": "使用本网站即表示您接受本隐私政策。如果您不同意本政策的任何部分，请不要使用本网站。"
+  },
   "contactPage": {
     "tabs": {
       "customer": "我是客户",
@@ -394,7 +479,13 @@
       "chargingHours": "充电时间（小时）",
       "chargingHoursPlaceholder": "可选：请输入充电时间",
       "otherRequirements": "其他需求描述",
-      "otherRequirementsPlaceholder": "可选：请输入其他需求（最多2000字）"
+      "otherRequirementsPlaceholder": "可选：请输入其他需求（最多2000字）",
+      "companyInfo": "企业信息",
+      "contactWay": "联系方式",
+      "applicationInfo": "应用信息",
+      "technicalRequirements": "技术需求",
+      "eventInfo": "活动信息",
+      "activityDetails": "活动详情"
     },
     "media": {
       "title": "媒体咨询",
@@ -441,7 +532,10 @@
       "feedbackPhone": "反馈电话",
       "feedbackEmail": "反馈邮箱",
       "antiCorruption": "反腐监察电话",
-      "antiCorruptionEmail": "反腐监察邮箱"
+      "antiCorruptionEmail": "反腐监察邮箱",
+      "headquartersAddress": "总部地址",
+      "address": "湖北省武汉市武昌区友谊大道与铁机路交汇处北侧武汉中交大厦B座九层",
+      "businessHours": "周一至周五 09:00 - 18:00"
     },
     "common": {
       "requiredField": "必填项",
@@ -456,7 +550,17 @@
       "success": "感谢您的提交！我们会尽快与您联系。",
       "error": "提交失败，请检查表单信息后重试",
       "phoneOrEmailRequired": "电话和邮箱至少填写一个",
-      "endDateAfterStart": "结束日期不能早于开始日期"
+      "endDateAfterStart": "结束日期不能早于开始日期",
+      "pleaseSelect": "请选择",
+      "companyInfo": "企业信息",
+      "contactWay": "联系方式",
+      "applicationInfo": "应用信息",
+      "technicalRequirements": "技术需求",
+      "eventInfo": "活动信息",
+      "activityDetails": "活动详情",
+      "submissionError": "提交出错，请稍后重试",
+      "mediaInfo": "媒体信息",
+      "detailedRequirements": "详细需求"
     },
     "options": {
       "applicationTypes": {
