@@ -1,50 +1,42 @@
-﻿import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/admin-auth/require-admin";
+import { prisma } from "@/lib/prisma";
+import { ApiError } from "@/lib/api/errors";
 import { getUserAuthConfig } from "@/lib/user-auth/config";
 import { getUserSession } from "@/lib/user-auth/session";
 import type { UserRole } from "@prisma/client";
 
 export type AdminActor = {
-  userId: string | null;
-  role: UserRole | "LEGACY_ADMIN";
-  legacyAdmin: boolean;
+  userId: string;
+  role: UserRole;
+  legacyAdmin: false;
 };
 
 export async function requireAdminActor(): Promise<AdminActor> {
-  try {
-    const { sessionSecret } = getUserAuthConfig();
-    const session = await getUserSession(sessionSecret);
+  const { sessionSecret } = getUserAuthConfig();
+  const session = await getUserSession(sessionSecret);
 
-    if (session) {
-      const user = await prisma.user.findFirst({
-        where: {
-          id: session.sub,
-          isActive: true,
-          deletedAt: null,
-        },
-        select: {
-          id: true,
-          role: true,
-        },
-      });
-
-      if (user) {
-        return {
-          userId: user.id,
-          role: user.role,
-          legacyAdmin: false,
-        };
-      }
-    }
-  } catch {
-    // 新用户鉴权不可用时，继续兼容旧版管理员鉴权
+  if (!session) {
+    throw new ApiError("UNAUTHORIZED", "请先登录", 401);
   }
 
-  await requireAdmin();
+  const user = await prisma.user.findFirst({
+    where: {
+      id: session.sub,
+      isActive: true,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError("UNAUTHORIZED", "请先登录", 401);
+  }
 
   return {
-    userId: null,
-    role: "LEGACY_ADMIN",
-    legacyAdmin: true,
+    userId: user.id,
+    role: user.role,
+    legacyAdmin: false,
   };
 }

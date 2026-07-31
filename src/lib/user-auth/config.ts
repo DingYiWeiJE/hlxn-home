@@ -1,15 +1,15 @@
 import { ApiError } from "@/lib/api/errors";
 
 export function getUserAuthConfig() {
-  const sessionSecret = process.env.USER_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  const sessionSecret = process.env.USER_SESSION_SECRET;
   const ttlSeconds = Number(process.env.USER_SESSION_TTL_SECONDS ?? "28800");
 
   if (!sessionSecret || sessionSecret.length < 32) {
-    throw new ApiError("INTERNAL_SERVER_ERROR", "用户认证尚未正确配置", 500);
+    throw new ApiError("INTERNAL_SERVER_ERROR", "USER_SESSION_SECRET is not configured", 500);
   }
 
   if (!Number.isInteger(ttlSeconds) || ttlSeconds <= 0) {
-    throw new ApiError("INTERNAL_SERVER_ERROR", "用户会话配置不正确", 500);
+    throw new ApiError("INTERNAL_SERVER_ERROR", "USER_SESSION_TTL_SECONDS is invalid", 500);
   }
 
   return {
