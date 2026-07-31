@@ -186,8 +186,12 @@ export default function StrategicLayoutMap() {
         trigger: "item",
         borderWidth: 0,
         backgroundColor: "rgba(255,255,255,0.96)",
+        confine: true,
+        alwaysShowContent: false,
+        transitionDuration: 0.2,
+        padding: [12, 12, 12, 12],
         extraCssText:
-          "box-shadow:0 18px 42px rgba(15,39,66,0.16);border-radius:8px;padding:12px;",
+          "box-shadow:0 18px 42px rgba(15,39,66,0.16);border-radius:8px;max-height:500px;overflow-y:auto;",
         formatter: (params) => {
           const itemParams = Array.isArray(params) ? params[0] : (params as TooltipParams);
           const data = getTooltipData(itemParams.data);
@@ -320,14 +324,17 @@ export default function StrategicLayoutMap() {
     <section className="bg-[#f8fcff] py-16 lg:py-24">
       <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#5f8fc5]">
-            Strategic Network
-          </p>
           <h2 className="mt-3 text-2xl font-bold tracking-wide text-[#2365c4] md:text-3xl lg:text-4xl">
             {ui.worldTitle}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[#52677f] md:text-base">
-            {ui.intro}
+            公司以武汉为核心运营与研发总部，统筹全局战略规划、技术创新、市场营销及
+全产业链协同，构建“国内全域布局、海外双支点联动”的一体化发展格局。国内以华
+中地区武汉为核心牵引，以湖北智造基地为产业支撑，以华北、华南及西部区域总部
+为前沿技术科研创新与零碳技术攻坚应用平台，以华东镇江基地为整船集成与落地
+保障，形成“研发一制造一集成一应用一服务”的全链条协同体系，实现技术研究、产
+业转化与场景应用的完整闭环。海外已设立亚太地区运营与服务中心，同步筹备欧美
+地区技术与合规中心，持续助力船舶动力领域的零碳转型和高质量发展
           </p>
         </div>
 

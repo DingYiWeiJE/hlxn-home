@@ -10,6 +10,10 @@ export type StrategicLocation = {
   longitude: number;
   latitude: number;
   establishment?: string;
+  description?: string;
+  image?: string;
+  staff?: number;
+  businessScope?: string[];
 };
 
 export type RegionMetric = {
@@ -62,6 +66,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 114.0579,
     latitude: 22.5431,
     establishment: "2010",
+    description: "全球总部，拥有完整的研发、生产、销售和管理体系",
+    image: "/images/locations/shenzhen-hq.jpeg",
+    staff: 500,
+    businessScope: ["研发", "生产", "销售", "管理"],
   },
   {
     id: "branch-beijing",
@@ -75,6 +83,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 116.4074,
     latitude: 39.9042,
     establishment: "2015",
+    description: "华北地区运营中心，负责北方市场开发和客户服务",
+    image: "/images/locations/beijing-branch.jpeg",
+    staff: 120,
+    businessScope: ["销售", "客户服务", "技术支持"],
   },
   {
     id: "marketing-shanghai",
@@ -88,6 +100,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 121.4737,
     latitude: 31.2304,
     establishment: "2016",
+    description: "华东地区营销总部，致力于长三角地区市场拓展",
+    staff: 85,
+    businessScope: ["市场营销", "品牌推广", "客户管理"],
   },
   {
     id: "service-guangzhou",
@@ -101,6 +116,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 113.2644,
     latitude: 23.1291,
     establishment: "2018",
+    description: "粤港澳大湾区服务枢纽，提供24小时技术支持",
+    image: "/images/locations/guangzhou-service.jpeg",
+    staff: 95,
+    businessScope: ["技术支持", "维修维护", "售后服务"],
   },
   {
     id: "branch-nanjing",
@@ -114,6 +133,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 118.7969,
     latitude: 32.0603,
     establishment: "2017",
+    description: "江苏省区域总部，服务长江经济带中部地区",
+    staff: 75,
+    businessScope: ["销售", "技术服务", "产品推广"],
   },
   {
     id: "branch-shanghai",
@@ -127,6 +149,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 121.5,
     latitude: 31.3,
     establishment: "2016",
+    description: "上海运营中心，汇集研发和销售力量",
+    image: "/images/locations/shanghai-branch.jpeg",
+    staff: 150,
+    businessScope: ["研发中心", "销售中心", "客户中心"],
   },
   {
     id: "regional-singapore",
@@ -139,6 +165,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 103.8198,
     latitude: 1.3521,
     establishment: "2019",
+    description: "东南亚运营中心，辐射整个东南亚市场",
+    staff: 60,
+    businessScope: ["区域销售", "市场拓展", "客户支持"],
   },
   {
     id: "service-singapore",
@@ -151,6 +180,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 103.82,
     latitude: 1.36,
     establishment: "2020",
+    description: "东南亚技术服务中心，提供全方位技术支持",
+    staff: 40,
+    businessScope: ["技术服务", "产品维护", "培训服务"],
   },
   {
     id: "branch-losangeles",
@@ -163,6 +195,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: -118.2437,
     latitude: 34.0522,
     establishment: "2020",
+    description: "北美西部运营中心，覆盖加州和周边地区",
+    image: "/images/locations/losangeles-branch.jpeg",
+    staff: 110,
+    businessScope: ["销售", "产品演示", "客户服务"],
   },
   {
     id: "marketing-losangeles",
@@ -175,6 +211,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: -118.24,
     latitude: 34.06,
     establishment: "2021",
+    description: "西美地区营销总部，致力于品牌推广",
+    staff: 55,
+    businessScope: ["营销推广", "品牌建设", "市场研究"],
   },
   {
     id: "marketing-newyork",
@@ -187,6 +226,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: -74.0060,
     latitude: 40.7128,
     establishment: "2022",
+    description: "北美东部营销中心，连接华尔街和投资机构",
+    staff: 65,
+    businessScope: ["战略营销", "投资关系", "媒体宣传"],
   },
   {
     id: "service-chicago",
@@ -199,6 +241,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: -87.6298,
     latitude: 41.8781,
     establishment: "2021",
+    description: "北美中部技术服务中心，覆盖中西部地区",
+    staff: 50,
+    businessScope: ["技术支持", "产品维修", "故障排除"],
   },
   {
     id: "branch-tokyo",
@@ -211,6 +256,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 139.6917,
     latitude: 35.6762,
     establishment: "2021",
+    description: "日本运营总部，深耕日本市场和技术创新",
+    image: "/images/locations/tokyo-branch.jpeg",
+    staff: 130,
+    businessScope: ["销售", "技术研发", "客户支持"],
   },
   {
     id: "service-tokyo",
@@ -223,6 +272,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 139.69,
     latitude: 35.68,
     establishment: "2022",
+    description: "日本售后服务中心，提供高质量技术服务",
+    staff: 45,
+    businessScope: ["售后服务", "技术培训", "产品支持"],
   },
   {
     id: "branch-berlin",
@@ -235,6 +287,10 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 13.4050,
     latitude: 52.5200,
     establishment: "2022",
+    description: "欧洲中心总部，连接欧洲各国市场",
+    image: "/images/locations/berlin-branch.jpeg",
+    staff: 140,
+    businessScope: ["欧洲销售", "技术创新", "合规管理"],
   },
   {
     id: "marketing-berlin",
@@ -247,6 +303,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: 13.41,
     latitude: 52.53,
     establishment: "2023",
+    description: "欧洲营销中心，聚焦欧洲品牌建设",
+    staff: 70,
+    businessScope: ["欧洲营销", "品牌策略", "市场分析"],
   },
   {
     id: "service-london",
@@ -259,5 +318,9 @@ export const strategicLocations: StrategicLocation[] = [
     longitude: -0.1278,
     latitude: 51.5074,
     establishment: "2023",
+    description: "英伦地区技术服务中心，覆盖英国和爱尔兰",
+    image: "/images/locations/london-service.jpeg",
+    staff: 55,
+    businessScope: ["技术支持", "产品维护", "客户服务"],
   },
 ];
