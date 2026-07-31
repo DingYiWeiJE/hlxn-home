@@ -303,6 +303,18 @@ enum ApplicationCaseLocale {
   en
 }
 
+enum StrategicLocationType {
+  HEADQUARTERS
+  BRANCH
+  MARKETING
+  SERVICE
+}
+
+enum StrategicLocationStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Product {
   id         String        @id @default(cuid())
   name       String
@@ -505,6 +517,59 @@ model ApplicationCase {
   @@index([deletedAt, caseDate])
   @@index([createdAt])
   @@index([imageAssetId])
+}
+
+// ============================================================
+// 战略布局网点相关
+// ============================================================
+
+model StrategicLocation {
+  id   String @id @default(cuid())
+  code String @unique
+
+  nameZh String
+  nameEn String
+
+  type StrategicLocationType
+
+  countryCode   String
+  countryNameZh String
+  countryNameEn String
+
+  provinceNameZh String?
+  provinceNameEn String?
+  cityNameZh     String?
+  cityNameEn     String?
+
+  longitude Decimal @db.Decimal(10, 6)
+  latitude  Decimal @db.Decimal(10, 6)
+
+  establishment String?
+  staff         Int?
+
+  descriptionZh String? @db.Text
+  descriptionEn String? @db.Text
+
+  businessScopeZh Json @default("[]")
+  businessScopeEn Json @default("[]")
+
+  imageUrl String? @db.Text
+
+  status    StrategicLocationStatus @default(DRAFT)
+  enabled   Boolean                 @default(true)
+  sortOrder Int                     @default(0)
+
+  createdById String?
+  updatedById String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status, enabled, sortOrder])
+  @@index([countryCode, status, enabled])
+  @@index([provinceNameZh])
+  @@index([deletedAt])
 }
 
 // ============================================================

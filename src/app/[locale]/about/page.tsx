@@ -137,7 +137,7 @@ async function AboutContent({
           }}
         />
         <PatentSection locale={locale} />
-        <StrategicLayoutMapSection />
+        <StrategicLayoutMapSection locale={locale} />
         <MapSection locale={locale} />
       </main>
       <Footer locale={locale} />

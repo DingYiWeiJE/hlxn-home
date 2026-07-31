@@ -29,6 +29,24 @@ const ui = {
   markers: "网点位置",
 } as const;
 
+const uiByLocale = {
+  zh: ui,
+  en: {
+    loadingMap: "Loading map...",
+    loadingData: "Loading map data...",
+    loadingError: "Failed to load map files. Please check GeoJSON files under public/maps.",
+    worldTitle: "Global Strategic Layout",
+    chinaTitle: "China Strategic Layout",
+    singaporeTitle: "Singapore Strategic Layout",
+    intro:
+      "The map shows the distribution of headquarters, branches, marketing offices and service centers across global strategic locations.",
+    locationCount: "Location count",
+    high: "High",
+    low: "Low",
+    markers: "Locations",
+  },
+} as const;
+
 const ReactECharts = dynamic<EChartsReactProps>(
   () => import("echarts-for-react").then((mod) => mod.default),
   {
@@ -92,17 +110,33 @@ const levelMeta: Record<
   },
 };
 
-function getVisibleLocations(level: MapLevel) {
+type Locale = "zh" | "en";
+
+type PublicStrategicLocationsResponse =
+  | {
+      success: true;
+      data: {
+        items: StrategicLocation[];
+      };
+    }
+  | {
+      success: false;
+      error?: {
+        message?: string;
+      };
+    };
+
+function getVisibleLocations(level: MapLevel, locations: StrategicLocation[]) {
   if (level === "world") {
-    return strategicLocations;
+    return locations;
   }
 
-  return strategicLocations.filter((location) => {
+  return locations.filter((location) => {
     if (level === "china") {
-      return location.country === "China";
+      return location.countryCode === "CN" || location.country === "China";
     }
 
-    return location.country === "Singapore";
+    return location.countryCode === "SG" || location.country === "Singapore";
   });
 }
 
@@ -110,11 +144,56 @@ function buildProvinceMetrics(locations: StrategicLocation[]) {
   const counts = new Map<string, number>();
 
   locations.forEach((location) => {
-    if (!location.province) {
+    const provinceName = location.provinceZh ?? location.province;
+
+    if (!provinceName) {
       return;
     }
 
-    counts.set(location.province, (counts.get(location.province) ?? 0) + 1);
+    counts.set(provinceName, (counts.get(provinceName) ?? 0) + 1);
+  });
+
+  return Array.from(counts, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+}
+
+function getWorldMapName(location: StrategicLocation) {
+  if (location.countryCode === "CN" || location.country === "China") {
+    return "China";
+  }
+
+  if (location.countryCode === "SG" || location.country === "Singapore") {
+    return "Singapore";
+  }
+
+  if (
+    location.countryCode === "US" ||
+    location.country === "United States" ||
+    location.country === "United States of America"
+  ) {
+    return "United States of America";
+  }
+
+  if (location.countryCode === "JP" || location.country === "Japan") {
+    return "Japan";
+  }
+
+  if (location.countryCode === "DE" || location.country === "Germany") {
+    return "Germany";
+  }
+
+  if (location.countryCode === "GB" || location.country === "United Kingdom") {
+    return "United Kingdom";
+  }
+
+  return location.country;
+}
+
+function buildCountryMetrics(locations: StrategicLocation[]) {
+  const counts = new Map<string, number>();
+
+  locations.forEach((location) => {
+    const countryName = getWorldMapName(location);
+    counts.set(countryName, (counts.get(countryName) ?? 0) + 1);
   });
 
   return Array.from(counts, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
@@ -132,14 +211,45 @@ function getMaxMetricValue(metrics: RegionMetric[]) {
   return Math.max(...metrics.map((item) => item.value), 1);
 }
 
-export default function StrategicLayoutMap() {
+export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string }) {
+  const normalizedLocale: Locale = locale === "en" ? "en" : "zh";
+  const currentUi = uiByLocale[normalizedLocale];
   const [level, setLevel] = useState<MapLevel>("world");
+  const [locations, setLocations] = useState<StrategicLocation[]>(strategicLocations);
   const [registeredMaps, setRegisteredMaps] = useState<Partial<Record<MapLevel, MapGeoJson>>>({});
   const [mapError, setMapError] = useState<{ level: MapLevel; message: string } | null>(null);
   const chinaProvinceMetrics = useMemo(
-    () => buildProvinceMetrics(strategicLocations.filter((location) => location.country === "China")),
-    [],
+    () => buildProvinceMetrics(locations.filter((location) => location.countryCode === "CN" || location.country === "China")),
+    [locations],
   );
+  const countryMetrics = useMemo(() => buildCountryMetrics(locations), [locations]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch(`/api/strategic-locations?locale=${normalizedLocale}`, {
+      cache: "no-store",
+      credentials: "include",
+    })
+      .then(async (response) => {
+        const result = (await response.json()) as PublicStrategicLocationsResponse;
+
+        if (!active || !response.ok || !result.success || result.data.items.length === 0) {
+          return;
+        }
+
+        setLocations(result.data.items);
+      })
+      .catch(() => {
+        if (active) {
+          setLocations(strategicLocations);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [normalizedLocale]);
 
   useEffect(() => {
     let active = true;
@@ -172,9 +282,15 @@ export default function StrategicLayoutMap() {
 
   const option = useMemo<EChartsOption>(() => {
     const meta = levelMeta[level];
-    const locations = getVisibleLocations(level);
-    const mapMetrics = level === "china" ? chinaProvinceMetrics : regionMetrics;
+    const visibleLocations = getVisibleLocations(level, locations);
+    const mapMetrics = level === "china" ? chinaProvinceMetrics : countryMetrics;
     const maxValue = getMaxMetricValue(mapMetrics);
+    const title =
+      level === "china"
+        ? currentUi.chinaTitle
+        : level === "singapore"
+          ? currentUi.singaporeTitle
+          : currentUi.worldTitle;
 
     return {
       backgroundColor: "transparent",
@@ -198,7 +314,7 @@ export default function StrategicLayoutMap() {
           }
 
           const value = typeof data?.value === "number" ? data.value : 0;
-          return `<div style="font-family:Arial,Helvetica,sans-serif;color:#0f2742;"><strong>${itemParams.name ?? ""}</strong><br/><span style="color:#49647d;font-size:12px;">${ui.locationCount}：${value}</span></div>`;
+          return `<div style="font-family:Arial,Helvetica,sans-serif;color:#0f2742;"><strong>${itemParams.name ?? ""}</strong><br/><span style="color:#49647d;font-size:12px;">${currentUi.locationCount}：${value}</span></div>`;
         },
       },
       visualMap: {
@@ -208,7 +324,7 @@ export default function StrategicLayoutMap() {
         bottom: 22,
         itemWidth: 12,
         itemHeight: 92,
-        text: [ui.high, ui.low],
+        text: [currentUi.high, currentUi.low],
         calculable: false,
         show: level === "world",
         seriesIndex: 0,
@@ -249,7 +365,7 @@ export default function StrategicLayoutMap() {
       },
       series: [
         {
-          name: meta.title,
+          name: title,
           type: "map",
           geoIndex: 0,
           map: meta.mapName,
@@ -270,10 +386,10 @@ export default function StrategicLayoutMap() {
           },
         },
         {
-          name: ui.markers,
+          name: currentUi.markers,
           type: "scatter",
           coordinateSystem: "geo",
-          data: buildScatterData(locations),
+          data: buildScatterData(visibleLocations),
           symbolSize: 13,
           itemStyle: {
             color: "#06b6d4",
@@ -292,7 +408,7 @@ export default function StrategicLayoutMap() {
         },
       ],
     };
-  }, [chinaProvinceMetrics, level]);
+  }, [chinaProvinceMetrics, countryMetrics, currentUi, level, locations]);
 
   const handleMapClick = useCallback((params: ECElementEvent) => {
     if (params.seriesType === "scatter") {
@@ -330,16 +446,17 @@ export default function StrategicLayoutMap() {
       <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
         <div className="max-w-3xl">
           <h2 className="mt-3 text-2xl font-bold tracking-wide text-[#2365c4] md:text-3xl lg:text-4xl">
-            {ui.worldTitle}
+            {currentUi.worldTitle}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[#52677f] md:text-base">
-            公司以武汉为核心运营与研发总部，统筹全局战略规划、技术创新、市场营销及
+            {normalizedLocale === "zh" ? <>公司以武汉为核心运营与研发总部，统筹全局战略规划、技术创新、市场营销及
 全产业链协同，构建“国内全域布局、海外双支点联动”的一体化发展格局。国内以华
 中地区武汉为核心牵引，以湖北智造基地为产业支撑，以华北、华南及西部区域总部
 为前沿技术科研创新与零碳技术攻坚应用平台，以华东镇江基地为整船集成与落地
 保障，形成“研发一制造一集成一应用一服务”的全链条协同体系，实现技术研究、产
 业转化与场景应用的完整闭环。海外已设立亚太地区运营与服务中心，同步筹备欧美
 地区技术与合规中心，持续助力船舶动力领域的零碳转型和高质量发展
+            </> : currentUi.intro}
           </p>
         </div>
 
@@ -347,11 +464,11 @@ export default function StrategicLayoutMap() {
           <div className="relative h-[600px] min-h-[520px] w-full">
             {mapError?.level === level ? (
               <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[#b42318]">
-                {ui.loadingError}
+                {currentUi.loadingError}
               </div>
             ) : !registeredMaps[level] ? (
               <div className="flex h-full items-center justify-center text-sm text-[#60758a]">
-                {ui.loadingData}
+                {currentUi.loadingData}
               </div>
             ) : (
               <ReactECharts

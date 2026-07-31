@@ -3,9 +3,11 @@ export type StrategicLocation = {
   name: string;
   type: "headquarters" | "branch" | "marketing" | "service";
   typeLabel: string;
-  country: "China" | "Singapore" | "United States" | "Japan" | "Germany" | "United Kingdom";
+  country: string;
+  countryCode?: string;
   countryLabel: string;
   province?: string;
+  provinceZh?: string;
   city?: string;
   longitude: number;
   latitude: number;

@@ -6,6 +6,7 @@ import {
   Images,
   LayoutDashboard,
   LogOut,
+  MapPinned,
   Menu,
   MessageSquare,
   Newspaper,
@@ -74,6 +75,12 @@ const navigationItems: NavigationItem[] = [
     label: "公司发展历程",
     description: "管理 About 页面时间轴内容",
     icon: History,
+  },
+  {
+    href: "/admin/strategic-locations",
+    label: "战略布局管理",
+    description: "管理全球战略网点和中英文展示内容",
+    icon: MapPinned,
   },
   // {
   //   href: "/admin/assets",

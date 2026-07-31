@@ -18,6 +18,6 @@ const StrategicLayoutMap = dynamic(
   },
 );
 
-export default function StrategicLayoutMapSection() {
-  return <StrategicLayoutMap />;
+export default function StrategicLayoutMapSection({ locale = "zh" }: { locale?: string }) {
+  return <StrategicLayoutMap locale={locale} />;
 }
