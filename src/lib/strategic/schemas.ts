@@ -51,6 +51,8 @@ const strategicLocationFieldsSchema = z.object({
   provinceNameEn: nullableTrimmedString(80),
   cityNameZh: nullableTrimmedString(80),
   cityNameEn: nullableTrimmedString(80),
+  addressZh: nullableTrimmedString(500),
+  addressEn: nullableTrimmedString(500),
   longitude: longitudeSchema,
   latitude: latitudeSchema,
   establishment: nullableTrimmedString(40),

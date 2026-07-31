@@ -149,6 +149,8 @@ enum MediaAssetPurpose {
 
   NEWS_COVER
   NEWS_CONTENT
+
+  STRATEGIC_LOCATION_IMAGE
 }
 
 model MediaAsset {
@@ -540,6 +542,9 @@ model StrategicLocation {
   provinceNameEn String?
   cityNameZh     String?
   cityNameEn     String?
+
+  addressZh String?
+  addressEn String?
 
   longitude Decimal @db.Decimal(10, 6)
   latitude  Decimal @db.Decimal(10, 6)

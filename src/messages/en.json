@@ -449,6 +449,17 @@
     "backToContact": "Back to Contact Page",
     "acceptanceNote": "By using this website, you accept this Privacy Policy. If you do not agree with any part of this policy, please do not use this website."
   },
+  "strategicTooltip": {
+    "type": "Type",
+    "country": "Country",
+    "province": "Province",
+    "city": "City",
+    "establishment": "Established",
+    "staff": "Staff Count",
+    "staffUnit": "people",
+    "businessScope": "Business Scope",
+    "scopeSeparator": ", "
+  },
   "contactPage": {
     "tabs": {
       "customer": "Customer Inquiry",

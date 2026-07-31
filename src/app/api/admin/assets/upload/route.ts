@@ -29,6 +29,9 @@ const imagePurposeValues = [
   "SOLUTION_CUSTOMER_VALUE",
   "APPLICATION_CASE_IMAGE",
   "COMPANY_HISTORY_IMAGE",
+  "NEWS_COVER",
+  "NEWS_CONTENT",
+  "STRATEGIC_LOCATION_IMAGE",
 ] as const;
 
 const formSchema = z.object({

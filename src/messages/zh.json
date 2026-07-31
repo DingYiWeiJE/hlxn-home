@@ -449,6 +449,17 @@
     "backToContact": "返回联系页面",
     "acceptanceNote": "使用本网站即表示您接受本隐私政策。如果您不同意本政策的任何部分，请不要使用本网站。"
   },
+  "strategicTooltip": {
+    "type": "类型",
+    "country": "国家",
+    "province": "省份",
+    "city": "城市",
+    "establishment": "成立年份",
+    "staff": "员工数",
+    "staffUnit": "人",
+    "businessScope": "业务范围",
+    "scopeSeparator": "、"
+  },
   "contactPage": {
     "tabs": {
       "customer": "我是客户",

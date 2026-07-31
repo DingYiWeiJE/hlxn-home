@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "MediaAssetPurpose" ADD VALUE 'STRATEGIC_LOCATION_IMAGE';

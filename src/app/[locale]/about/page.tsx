@@ -307,19 +307,6 @@ async function MapSection({ locale }: { locale: string }) {
 
   return (
     <>
-    <section className="bg-white py-16">
-        <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
-          <div className="flex justify-center">
-            <Image
-              src="/images/about/map.png"
-              alt="Company Map"
-              width={1440}
-              height={600}
-              className="w-full h-auto"
-            />
-          </div>
-        </div>
-      </section>
       <section className="bg-[#e7f6ff] py-16 lg:py-24">
         <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="text-center">

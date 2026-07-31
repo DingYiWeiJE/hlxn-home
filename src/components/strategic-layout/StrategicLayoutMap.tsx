@@ -6,7 +6,7 @@ import * as echarts from "echarts";
 import type { EChartsOption, EChartsType } from "echarts";
 import type { EChartsReactProps } from "echarts-for-react";
 import type { ECElementEvent } from "echarts/core";
-import { renderStrategicTooltip } from "./StrategicTooltip";
+import { renderStrategicTooltip, type TooltipLabels } from "./StrategicTooltip";
 import { loadMapGeoJson, type MapGeoJson, type MapLevel } from "./mapLoader";
 import {
   regionMetrics,
@@ -22,7 +22,13 @@ const ui = {
   worldTitle: "全球战略布局",
   chinaTitle: "中国战略布局",
   singaporeTitle: "新加坡战略布局",
-  intro: "基于 Mock 数据展示全球分公司、营销分部等网点分布，支持点击中国或新加坡查看详细网点信息。",
+  intro: `公司以武汉为核心运营与研发总部，统筹全局战略规划、技术创新、市场营销及
+全产业链协同，构建“国内全域布局、海外双支点联动”的一体化发展格局。国内以华
+中地区武汉为核心牵引，以湖北智造基地为产业支撑，以华北、华南及西部区域总部
+为前沿技术科研创新与零碳技术攻坚应用平台，以华东镇江基地为整船集成与落地
+保障，形成“研发一制造一集成一应用一服务”的全链条协同体系，实现技术研究、产
+业转化与场景应用的完整闭环。海外已设立亚太地区运营与服务中心，同步筹备欧美
+地区技术与合规中心，持续助力船舶动力领域的零碳转型和高质量发展`,
   locationCount: "网点数量",
   high: "高",
   low: "低",
@@ -38,14 +44,40 @@ const uiByLocale = {
     worldTitle: "Global Strategic Layout",
     chinaTitle: "China Strategic Layout",
     singaporeTitle: "Singapore Strategic Layout",
-    intro:
-      "The map shows the distribution of headquarters, branches, marketing offices and service centers across global strategic locations.",
+    intro:`With Wuhan serving as the corporate core for headquarters operations and R&D, the Company oversees overall strategic planning, technological innovation, marketing management and cross-industry chain collaboration, establishing an integrated development framework featuring nationwide domestic deployment plus dual overseas pivot coordination.
+Domestically, Wuhan in Central China acts as the primary driving hub, supported by Hubei Intelligent Manufacturing Base as the industrial backbone. Regional headquarters in North China, South China and Western China function as frontline platforms for cutting-edge scientific research, technological innovation and the development & deployment of zero-carbon technologies. The Zhenjiang Base in East China undertakes vessel assembly and on-site implementation support. This layout forms a full-spectrum collaborative system covering research & development – manufacturing – assembly – application – services, delivering a closed-loop mechanism that links technological research, industrial commercialization and scenario-based implementation.
+On the overseas front, the Company has launched an Asia-Pacific operation and service center, while proceeding with preparations for technology and compliance centers across Europe and the Americas. These global arrangements consistently underpin the zero-carbon transition and high-quality advancement within the marine power industry.`,
     locationCount: "Location count",
     high: "High",
     low: "Low",
     markers: "Locations",
   },
 } as const;
+
+const tooltipLabelsByLocale: Record<Locale, TooltipLabels> = {
+  zh: {
+    type: "类型",
+    country: "国家",
+    province: "省份",
+    city: "城市",
+    establishment: "成立年份",
+    staff: "员工数",
+    staffUnit: "人",
+    businessScope: "业务范围",
+    scopeSeparator: "、",
+  },
+  en: {
+    type: "Type",
+    country: "Country",
+    province: "Province",
+    city: "City",
+    establishment: "Established",
+    staff: "Staff Count",
+    staffUnit: "people",
+    businessScope: "Business Scope",
+    scopeSeparator: ", ",
+  },
+};
 
 const ReactECharts = dynamic<EChartsReactProps>(
   () => import("echarts-for-react").then((mod) => mod.default),
@@ -291,6 +323,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
         : level === "singapore"
           ? currentUi.singaporeTitle
           : currentUi.worldTitle;
+    const tooltipLabels = tooltipLabelsByLocale[normalizedLocale];
 
     return {
       backgroundColor: "transparent",
@@ -310,7 +343,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
           const data = getTooltipData(itemParams.data);
 
           if (data?.location) {
-            return renderStrategicTooltip(data.location);
+            return renderStrategicTooltip(data.location, tooltipLabels);
           }
 
           const value = typeof data?.value === "number" ? data.value : 0;
@@ -408,7 +441,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
         },
       ],
     };
-  }, [chinaProvinceMetrics, countryMetrics, currentUi, level, locations]);
+  }, [chinaProvinceMetrics, countryMetrics, currentUi, level, locations, normalizedLocale]);
 
   const handleMapClick = useCallback((params: ECElementEvent) => {
     if (params.seriesType === "scatter") {
@@ -449,13 +482,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
             {currentUi.worldTitle}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[#52677f] md:text-base">
-            {normalizedLocale === "zh" ? <>公司以武汉为核心运营与研发总部，统筹全局战略规划、技术创新、市场营销及
-全产业链协同，构建“国内全域布局、海外双支点联动”的一体化发展格局。国内以华
-中地区武汉为核心牵引，以湖北智造基地为产业支撑，以华北、华南及西部区域总部
-为前沿技术科研创新与零碳技术攻坚应用平台，以华东镇江基地为整船集成与落地
-保障，形成“研发一制造一集成一应用一服务”的全链条协同体系，实现技术研究、产
-业转化与场景应用的完整闭环。海外已设立亚太地区运营与服务中心，同步筹备欧美
-地区技术与合规中心，持续助力船舶动力领域的零碳转型和高质量发展
+            {normalizedLocale === "zh" ? <>
             </> : currentUi.intro}
           </p>
         </div>
