@@ -6,7 +6,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import CompanyHistorySection from "@/components/about/CompanyHistorySection";
-import CustomerDistributionMapSection from "@/components/customer-map/CustomerDistributionMapSection";
 import StrategicLayoutMapSection from "@/components/strategic-layout/StrategicLayoutMapSection";
 import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
@@ -138,7 +137,6 @@ async function AboutContent({
           }}
         />
         <PatentSection locale={locale} />
-        <CustomerDistributionMapSection />
         <StrategicLayoutMapSection />
         <MapSection locale={locale} />
       </main>

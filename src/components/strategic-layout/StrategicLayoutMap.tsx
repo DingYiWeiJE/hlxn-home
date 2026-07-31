@@ -8,7 +8,7 @@ import type { EChartsReactProps } from "echarts-for-react";
 import type { ECElementEvent } from "echarts/core";
 import { ChevronRight } from "lucide-react";
 import { renderStrategicTooltip } from "./StrategicTooltip";
-import { loadMapGeoJson, type MapGeoJson, type MapLevel } from "../customer-map/mapLoader";
+import { loadMapGeoJson, type MapGeoJson, type MapLevel } from "./mapLoader";
 import {
   regionMetrics,
   strategicLocations,
