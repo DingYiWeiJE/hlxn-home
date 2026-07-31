@@ -3,16 +3,14 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as echarts from "echarts";
-import type { EChartsOption } from "echarts";
+import type { EChartsOption, EChartsType } from "echarts";
 import type { EChartsReactProps } from "echarts-for-react";
 import type { ECElementEvent } from "echarts/core";
-import { ChevronRight } from "lucide-react";
 import { renderStrategicTooltip } from "./StrategicTooltip";
 import { loadMapGeoJson, type MapGeoJson, type MapLevel } from "./mapLoader";
 import {
   regionMetrics,
   strategicLocations,
-  names,
   type StrategicLocation,
   type RegionMetric,
 } from "./strategicLayoutData";
@@ -25,13 +23,10 @@ const ui = {
   chinaTitle: "中国战略布局",
   singaporeTitle: "新加坡战略布局",
   intro: "基于 Mock 数据展示全球分公司、营销分部等网点分布，支持点击中国或新加坡查看详细网点信息。",
-  world: "全球",
   locationCount: "网点数量",
   high: "高",
   low: "低",
   markers: "网点位置",
-  breadcrumbLabel: "战略布局地图层级",
-  back: "返回上一级",
 } as const;
 
 const ReactECharts = dynamic<EChartsReactProps>(
@@ -45,11 +40,6 @@ const ReactECharts = dynamic<EChartsReactProps>(
     ),
   },
 );
-
-type BreadcrumbItem = {
-  label: string;
-  level: MapLevel;
-};
 
 type TooltipParams = {
   name?: string;
@@ -102,18 +92,6 @@ const levelMeta: Record<
   },
 };
 
-const breadcrumbsByLevel: Record<MapLevel, BreadcrumbItem[]> = {
-  world: [{ label: ui.world, level: "world" }],
-  china: [
-    { label: ui.world, level: "world" },
-    { label: names.china, level: "china" },
-  ],
-  singapore: [
-    { label: ui.world, level: "world" },
-    { label: names.singapore, level: "singapore" },
-  ],
-};
-
 function getVisibleLocations(level: MapLevel) {
   if (level === "world") {
     return strategicLocations;
@@ -126,6 +104,20 @@ function getVisibleLocations(level: MapLevel) {
 
     return location.country === "Singapore";
   });
+}
+
+function buildProvinceMetrics(locations: StrategicLocation[]) {
+  const counts = new Map<string, number>();
+
+  locations.forEach((location) => {
+    if (!location.province) {
+      return;
+    }
+
+    counts.set(location.province, (counts.get(location.province) ?? 0) + 1);
+  });
+
+  return Array.from(counts, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 }
 
 function buildScatterData(locations: StrategicLocation[]) {
@@ -144,6 +136,10 @@ export default function StrategicLayoutMap() {
   const [level, setLevel] = useState<MapLevel>("world");
   const [registeredMaps, setRegisteredMaps] = useState<Partial<Record<MapLevel, MapGeoJson>>>({});
   const [mapError, setMapError] = useState<{ level: MapLevel; message: string } | null>(null);
+  const chinaProvinceMetrics = useMemo(
+    () => buildProvinceMetrics(strategicLocations.filter((location) => location.country === "China")),
+    [],
+  );
 
   useEffect(() => {
     let active = true;
@@ -177,7 +173,8 @@ export default function StrategicLayoutMap() {
   const option = useMemo<EChartsOption>(() => {
     const meta = levelMeta[level];
     const locations = getVisibleLocations(level);
-    const maxValue = getMaxMetricValue(regionMetrics);
+    const mapMetrics = level === "china" ? chinaProvinceMetrics : regionMetrics;
+    const maxValue = getMaxMetricValue(mapMetrics);
 
     return {
       backgroundColor: "transparent",
@@ -256,7 +253,7 @@ export default function StrategicLayoutMap() {
           type: "map",
           geoIndex: 0,
           map: meta.mapName,
-          data: meta.metrics,
+          data: level === "china" ? chinaProvinceMetrics : meta.metrics,
           itemStyle: {
             areaColor: "#eef6fb",
             borderColor: "#ffffff",
@@ -295,7 +292,7 @@ export default function StrategicLayoutMap() {
         },
       ],
     };
-  }, [level]);
+  }, [chinaProvinceMetrics, level]);
 
   const handleMapClick = useCallback((params: ECElementEvent) => {
     if (params.seriesType === "scatter") {
@@ -320,6 +317,14 @@ export default function StrategicLayoutMap() {
     [handleMapClick],
   );
 
+  const handleChartReady = useCallback((chart: EChartsType) => {
+    chart.getZr().on("click", (event: { target?: unknown }) => {
+      if (!event.target) {
+        setLevel((currentLevel) => (currentLevel === "world" ? currentLevel : "world"));
+      }
+    });
+  }, []);
+
   return (
     <section className="bg-[#f8fcff] py-16 lg:py-24">
       <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
@@ -339,42 +344,6 @@ export default function StrategicLayoutMap() {
         </div>
 
         <div className="mt-10 overflow-hidden rounded-lg border border-[#d9ebf8] bg-[#f8fcff] shadow-[0_24px_70px_rgba(20,73,128,0.10)]">
-          <div className="flex flex-col gap-4 border-b border-[#d9ebf8] bg-white px-5 py-4 md:flex-row md:items-center md:justify-between lg:px-7">
-            <nav aria-label={ui.breadcrumbLabel} className="flex flex-wrap items-center gap-2 text-sm">
-              {breadcrumbsByLevel[level].map((item, index, items) => {
-                const isLast = index === items.length - 1;
-
-                return (
-                  <span key={item.level} className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={isLast}
-                      onClick={() => setLevel(item.level)}
-                      className={`rounded px-2.5 py-1 transition ${
-                        isLast
-                          ? "cursor-default bg-[#eaf4fc] font-semibold text-[#2365c4]"
-                          : "text-[#60758a] hover:bg-[#f1f7fc] hover:text-[#2365c4]"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                    {!isLast && <ChevronRight className="h-4 w-4 text-[#9ab1c8]" aria-hidden="true" />}
-                  </span>
-                );
-              })}
-            </nav>
-
-            {level !== "world" && (
-              <button
-                type="button"
-                onClick={() => setLevel("world")}
-                className="w-fit rounded border border-[#b9d7ee] px-3 py-1.5 text-sm font-semibold text-[#2365c4] transition hover:bg-[#eef7fe]"
-              >
-                {ui.back}
-              </button>
-            )}
-          </div>
-
           <div className="relative h-[600px] min-h-[520px] w-full">
             {mapError?.level === level ? (
               <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[#b42318]">
@@ -389,6 +358,7 @@ export default function StrategicLayoutMap() {
                 echarts={echarts}
                 option={option}
                 onEvents={onEvents}
+                onChartReady={handleChartReady}
                 notMerge
                 lazyUpdate
                 style={{ width: "100%", height: "100%" }}
