@@ -1,0 +1,198 @@
+export type CustomerLocation = {
+  id: string;
+  name: string;
+  country: "China" | "Singapore" | "United States" | "Japan" | "Germany" | "United Kingdom";
+  countryLabel: string;
+  province?: string;
+  city?: string;
+  longitude: number;
+  latitude: number;
+  image?: string;
+};
+
+export type RegionMetric = {
+  name: string;
+  value: number;
+};
+
+export const names = {
+  customerA: "\u5ba2\u6237A",
+  customerB: "\u5ba2\u6237B",
+  customerC: "\u5ba2\u6237C",
+  customerD: "\u5ba2\u6237D",
+  customerE: "\u5ba2\u6237E",
+  customerF: "\u5ba2\u6237F",
+  customerG: "\u5ba2\u6237G",
+  customerH: "\u5ba2\u6237H",
+  customerI: "\u5ba2\u6237I",
+  customerJ: "\u5ba2\u6237J",
+  customerK: "\u5ba2\u6237K",
+  customerL: "\u5ba2\u6237L",
+  customerM: "\u5ba2\u6237M",
+  china: "\u4e2d\u56fd",
+  singapore: "\u65b0\u52a0\u5761",
+  unitedStates: "\u7f8e\u56fd",
+  japan: "\u65e5\u672c",
+  germany: "\u5fb7\u56fd",
+  unitedKingdom: "\u82f1\u56fd",
+  guangdong: "\u5e7f\u4e1c\u7701",
+  jiangsu: "\u6c5f\u82cf\u7701",
+  shanghai: "\u4e0a\u6d77\u5e02",
+  zhejiang: "\u6d59\u6c5f\u7701",
+  beijing: "\u5317\u4eac\u5e02",
+  hubei: "\u6e56\u5317\u7701",
+  shenzhen: "\u6df1\u5733\u5e02",
+  guangzhou: "\u5e7f\u5dde\u5e02",
+  dongguan: "\u4e1c\u839e\u5e02",
+  foshan: "\u4f5b\u5c71\u5e02",
+  huizhou: "\u60e0\u5dde\u5e02",
+  nanjing: "\u5357\u4eac\u5e02",
+  losAngeles: "\u6d1b\u6749\u77f6",
+  tokyo: "\u4e1c\u4eac",
+  osaka: "\u5927\u962a",
+  berlin: "\u67cf\u6797",
+  munich: "\u6155\u5c3c\u9ed1",
+  london: "\u4f26\u6566",
+  manchester: "\u66fc\u5f7b\u65af\u7279",
+} as const;
+
+export const countryMetrics: RegionMetric[] = [
+  { name: "China", value: 20 },
+  { name: "United States of America", value: 8 },
+  { name: "Japan", value: 6 },
+  { name: "Germany", value: 5 },
+  { name: "United Kingdom", value: 4 },
+  { name: "Singapore", value: 3 },
+];
+
+export const customerLocations: CustomerLocation[] = [
+  {
+    id: "customer-a",
+    name: names.customerA,
+    country: "China",
+    countryLabel: names.china,
+    province: names.guangdong,
+    city: names.shenzhen,
+    longitude: 114.0579,
+    latitude: 22.5431,
+    image: "/images/about/showcase-1.jpeg",
+  },
+  {
+    id: "customer-b",
+    name: names.customerB,
+    country: "China",
+    countryLabel: names.china,
+    province: names.guangdong,
+    city: names.guangzhou,
+    longitude: 113.2644,
+    latitude: 23.1291,
+    image: "/images/about/showcase-2.jpeg",
+  },
+  {
+    id: "customer-c",
+    name: names.customerC,
+    country: "China",
+    countryLabel: names.china,
+    province: names.guangdong,
+    city: names.dongguan,
+    longitude: 113.7518,
+    latitude: 23.0207,
+  },
+  {
+    id: "customer-d",
+    name: names.customerD,
+    country: "China",
+    countryLabel: names.china,
+    province: names.jiangsu,
+    city: names.nanjing,
+    longitude: 118.7969,
+    latitude: 32.0603,
+  },
+  {
+    id: "customer-e",
+    name: names.customerE,
+    country: "China",
+    countryLabel: names.china,
+    province: names.shanghai,
+    city: names.shanghai,
+    longitude: 121.4737,
+    latitude: 31.2304,
+    image: "/images/about/showcase-3.jpeg",
+  },
+  {
+    id: "customer-f",
+    name: names.customerF,
+    country: "Singapore",
+    countryLabel: names.singapore,
+    city: names.singapore,
+    longitude: 103.8198,
+    latitude: 1.3521,
+    image: "/images/about/showcase-4.jpeg",
+  },
+  {
+    id: "customer-g",
+    name: names.customerG,
+    country: "United States",
+    countryLabel: names.unitedStates,
+    city: names.losAngeles,
+    longitude: -118.2437,
+    latitude: 34.0522,
+  },
+  {
+    id: "customer-h",
+    name: names.customerH,
+    country: "Japan",
+    countryLabel: names.japan,
+    city: names.tokyo,
+    longitude: 139.6917,
+    latitude: 35.6762,
+    image: "/images/about/showcase-5.jpeg",
+  },
+  {
+    id: "customer-i",
+    name: names.customerI,
+    country: "Japan",
+    countryLabel: names.japan,
+    city: names.osaka,
+    longitude: 135.5023,
+    latitude: 34.6937,
+  },
+  {
+    id: "customer-j",
+    name: names.customerJ,
+    country: "Germany",
+    countryLabel: names.germany,
+    city: names.berlin,
+    longitude: 13.4050,
+    latitude: 52.5200,
+    image: "/images/about/showcase-6.jpeg",
+  },
+  {
+    id: "customer-k",
+    name: names.customerK,
+    country: "Germany",
+    countryLabel: names.germany,
+    city: names.munich,
+    longitude: 11.5820,
+    latitude: 48.1351,
+  },
+  {
+    id: "customer-l",
+    name: names.customerL,
+    country: "United Kingdom",
+    countryLabel: names.unitedKingdom,
+    city: names.london,
+    longitude: -0.1278,
+    latitude: 51.5074,
+    image: "/images/about/showcase-7.jpeg",
+  },
+  {
+    id: "customer-m",
+    name: names.customerM,
+    country: "United Kingdom",
+    countryLabel: names.unitedKingdom,
+    city: names.manchester,
+    longitude: -2.2426,
+    latitude: 53.4808,
+  },
+];

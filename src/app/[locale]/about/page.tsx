@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import CompanyHistorySection from "@/components/about/CompanyHistorySection";
+import CustomerDistributionMapSection from "@/components/customer-map/CustomerDistributionMapSection";
+import StrategicLayoutMapSection from "@/components/strategic-layout/StrategicLayoutMapSection";
 import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
@@ -17,6 +19,15 @@ type Props = {
 };
 
 export const dynamic = "force-dynamic";
+
+async function getAboutHistoryItems(locale: CompanyHistoryLocale) {
+  try {
+    return await getCompanyHistoryByLocale(locale);
+  } catch (error) {
+    console.warn("[About] Failed to load company history items.", error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -127,6 +138,8 @@ async function AboutContent({
           }}
         />
         <PatentSection locale={locale} />
+        <CustomerDistributionMapSection />
+        <StrategicLayoutMapSection />
         <MapSection locale={locale} />
       </main>
       <Footer locale={locale} />
@@ -296,7 +309,7 @@ async function MapSection({ locale }: { locale: string }) {
 
   return (
     <>
-      <section className="bg-white py-16">
+    <section className="bg-white py-16">
         <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="flex justify-center">
             <Image
@@ -309,7 +322,6 @@ async function MapSection({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
-
       <section className="bg-[#e7f6ff] py-16 lg:py-24">
         <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="text-center">
@@ -342,7 +354,7 @@ export default async function About({ params }: Props) {
 
   setRequestLocale(locale);
 
-  const historyItems = await getCompanyHistoryByLocale(normalizedLocale);
+  const historyItems = await getAboutHistoryItems(normalizedLocale);
 
   return <AboutContent locale={locale} historyItems={historyItems} />;
 }
