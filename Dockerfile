@@ -27,6 +27,10 @@ WORKDIR /app
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
 # Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -35,12 +39,8 @@ COPY prisma ./prisma/
 RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built application from builder
-COPY --from=builder /app/.next ./.next
+COPY --from=builder --chown=nextjs:nextjs /app/.next ./.next
 COPY --from=builder /app/public ./public
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
 
 USER nextjs
 
