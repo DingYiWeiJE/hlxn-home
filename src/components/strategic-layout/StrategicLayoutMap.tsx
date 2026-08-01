@@ -247,7 +247,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
   const normalizedLocale: Locale = locale === "en" ? "en" : "zh";
   const currentUi = uiByLocale[normalizedLocale];
   const [level, setLevel] = useState<MapLevel>("world");
-  const [locations, setLocations] = useState<StrategicLocation[]>(strategicLocations);
+  const [locations, setLocations] = useState<StrategicLocation[]>([]);
   const [registeredMaps, setRegisteredMaps] = useState<Partial<Record<MapLevel, MapGeoJson>>>({});
   const [mapError, setMapError] = useState<{ level: MapLevel; message: string } | null>(null);
   const chinaProvinceMetrics = useMemo(
@@ -259,22 +259,34 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
   useEffect(() => {
     let active = true;
 
+    console.log('🔄 Starting fetch strategic locations with locale:', normalizedLocale);
+
     fetch(`/api/strategic-locations?locale=${normalizedLocale}`, {
       cache: "no-store",
       credentials: "include",
     })
       .then(async (response) => {
+        console.log('📡 Response status:', response.status, response.ok);
         const result = (await response.json()) as PublicStrategicLocationsResponse;
 
+        console.log('📦 API Response:', result);
+
         if (!active || !response.ok || !result.success || result.data.items.length === 0) {
+          console.log('⚠️ Skipping update - active:', active, 'ok:', response.ok, 'success:', result.success, 'items count:', result.data?.items?.length);
           return;
         }
 
+        console.log('%c Ding 🚀🚀🚀', 'color: white; background: linear-gradient(135deg, #00c853, #64dd17); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.3);',
+          result
+        );
+
+
         setLocations(result.data.items);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('❌ Fetch strategic locations failed:', error);
         if (active) {
-          setLocations(strategicLocations);
+          setLocations([]);
         }
       });
 
@@ -402,7 +414,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
           type: "map",
           geoIndex: 0,
           map: meta.mapName,
-          data: level === "china" ? chinaProvinceMetrics : meta.metrics,
+          data: mapMetrics,
           itemStyle: {
             areaColor: "#eef6fb",
             borderColor: "#ffffff",
