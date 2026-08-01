@@ -96,7 +96,7 @@ export async function generateMetadata({
       ? `${solution.name}解决方案`
       : `${solution.name} solution`);
 
-  const backgroundImage = solution.workingPrincipleBackgroundImage;
+  const backgroundImage = solution.coverImage;
 
   return {
     title: `${solution.name} | ${text.brand}`,
@@ -131,6 +131,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const coverImage = solution.coverImage;
   const backgroundImage = solution.workingPrincipleBackgroundImage;
 
   if (!backgroundImage) {
@@ -190,17 +191,19 @@ export default async function SolutionDetailPage({ params }: PageProps) {
                 </div>
               ) : null}
             </div>
-            <div className="relative min-h-[320px] overflow-hidden rounded-2xl bg-[#dceef8] sm:min-h-[420px]">
-              <Image
-                src={backgroundImage.url}
-                alt={
-                  backgroundImage.alt || solution.name
-                }
-                fill
-                priority
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                className="object-cover"
-              />
+            <div className="relative min-h-[320px] overflow-hidden rounded-2x sm:min-h-[420px]">
+              {coverImage ? (
+                <Image
+                  src={coverImage.url}
+                  alt={
+                    coverImage.alt || solution.name
+                  }
+                  fill
+                  priority
+                  sizes="(max-width: 1023px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              ) : null}
             </div>
           </div>
         </section>

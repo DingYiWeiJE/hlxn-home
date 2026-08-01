@@ -33,6 +33,7 @@ export type PublicSolutionListItem = {
 
 export type PublicSolutionDetail = PublicSolutionListItem & {
   translationKey: string | null;
+  coverImage: SolutionImage | null;
   workingPrincipleParagraphs: unknown;
   systemCompositionParagraphs: unknown;
   usageScenarios: Array<{
@@ -202,6 +203,9 @@ const detailSelect = {
   publishedAt: true,
   createdAt: true,
   updatedAt: true,
+  coverImageAsset: {
+    select: imageSelect,
+  },
   workingPrincipleBackgroundAsset: {
     select: imageSelect,
   },
@@ -273,6 +277,7 @@ function formatSolutionDetail(
   const workingPrincipleBackgroundImage = formatImage(
     solution.workingPrincipleBackgroundAsset,
   );
+  const coverImage = formatImage(solution.coverImageAsset);
 
   if (!workingPrincipleBackgroundImage) {
     return null;
@@ -288,6 +293,7 @@ function formatSolutionDetail(
     highlights: solution.highlights,
     workingPrincipleParagraphs: solution.workingPrincipleParagraphs,
     workingPrincipleBackgroundImage,
+    coverImage,
     systemCompositionParagraphs: solution.systemCompositionParagraphs,
     usageScenarios: solution.usageScenarios
       .map((item) => {
