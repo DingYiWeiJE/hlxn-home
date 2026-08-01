@@ -179,6 +179,7 @@ model MediaAsset {
   createdById                         String?
   createdBy                           User?      @relation("MediaAssetCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   productIntroBackgrounds             Product[]  @relation("ProductIntroBackgroundImage")
+  solutionCovers                      Solution[] @relation("SolutionCoverImage")
   solutionWorkingPrincipleBackgrounds Solution[] @relation("SolutionWorkingPrincipleBackgroundImage")
 
   advantages             ProductAdvantage[]
@@ -425,6 +426,7 @@ model Solution {
   status    SolutionStatus @default(DRAFT)
   sortOrder Int            @default(0)
 
+  coverImageAssetId                 String?
   summaryParagraphs                 Json    @default("[]")
   highlights                        Json    @default("[]")
   workingPrincipleParagraphs        Json    @default("[]")
@@ -441,7 +443,8 @@ model Solution {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  workingPrincipleBackgroundAsset MediaAsset? @relation("SolutionWorkingPrincipleBackgroundImage", fields: [workingPrincipleBackgroundAssetId], references: [id], onDelete: SetNull)
+  coverImageAsset                     MediaAsset? @relation("SolutionCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
+  workingPrincipleBackgroundAsset     MediaAsset? @relation("SolutionWorkingPrincipleBackgroundImage", fields: [workingPrincipleBackgroundAssetId], references: [id], onDelete: SetNull)
 
   usageScenarios SolutionUsageScenario[]
   customerValues SolutionCustomerValue[]
@@ -451,6 +454,7 @@ model Solution {
   @@index([translationKey])
   @@index([locale, status, sortOrder])
   @@index([status, sortOrder])
+  @@index([coverImageAssetId])
   @@index([workingPrincipleBackgroundAssetId])
   @@index([deletedAt])
 }

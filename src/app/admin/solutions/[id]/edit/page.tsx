@@ -34,8 +34,22 @@ export default async function EditSolutionPage({ params }: PageProps) {
       highlights: true,
       workingPrincipleParagraphs: true,
       workingPrincipleBackgroundAssetId: true,
+      coverImageAssetId: true,
       systemCompositionParagraphs: true,
       publishedAt: true,
+      coverImageAsset: {
+        select: {
+          id: true,
+          url: true,
+          filename: true,
+          originalName: true,
+          mimeType: true,
+          size: true,
+          width: true,
+          height: true,
+          alt: true,
+        },
+      },
       workingPrincipleBackgroundAsset: {
         select: {
           id: true,

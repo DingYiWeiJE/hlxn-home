@@ -100,6 +100,7 @@ const solutionFieldsSchema = z.object({
   sortOrder: z.number().int().min(0).default(0),
   publishedAt: z.coerce.date().optional().nullable(),
   translationKey: translationKeySchema,
+  coverImageAssetId: imageIdSchema.optional(),
   summaryParagraphs: requiredParagraphsSchema,
   highlights: highlightsSchema,
   workingPrincipleParagraphs: requiredParagraphsSchema,

@@ -70,6 +70,8 @@ export type SolutionFormInitialData = {
   summaryParagraphs: unknown;
   highlights: unknown;
   workingPrincipleParagraphs: unknown;
+  coverImageAssetId: string | null;
+  coverImageAsset: ImageAsset | null;
   workingPrincipleBackgroundAssetId: string | null;
   workingPrincipleBackgroundAsset: ImageAsset | null;
   systemCompositionParagraphs: unknown;
@@ -232,6 +234,13 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
       initialData?.workingPrincipleBackgroundAsset ?? null,
     );
 
+  const [coverImageAssetId, setCoverImageAssetId] = useState(
+    initialData?.coverImageAssetId ?? "",
+  );
+  const [coverImageAsset, setCoverImageAsset] = useState<ImageAsset | null>(
+    initialData?.coverImageAsset ?? null,
+  );
+
   const [usageScenarios, setUsageScenarios] = useState<UsageScenarioItem[]>(
     () =>
       (initialData?.usageScenarios ?? []).map((item) => ({
@@ -258,7 +267,7 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
 
   const [picker, setPicker] = useState<
     | {
-        target: "working";
+        target: "cover" | "working";
         index?: undefined;
       }
     | {
@@ -272,7 +281,15 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
   const [success, setSuccess] = useState("");
 
   const pickerPurpose = useMemo<ProductMediaPurpose>(() => {
-    if (!picker || picker.target === "working") {
+    if (!picker) {
+      return "SOLUTION_WORKING_PRINCIPLE_BACKGROUND";
+    }
+
+    if (picker.target === "cover") {
+      return "GENERAL";
+    }
+
+    if (picker.target === "working") {
       return "SOLUTION_WORKING_PRINCIPLE_BACKGROUND";
     }
 
@@ -286,17 +303,26 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
       return null;
     }
 
+    if (picker.target === "cover") {
+      return coverImageAssetId;
+    }
+
     if (picker.target === "working") {
       return workingPrincipleBackgroundAssetId;
     }
 
-    if (picker.target === "usage") {
+    if (picker.target === "usage" && picker.index !== undefined) {
       return usageScenarios[picker.index]?.imageAssetId ?? null;
     }
 
-    return customerValues[picker.index]?.imageAssetId ?? null;
+    if (picker.target === "customer" && picker.index !== undefined) {
+      return customerValues[picker.index]?.imageAssetId ?? null;
+    }
+
+    return null;
   }, [
     customerValues,
+    coverImageAssetId,
     picker,
     usageScenarios,
     workingPrincipleBackgroundAssetId,
@@ -308,6 +334,12 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
     }
 
     const imageAsset = asImageAsset(asset);
+
+    if (picker.target === "cover") {
+      setCoverImageAssetId(asset.id);
+      setCoverImageAsset(imageAsset);
+      return;
+    }
 
     if (picker.target === "working") {
       setWorkingPrincipleBackgroundAssetId(asset.id);
@@ -361,6 +393,7 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
       sortOrder,
       publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
       translationKey: translationKey.trim() || null,
+      coverImageAssetId,
       summaryParagraphs: normalizeTextItems(summaryParagraphs),
       highlights: normalizeTextItems(highlights),
       workingPrincipleParagraphs: normalizeTextItems(
@@ -469,8 +502,11 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
             {success}
           </div>
         ) : null}
+        
 
-        <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+        <section className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-3">
+          <div className="md:col-span-2 grid gap-5 grid-cols-2">
+
           <InputBlock label="语言" required>
             <select
               value={locale}
@@ -539,6 +575,17 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
               className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </InputBlock>
+          </div>
+
+          <ImagePickerBox
+            label="解决方案封面图"
+            asset={coverImageAsset}
+            onPick={() => setPicker({ target: "cover" })}
+            onClear={() => {
+              setCoverImageAssetId("");
+              setCoverImageAsset(null);
+            }}
+          />
         </section>
 
         <TextListEditor
@@ -609,7 +656,11 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
       <MediaAssetPicker
         open={picker !== null}
         type="IMAGE"
-        title="选择或上传解决方案图片"
+        title={
+          picker?.target === "cover"
+            ? "选择或上传解决方案封面图"
+            : "选择或上传解决方案图片"
+        }
         purpose={pickerPurpose}
         selectedAssetId={selectedPickerAssetId}
         uploadAlt={name || "solution image"}
@@ -819,7 +870,7 @@ function ImagePickerBox({
       <button
         type="button"
         onClick={onPick}
-        className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white"
+        className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-white"
       >
         {asset ? (
           <Image

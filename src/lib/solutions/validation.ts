@@ -8,6 +8,7 @@ type ImageReference = {
 };
 
 export type SolutionReferenceInput = {
+  coverImageAssetId?: string | null;
   workingPrincipleBackgroundAssetId?: string | null;
   usageScenarios?: ImageReference[];
   customerValues?: ImageReference[];
@@ -18,9 +19,19 @@ export async function validateSolutionReferences(
   input: SolutionReferenceInput,
 ): Promise<void> {
   await validateSingleImageAsset({
+    assetId: input.coverImageAssetId,
+    allowedPurposes: [MediaAssetPurpose.GENERAL],
+    fieldName: "coverImageAssetId",
+    errorMessage:
+      "Cover image is invalid",
+    required: false,
+  });
+
+  await validateSingleImageAsset({
     assetId: input.workingPrincipleBackgroundAssetId,
-    expectedPurpose:
+    allowedPurposes: [
       MediaAssetPurpose.SOLUTION_WORKING_PRINCIPLE_BACKGROUND,
+    ],
     fieldName: "workingPrincipleBackgroundAssetId",
     errorMessage:
       "Working principle background image is invalid or has an incorrect purpose",
@@ -46,13 +57,13 @@ export async function validateSolutionReferences(
 
 async function validateSingleImageAsset({
   assetId,
-  expectedPurpose,
+  allowedPurposes,
   fieldName,
   errorMessage,
   required = false,
 }: {
   assetId?: string | null;
-  expectedPurpose: MediaAssetPurpose;
+  allowedPurposes: MediaAssetPurpose[];
   fieldName: string;
   errorMessage: string;
   required?: boolean;
@@ -75,7 +86,9 @@ async function validateSingleImageAsset({
       type: MediaAssetType.IMAGE,
       enabled: true,
       deletedAt: null,
-      purpose: expectedPurpose,
+      purpose: {
+        in: allowedPurposes,
+      },
     },
     select: {
       id: true,

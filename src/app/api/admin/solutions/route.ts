@@ -78,6 +78,16 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           updatedAt: true,
           deletedAt: true,
+          coverImageAsset: {
+            select: {
+              id: true,
+              url: true,
+              originalName: true,
+              width: true,
+              height: true,
+              alt: true,
+            },
+          },
           workingPrincipleBackgroundAsset: {
             select: {
               id: true,
@@ -116,6 +126,7 @@ export async function GET(request: NextRequest) {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         deletedAt: item.deletedAt,
+        coverImage: item.coverImageAsset,
         workingPrincipleBackgroundImage:
           item.workingPrincipleBackgroundAsset,
         counts: {
@@ -146,6 +157,7 @@ export async function POST(request: Request) {
     const body = createSolutionSchema.parse(await request.json());
 
     await validateSolutionReferences({
+      coverImageAssetId: body.coverImageAssetId,
       workingPrincipleBackgroundAssetId:
         body.workingPrincipleBackgroundAssetId,
       usageScenarios: body.usageScenarios,
@@ -186,6 +198,7 @@ export async function POST(request: Request) {
           status: body.status,
           sortOrder: body.sortOrder,
           translationKey: body.translationKey,
+          coverImageAssetId: body.coverImageAssetId,
           summaryParagraphs: body.summaryParagraphs,
           highlights: body.highlights,
           workingPrincipleParagraphs: body.workingPrincipleParagraphs,

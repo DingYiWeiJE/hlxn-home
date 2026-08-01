@@ -28,6 +28,7 @@ const solutionDetailSelect = {
   highlights: true,
   workingPrincipleParagraphs: true,
   workingPrincipleBackgroundAssetId: true,
+  coverImageAssetId: true,
   systemCompositionParagraphs: true,
   createdBy: true,
   updatedBy: true,
@@ -35,6 +36,20 @@ const solutionDetailSelect = {
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
+  coverImageAsset: {
+    select: {
+      id: true,
+      type: true,
+      url: true,
+      filename: true,
+      originalName: true,
+      mimeType: true,
+      size: true,
+      width: true,
+      height: true,
+      alt: true,
+    },
+  },
   workingPrincipleBackgroundAsset: {
     select: {
       id: true,
@@ -121,6 +136,8 @@ function formatSolutionDetail(solution: SolutionDetailPayload) {
     workingPrincipleParagraphs: solution.workingPrincipleParagraphs,
     workingPrincipleBackgroundAssetId:
       solution.workingPrincipleBackgroundAssetId,
+    coverImageAssetId: solution.coverImageAssetId,
+    coverImageAsset: solution.coverImageAsset,
     workingPrincipleBackgroundAsset:
       solution.workingPrincipleBackgroundAsset,
     systemCompositionParagraphs: solution.systemCompositionParagraphs,
@@ -188,6 +205,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     await validateSolutionReferences({
+      coverImageAssetId: body.coverImageAssetId,
       workingPrincipleBackgroundAssetId:
         body.workingPrincipleBackgroundAssetId,
       usageScenarios: body.usageScenarios,
@@ -299,6 +317,9 @@ export async function PATCH(request: Request, context: RouteContext) {
             : {}),
           ...(body.translationKey !== undefined
             ? { translationKey: body.translationKey }
+            : {}),
+          ...(body.coverImageAssetId !== undefined
+            ? { coverImageAssetId: body.coverImageAssetId }
             : {}),
           ...(body.summaryParagraphs !== undefined
             ? { summaryParagraphs: body.summaryParagraphs }
