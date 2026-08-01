@@ -271,8 +271,8 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
 
         console.log('📦 API Response:', result);
 
-        if (!active || !response.ok || !result.success || result.data.items.length === 0) {
-          console.log('⚠️ Skipping update - active:', active, 'ok:', response.ok, 'success:', result.success, 'items count:', result.data?.items?.length);
+        if (!active || !response.ok || !result.success || !result.data || result.data.items.length === 0) {
+          console.log('⚠️ Skipping update - active:', active, 'ok:', response.ok, 'success:', result.success, 'items count:', result.success ? result.data?.items?.length : 'N/A');
           return;
         }
 
