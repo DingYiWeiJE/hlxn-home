@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
 import Navigation from "@/components/Navigation";
 import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
 import type { Metadata } from "next";
@@ -16,6 +17,89 @@ type Props = {
     locale: string;
   }>;
 };
+
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  locale: "zh" | "en";
+  coverImage?: {
+    url: string;
+  } | null;
+  summaryParagraphs?: string[];
+};
+
+async function getSiteOrigin(): Promise<string> {
+  const configuredOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.APP_ORIGIN ??
+    process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  if (configuredOrigin) {
+    return configuredOrigin.replace(/\/+$/, "");
+  }
+
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host") ??
+    requestHeaders.get("host");
+
+  if (!host) {
+    return "http://localhost:3000";
+  }
+
+  const forwardedProtocol = requestHeaders.get(
+    "x-forwarded-proto"
+  );
+
+  const isLocal =
+    host.startsWith("localhost") ||
+    host.startsWith("127.0.0.1");
+
+  const protocol =
+    forwardedProtocol ?? (isLocal ? "http" : "https");
+
+  return `${protocol}://${host}`;
+}
+
+async function fetchProducts(
+  locale: string
+): Promise<Product[]> {
+  try {
+    const origin = await getSiteOrigin();
+    const query = new URLSearchParams({
+      locale,
+      pageSize: "5",
+    });
+
+    const response = await fetch(
+      `${origin}/api/products?${query.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch products");
+      return [];
+    }
+
+    const result = await response.json();
+
+    if (result.success && Array.isArray(result.data.items)) {
+      return result.data.items;
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -49,6 +133,8 @@ export default async function Home({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
+  const products = await fetchProducts(locale);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -71,46 +157,23 @@ export default async function Home({ params }: Props) {
       <ChooseHanliSection locale={locale} />
       <AboutHanli locale={locale} />
       <SolutionsSection locale={locale} />
-      <ProductIntroCard
-        locale={locale}
-        imageUrl="/images/home/electric-direct-drive.png"
-        backgroundColor="white"
-        imageFirst={true}
-        translationKey="productCards.electricDirectDrive"
-        buttonHref="/products"
-      />
-      <ProductIntroCard
-        locale={locale}
-        imageUrl="/images/home/hybrid-power-system.png"
-        backgroundColor="#e7f6ff"
-        imageFirst={false}
-        translationKey="productCards.hybridPower"
-        buttonHref="/products"
-      />
-      <ProductIntroCard
-        locale={locale}
-        imageUrl="/images/home/marine-energy-storage.png"
-        backgroundColor="white"
-        imageFirst={true}
-        translationKey="productCards.shipEnergyStorage"
-        buttonHref="/products"
-      />
-      <ProductIntroCard
-        locale={locale}
-        imageUrl="/images/home/hydrogen-fuel-system.png"
-        backgroundColor="#e7f6ff"
-        imageFirst={false}
-        translationKey="productCards.hydrogenFuelSystem"
-        buttonHref="/products"
-      />
-      <ProductIntroCard
-        locale={locale}
-        imageUrl="/images/home/methanol-fuel-system.png"
-        backgroundColor="white"
-        imageFirst={true}
-        translationKey="productCards.methanolFuelSystem"
-        buttonHref="/products"
-      />
+      {products.map((product, index) => (
+        <ProductIntroCard
+          key={product.id}
+          locale={locale}
+          imageUrl={product.coverImage?.url || "/images/placeholder.png"}
+          backgroundColor={index % 2 === 0 ? "white" : "#e7f6ff"}
+          imageFirst={index % 2 === 0}
+          translationKey="productCards.placeholder"
+          buttonHref={`/${locale}/products/${product.slug}`}
+          productName={product.name}
+          productSummary={
+            Array.isArray(product.summaryParagraphs)
+              ? product.summaryParagraphs[0]
+              : ""
+          }
+        />
+      ))}
 
       <div className="w-full bg-[#e7f6ff] py-12 text-center pb-0">
         <h2 className="text-3xl font-bold text-[#3d71c2] ">{t("caseSection.title")}</h2>

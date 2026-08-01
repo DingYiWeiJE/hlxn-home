@@ -347,7 +347,7 @@ export default async function ProductDetailPage({
                     (max-width: 1023px) 100vw,
                     50vw
                   "
-                  className="object-contain p-4 sm:p-8"
+                  className="object-cover p-4 sm:p-8"
                 />
               ) : (
                 <div className="flex h-64 w-full items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white/70 text-sm text-slate-400">
@@ -724,7 +724,7 @@ function ProductFeatureCard({
           fill
           unoptimized
           sizes="80px"
-          className="object-contain transition duration-300 group-hover:scale-105"
+          className="object-cover transition duration-300 group-hover:scale-105"
         />
       </div>
 
@@ -753,7 +753,7 @@ function ApplicationCard({
           fill
           unoptimized
           sizes="96px"
-          className="object-contain transition duration-300 group-hover:scale-105"
+          className="object-cover transition duration-300 group-hover:scale-105"
         />
       </div>
 
