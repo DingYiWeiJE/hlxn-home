@@ -29,7 +29,7 @@ const labels = {
     overview: "解决方案简介",
     workingPrinciple: "工作原理",
     systemComposition: "系统构成",
-    usageScenarios: "使用场景",
+    usageScenarios: "适用场景",
     customerValues: "客户价值",
     notFound: "解决方案不存在",
     brand: "汉理楚能",
@@ -96,7 +96,7 @@ export async function generateMetadata({
       ? `${solution.name}解决方案`
       : `${solution.name} solution`);
 
-  const backgroundImage = solution.coverImage;
+  const coverImage = solution.coverImage;
 
   return {
     title: `${solution.name} | ${text.brand}`,
@@ -108,11 +108,11 @@ export async function generateMetadata({
       title: solution.name,
       description,
       type: "website",
-      images: backgroundImage
+      images: coverImage
         ? [
             {
-              url: backgroundImage.url,
-              alt: backgroundImage.alt ?? solution.name,
+              url: coverImage.url,
+              alt: coverImage.alt ?? solution.name,
             },
           ]
         : undefined,
@@ -123,6 +123,7 @@ export async function generateMetadata({
 export default async function SolutionDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
   const locale = normalizeLocale(resolvedParams.locale);
+
   setRequestLocale(locale);
 
   const solution = await fetchSolution(resolvedParams);
@@ -132,9 +133,10 @@ export default async function SolutionDetailPage({ params }: PageProps) {
   }
 
   const coverImage = solution.coverImage;
-  const backgroundImage = solution.workingPrincipleBackgroundImage;
+  const workingPrincipleBackgroundImage =
+    solution.workingPrincipleBackgroundImage;
 
-  if (!backgroundImage) {
+  if (!workingPrincipleBackgroundImage) {
     notFound();
   }
 
@@ -142,12 +144,16 @@ export default async function SolutionDetailPage({ params }: PageProps) {
     locale,
     slug: solution.slug,
   });
+
   const text = labels[locale];
+
   const summaryParagraphs = toStringArray(solution.summaryParagraphs);
   const highlights = toStringArray(solution.highlights);
+
   const workingPrincipleParagraphs = toStringArray(
     solution.workingPrincipleParagraphs,
   );
+
   const systemCompositionParagraphs = toStringArray(
     solution.systemCompositionParagraphs,
   );
@@ -159,30 +165,34 @@ export default async function SolutionDetailPage({ params }: PageProps) {
       </div>
 
       <main className="flex-1">
+        {/* 页面头图 */}
         <section className="relative overflow-hidden bg-[#f4f9fc] pt-16">
           <div className="mx-auto grid min-h-[560px] w-full max-w-[1440px] items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1.05fr)] lg:px-12 lg:py-20">
             <div>
               <Link
                 href={`/${locale}/solutions`}
-                className="inline-flex text-sm font-semibold text-[#2364c7] transition hover:text-[#1d54a8]"
+                className="inline-flex text-sm font-semibold text-[#2364c7] transition-colors hover:text-[#1d54a8]"
               >
                 {text.back}
               </Link>
+
               <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-tight text-[#2364c7] sm:text-4xl lg:text-5xl">
                 {solution.name}
               </h1>
+
               {summaryParagraphs.length > 0 ? (
                 <div className="mt-6 max-w-2xl space-y-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  {summaryParagraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
+                  {summaryParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
                   ))}
                 </div>
               ) : null}
+
               {highlights.length > 0 ? (
                 <div className="mt-7 flex flex-wrap gap-3">
-                  {highlights.map((highlight) => (
+                  {highlights.map((highlight, index) => (
                     <span
-                      key={highlight}
+                      key={`${highlight}-${index}`}
                       className="inline-flex min-h-10 items-center rounded-md bg-[#2364c7] px-4 py-2 text-sm font-semibold text-white shadow-sm"
                     >
                       {highlight}
@@ -191,13 +201,12 @@ export default async function SolutionDetailPage({ params }: PageProps) {
                 </div>
               ) : null}
             </div>
-            <div className="relative min-h-[320px] overflow-hidden rounded-2x sm:min-h-[420px]">
+
+            <div className="relative min-h-[320px] overflow-hidden rounded-2xl sm:min-h-[420px]">
               {coverImage ? (
                 <Image
                   src={coverImage.url}
-                  alt={
-                    coverImage.alt || solution.name
-                  }
+                  alt={coverImage.alt || solution.name}
                   fill
                   priority
                   sizes="(max-width: 1023px) 100vw, 50vw"
@@ -208,143 +217,153 @@ export default async function SolutionDetailPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* 锚点导航 */}
         <nav className="sticky top-0 z-30 border-y border-slate-100 bg-white/95 shadow-sm backdrop-blur">
           <div className="mx-auto flex w-full max-w-[1100px] overflow-x-auto px-4 sm:justify-center sm:px-6">
             <AnchorLink href="#overview" label={text.overview} />
-            <AnchorLink href="#working-principle" label={text.workingPrinciple} />
+
+            <AnchorLink
+              href="#working-principle"
+              label={text.workingPrinciple}
+            />
+
             {systemCompositionParagraphs.length > 0 ? (
               <AnchorLink
                 href="#system-composition"
                 label={text.systemComposition}
               />
             ) : null}
+
             {solution.usageScenarios.length > 0 ? (
-              <AnchorLink href="#usage-scenarios" label={text.usageScenarios} />
+              <AnchorLink
+                href="#usage-scenarios"
+                label={text.usageScenarios}
+              />
             ) : null}
+
             {solution.customerValues.length > 0 ? (
-              <AnchorLink href="#customer-values" label={text.customerValues} />
+              <AnchorLink
+                href="#customer-values"
+                label={text.customerValues}
+              />
             ) : null}
           </div>
         </nav>
 
-        <section id="overview" className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 lg:py-24">
+        {/* 解决方案简介 */}
+        <section
+          id="overview"
+          className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 lg:py-24"
+        >
           <div className="mx-auto max-w-4xl">
             <SectionTitle>{text.overview}</SectionTitle>
-            <div className="mt-8 space-y-4 text-base leading-8 text-slate-600">
-              {summaryParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+
+            {summaryParagraphs.length > 0 ? (
+              <div className="mt-8 space-y-4 text-base leading-8 text-slate-600">
+                {summaryParagraphs.map((paragraph, index) => (
+                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
 
+        {/* 工作原理 */}
         <section id="working-principle" className="scroll-mt-24">
           <div className="relative flex min-h-[500px] items-center overflow-hidden bg-slate-900 px-5 py-16 sm:px-8 lg:min-h-[620px] lg:py-24">
             <Image
-              src={backgroundImage.url}
+              src={workingPrincipleBackgroundImage.url}
               alt={
-                backgroundImage.alt ||
-                text.workingPrinciple
+                workingPrincipleBackgroundImage.alt || text.workingPrinciple
               }
               fill
               sizes="100vw"
               className="object-cover"
             />
+
             <div className="absolute inset-0 bg-slate-950/60" />
+
             <div className="relative z-10 mx-auto w-full max-w-4xl text-white">
               <SectionTitle light>{text.workingPrinciple}</SectionTitle>
-              <div className="mx-auto mt-8 max-w-3xl space-y-4 text-center text-sm leading-8 text-white/95 sm:text-base">
-                {workingPrincipleParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
+
+              {workingPrincipleParagraphs.length > 0 ? (
+                <div className="mx-auto mt-8 max-w-3xl space-y-4 text-center text-sm leading-8 text-white/95 sm:text-base">
+                  {workingPrincipleParagraphs.map((paragraph, index) => (
+                    <p key={`${paragraph}-${index}`}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
 
+        {/* 系统构成 */}
         {systemCompositionParagraphs.length > 0 ? (
           <section
             id="system-composition"
-            className="scroll-mt-24 bg-[#eef8ff] px-5 py-16 sm:px-8 lg:py-24"
+            className="scroll-mt-24 bg-white px-5 sm:px-8"
           >
-            <div className="mx-auto max-w-5xl">
+            <div className="mx-auto flex min-h-[330px] max-w-[1360px] flex-col items-center justify-center py-16 text-center lg:min-h-[377px] lg:py-20">
               <SectionTitle>{text.systemComposition}</SectionTitle>
-              <div className="mt-10 grid gap-4 md:grid-cols-2">
-                {systemCompositionParagraphs.map((paragraph) => (
-                  <p
-                    key={paragraph}
-                    className="rounded-2xl border border-white/80 bg-white p-6 text-sm leading-7 text-slate-600 shadow-sm"
-                  >
-                    {paragraph}
-                  </p>
+
+              <div className="mt-9 max-w-[1320px] space-y-2 text-sm leading-7 text-[#475569] sm:text-base sm:leading-8 lg:mt-10">
+                {systemCompositionParagraphs.map((paragraph, index) => (
+                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
                 ))}
               </div>
             </div>
           </section>
         ) : null}
 
+        {/* 适用场景 */}
         {solution.usageScenarios.length > 0 ? (
           <section
             id="usage-scenarios"
-            className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 lg:py-24"
+            className="scroll-mt-24 bg-[#e7f6ff] px-5 py-16 sm:px-8 lg:py-[68px]"
           >
-            <div className="mx-auto max-w-[1100px]">
+            <div className="mx-auto max-w-[1360px]">
               <SectionTitle>{text.usageScenarios}</SectionTitle>
-              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+              <div className="mt-10 flex flex-wrap justify-center gap-3">
                 {solution.usageScenarios.map((item) => (
-                  <ImageTitleCard
+                  <div
                     key={item.id}
-                    title={item.title}
-                    paragraphs={toStringArray(item.detailParagraphs)}
-                    image={item.image}
-                  />
+                    className="flex w-full sm:w-[calc((100%_-_0.75rem)/2)] lg:w-[calc((100%_-_2.25rem)/4)]"
+                  >
+                    <UsageScenarioCard
+                      title={item.title}
+                      paragraphs={toStringArray(item.detailParagraphs)}
+                      image={item.image}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
           </section>
         ) : null}
 
+        {/* 客户价值 */}
         {solution.customerValues.length > 0 ? (
           <section
             id="customer-values"
-            className="scroll-mt-24 bg-[#eef8ff] px-5 py-16 sm:px-8 lg:py-24"
+            className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 lg:py-16"
           >
-            <div className="mx-auto max-w-[1120px]">
+            <div className="mx-auto max-w-[1060px]">
               <SectionTitle>{text.customerValues}</SectionTitle>
-              <div className="mt-12 space-y-8">
+
+              <div className="mt-6 flex flex-wrap justify-center gap-4">
                 {solution.customerValues.map((item, index) => (
-                  <article
+                  <div
                     key={item.id}
-                    className="grid overflow-hidden rounded-2xl bg-white shadow-sm lg:grid-cols-2"
+                    className="flex w-full md:w-[calc((100%_-_1rem)/2)]"
                   >
-                    <div
-                      className={
-                        index % 2 === 1
-                          ? "relative min-h-[260px] lg:order-2"
-                          : "relative min-h-[260px]"
-                      }
-                    >
-                      <Image
-                        src={item.image.url}
-                        alt={item.image.alt || item.title}
-                        fill
-                        sizes="(max-width: 1023px) 100vw, 50vw"
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
-                      <h3 className="text-2xl font-bold text-[#102a43]">
-                        {item.title}
-                      </h3>
-                      <div className="mt-5 space-y-3 text-sm leading-7 text-slate-600 sm:text-base">
-                        {toStringArray(item.detailParagraphs).map(
-                          (paragraph) => (
-                            <p key={paragraph}>{paragraph}</p>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  </article>
+                    <CustomerValueCard
+                      title={item.title}
+                      paragraphs={toStringArray(item.detailParagraphs)}
+                      image={item.image}
+                      accent={index % 4 === 1 || index % 4 === 2}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -361,7 +380,7 @@ function AnchorLink({ href, label }: { href: string; label: string }) {
   return (
     <a
       href={href}
-      className="inline-flex min-h-14 shrink-0 items-center justify-center whitespace-nowrap px-5 text-sm font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-[#2364c7] sm:px-7"
+      className="inline-flex min-h-14 shrink-0 items-center justify-center whitespace-nowrap px-5 text-sm font-semibold text-slate-600 transition-colors hover:bg-blue-50 hover:text-[#2364c7] sm:px-7"
     >
       {label}
     </a>
@@ -379,8 +398,8 @@ function SectionTitle({
     <h2
       className={
         light
-          ? "text-center text-3xl font-bold tracking-wide text-white sm:text-4xl"
-          : "text-center text-3xl font-bold tracking-wide text-[#2364c7] sm:text-4xl"
+          ? "text-center text-3xl font-bold leading-tight tracking-[0.02em] text-white sm:text-4xl"
+          : "text-center text-3xl font-bold leading-tight tracking-[0.02em] text-[#2a62bb] sm:text-4xl"
       }
     >
       {children}
@@ -388,7 +407,7 @@ function SectionTitle({
   );
 }
 
-function ImageTitleCard({
+function UsageScenarioCard({
   title,
   paragraphs,
   image,
@@ -398,26 +417,84 @@ function ImageTitleCard({
   image: SolutionImage;
 }) {
   return (
-    <article className="group overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#dceef8]">
+    <article className="flex h-full w-full min-h-[192px] flex-col items-center justify-center rounded-[10px] bg-white px-5 py-7 text-center">
+      <div className="relative h-12 w-14 shrink-0 sm:h-14 sm:w-16">
         <Image
           src={image.url}
           alt={image.alt || title}
           fill
-          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          sizes="64px"
+          className="object-contain"
         />
       </div>
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-[#102a43]">{title}</h3>
-        {paragraphs.length > 0 ? (
-          <div className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-            {paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-        ) : null}
+
+      <h3 className="mt-4 text-xl font-bold leading-tight text-[#0f172a] sm:text-2xl">
+        {title}
+      </h3>
+
+      {paragraphs.length > 0 ? (
+        <div className="mt-2 space-y-1 text-sm leading-6 text-[#475569] sm:text-base">
+          {paragraphs.map((paragraph, index) => (
+            <p key={`${paragraph}-${index}`}>{paragraph}</p>
+          ))}
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function CustomerValueCard({
+  title,
+  paragraphs,
+  image,
+  accent,
+}: {
+  title: string;
+  paragraphs: string[];
+  image: SolutionImage;
+  accent: boolean;
+}) {
+  return (
+    <article
+      className={
+        accent
+          ? "flex h-full w-full min-h-[312px] flex-col items-center justify-center rounded-[10px] bg-[#3279c2] px-6 py-10 text-center shadow-[0_2px_14px_rgba(38,102,154,0.14)] sm:px-10"
+          : "flex h-full w-full min-h-[312px] flex-col items-center justify-center rounded-[10px] border border-[#d7e9f5] bg-white px-6 py-10 text-center shadow-[0_2px_14px_rgba(38,102,154,0.14)] sm:px-10"
+      }
+    >
+      <div className="relative h-[68px] w-[76px] shrink-0">
+        <Image
+          src={image.url}
+          alt={image.alt || title}
+          fill
+          sizes="76px"
+          className="object-contain"
+        />
       </div>
+
+      <h3
+        className={
+          accent
+            ? "mt-6 text-xl font-bold leading-tight text-white sm:text-2xl"
+            : "mt-6 text-xl font-bold leading-tight text-[#0f172a] sm:text-2xl"
+        }
+      >
+        {title}
+      </h3>
+
+      {paragraphs.length > 0 ? (
+        <div
+          className={
+            accent
+              ? "mt-4 max-w-[390px] space-y-1 text-sm leading-6 text-white sm:text-base"
+              : "mt-4 max-w-[390px] space-y-1 text-sm leading-6 text-[#64748b] sm:text-base"
+          }
+        >
+          {paragraphs.map((paragraph, index) => (
+            <p key={`${paragraph}-${index}`}>{paragraph}</p>
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
