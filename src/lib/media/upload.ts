@@ -20,6 +20,13 @@ const allowedImageMimeTypes = new Set([
   "image/gif",
 ]);
 
+const imageExtensionsByMimeType = new Map([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+  ["image/gif", "gif"],
+]);
+
 export type MediaUploadScope =
   | "news"
   | "products"
@@ -183,22 +190,34 @@ export async function uploadImage(
 
   const { year, month } = getCurrentDatePath();
 
-  const isGif = detected.mime === "image/gif";
-  const extension = isGif ? "gif" : "webp";
-  const filename = `${randomBytes(16).toString("hex")}.${extension}`;
-
-  const relativePath =
-    `${options.scope}/images/${year}/${month}/${filename}`;
-
-  const { absolutePath } = resolveUploadPath(relativePath);
-
   let output = input;
   let outputMimeType = detected.mime;
   let width: number | null = null;
   let height: number | null = null;
+  let filename = "";
+  let absolutePath = "";
+  let relativePath = "";
 
   try {
-    if (!isGif) {
+    const inputMetadata = await sharp(input, {
+      animated: detected.mime === "image/gif",
+      limitInputPixels: false,
+    }).metadata();
+
+    width = inputMetadata.width ?? null;
+    height = inputMetadata.height ?? null;
+
+    const inputPixels =
+      width !== null && height !== null
+        ? width * height
+        : null;
+
+    const shouldConvert =
+      detected.mime !== "image/gif" &&
+      inputPixels !== null &&
+      inputPixels <= config.imageMaxInputPixels;
+
+    if (shouldConvert) {
       output = await sharp(input)
         .rotate()
         .resize({
@@ -213,8 +232,19 @@ export async function uploadImage(
       outputMimeType = "image/webp";
     }
 
+    const extension =
+      imageExtensionsByMimeType.get(outputMimeType) ?? detected.ext;
+
+    filename = `${randomBytes(16).toString("hex")}.${extension}`;
+
+    relativePath =
+      `${options.scope}/images/${year}/${month}/${filename}`;
+
+    ({ absolutePath } = resolveUploadPath(relativePath));
+
     const metadata = await sharp(output, {
-      animated: isGif,
+      animated: outputMimeType === "image/gif",
+      limitInputPixels: false,
     }).metadata();
 
     width = metadata.width ?? null;

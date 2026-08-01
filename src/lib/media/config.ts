@@ -23,6 +23,9 @@ export function getUploadConfig() {
 
     // 图片处理配置
     imageMaxWidth: Number(process.env.IMAGE_MAX_WIDTH ?? 1920),
+    imageMaxInputPixels: Number(
+      process.env.IMAGE_MAX_INPUT_PIXELS ?? 268_000_000,
+    ),
     webpQuality: Number(process.env.IMAGE_WEBP_QUALITY ?? 82),
   };
 }
