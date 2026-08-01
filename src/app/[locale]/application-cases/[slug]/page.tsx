@@ -1,12 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { setRequestLocale } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/SiteFooter";
+import SiteFooter from "@/components/SiteFooter";
 
 type ApplicationCase = {
   id: string;
@@ -25,67 +22,52 @@ type ApplicationCase = {
   createdAt: string;
 };
 
-export default function ApplicationCaseDetail() {
-  const params = useParams();
-  const [caseData, setCaseData] =
-    useState<ApplicationCase | null>(null);
+type Props = {
+  params: Promise<{
+    locale: string;
+    slug: string;
+  }>;
+};
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<
-    string | null
-  >(null);
+export default async function ApplicationCaseDetail({
+  params,
+}: Props) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
 
-  const locale = params.locale as string;
-  const slug = params.slug as string;
+  let caseData: ApplicationCase | null = null;
+  let error: string | null = null;
 
-  useEffect(() => {
-    async function fetchCaseDetail() {
-      try {
-        const response = await fetch(
-          `/api/application-cases/${slug}?locale=${locale}`,
-        );
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/application-cases/${slug}?locale=${locale}`,
+      { next: { revalidate: 3600 } },
+    );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch case");
-        }
-
-        const data =
-          await response.json();
-
-        if (data.success) {
-          setCaseData(data.data);
-        } else {
-          setError(
-            data.error?.message ||
-              "Failed to load case",
-          );
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load case",
-        );
-      } finally {
-        setLoading(false);
-      }
+    if (!response.ok) {
+      throw new Error("Failed to fetch case");
     }
 
-    fetchCaseDetail();
-  }, [locale, slug]);
+    const data = await response.json();
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#2463c5]" />
-      </div>
-    );
+    if (data.success) {
+      caseData = data.data;
+    } else {
+      error =
+        data.error?.message ||
+        "Failed to load case";
+    }
+  } catch (err) {
+    error =
+      err instanceof Error
+        ? err.message
+        : "Failed to load case";
   }
 
   if (error || !caseData) {
     return (
       <div className="flex min-h-screen flex-col">
-        <Navigation />
+        <Navigation hasbg/>
 
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -105,27 +87,18 @@ export default function ApplicationCaseDetail() {
           </div>
         </div>
 
-        <Footer locale={locale} />
+        <SiteFooter locale={locale} />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navigation />
+      <Navigation hasbg/>
 
       <main className="flex-1">
         <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-12">
-          <Link
-            href={`/${locale}/cases`}
-            className="inline-flex items-center gap-2 text-[#2463c5] hover:underline mb-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {locale === "zh"
-              ? "返回应用案例"
-              : "Back to Cases"}
-          </Link>
-
+          <div className="w-full h-[3rem]"/>
           <article>
             {caseData.imageAsset && (
               <div className="relative aspect-video overflow-hidden rounded-lg mb-8">
@@ -180,7 +153,7 @@ export default function ApplicationCaseDetail() {
         </div>
       </main>
 
-      <Footer locale={locale} />
+      <SiteFooter locale={locale} />
     </div>
   );
 }

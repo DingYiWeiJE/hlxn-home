@@ -1,8 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  ClipboardList,
+  FilePenLine,
+  Layers3,
+  Loader2,
+  Newspaper,
+  Package,
+  Plus,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type DashboardStats = {
   totalUsers: number;
@@ -18,19 +33,83 @@ type CurrentUser = {
   role: "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "VIEWER";
 };
 
-const roleLabels = {
+const roleLabels: Record<CurrentUser["role"], string> = {
   SUPER_ADMIN: "超级管理员",
   ADMIN: "管理员",
-  EDITOR: "编辑",
-  VIEWER: "浏览者",
+  EDITOR: "内容编辑",
+  VIEWER: "只读用户",
 };
 
-const roleColors = {
-  SUPER_ADMIN: "from-red-500 to-red-600",
-  ADMIN: "from-blue-500 to-blue-600",
-  EDITOR: "from-green-500 to-green-600",
-  VIEWER: "from-gray-500 to-gray-600",
+const roleStyles: Record<CurrentUser["role"], string> = {
+  SUPER_ADMIN: "border-rose-200 bg-rose-50 text-rose-700",
+  ADMIN: "border-blue-200 bg-blue-50 text-blue-700",
+  EDITOR: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  VIEWER: "border-slate-200 bg-slate-100 text-slate-700",
 };
+
+const quickActions = [
+  {
+    href: "/admin/news/create",
+    title: "发布新闻",
+    description: "新建企业动态与行业资讯",
+    icon: Newspaper,
+    iconClassName: "bg-blue-600 text-white",
+  },
+  {
+    href: "/admin/products/create",
+    title: "添加产品",
+    description: "完善产品资料与展示信息",
+    icon: Package,
+    iconClassName: "bg-emerald-600 text-white",
+  },
+  {
+    href: "/admin/application-cases/new",
+    title: "创建案例",
+    description: "沉淀项目成果与实践经验",
+    icon: BookOpen,
+    iconClassName: "bg-amber-500 text-white",
+  },
+  {
+    href: "/admin/contact-submissions",
+    title: "查看线索",
+    description: "跟进客户提交的联系表单",
+    icon: ClipboardList,
+    iconClassName: "bg-violet-600 text-white",
+  },
+];
+
+function StatCard({
+  label,
+  value,
+  detail,
+  icon: Icon,
+  iconClassName,
+}: {
+  label: string;
+  value: number | string;
+  detail: string;
+  icon: typeof Users;
+  iconClassName: string;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className="mt-2 text-3xl font-semibold tracking-normal text-slate-950">
+            {value}
+          </p>
+        </div>
+        <span
+          className={`flex h-11 w-11 items-center justify-center rounded-lg ${iconClassName}`}
+        >
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+      </div>
+      <p className="mt-4 text-sm text-slate-500">{detail}</p>
+    </section>
+  );
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -40,9 +119,14 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadDashboard = async () => {
+    let cancelled = false;
+
+    async function loadDashboard() {
       try {
-        const sessionResponse = await fetch("/api/auth/session");
+        const sessionResponse = await fetch("/api/auth/session", {
+          cache: "no-store",
+        });
+
         if (!sessionResponse.ok) {
           router.replace("/admin/login");
           return;
@@ -50,270 +134,247 @@ export default function AdminDashboard() {
 
         const sessionData = (await sessionResponse.json()) as {
           success: boolean;
-          data?: { authenticated: boolean; user: CurrentUser };
+          data?: { authenticated?: boolean; user?: CurrentUser };
         };
 
-        if (!sessionData.data?.authenticated) {
+        if (!sessionData.data?.authenticated || !sessionData.data.user) {
           router.replace("/admin/login");
           return;
         }
 
-        setUser(sessionData.data.user);
-
-        const statsResponse = await fetch("/api/admin/stats");
-        if (statsResponse.ok) {
-          const statsData = (await statsResponse.json()) as {
-            success: boolean;
-            data?: DashboardStats;
-          };
-          if (statsData.data) {
-            setStats(statsData.data);
-          }
+        if (!cancelled) {
+          setUser(sessionData.data.user);
         }
-      } catch (err) {
-        console.error("Load dashboard failed:", err);
-        setError(err instanceof Error ? err.message : "加载仪表板失败");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    loadDashboard();
+        const statsResponse = await fetch("/api/admin/stats", {
+          cache: "no-store",
+        });
+
+        if (!statsResponse.ok) {
+          throw new Error("暂时无法加载仪表盘数据，请稍后重试。");
+        }
+
+        const statsData = (await statsResponse.json()) as {
+          success: boolean;
+          data?: DashboardStats;
+        };
+
+        if (!statsData.success || !statsData.data) {
+          throw new Error("暂时无法加载仪表盘数据，请稍后重试。");
+        }
+
+        if (!cancelled) {
+          setStats(statsData.data);
+        }
+      } catch (loadError) {
+        console.error("Load dashboard failed:", loadError);
+
+        if (!cancelled) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "加载仪表盘失败，请稍后重试。",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadDashboard();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
+
+  const publishRate = useMemo(() => {
+    if (!stats?.totalNews) {
+      return 0;
+    }
+
+    return Math.round((stats.publishedNews / stats.totalNews) * 100);
+  }, [stats]);
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
-            <p className="text-slate-600 font-medium">加载中...</p>
-          </div>
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="flex items-center gap-3 text-sm font-medium text-slate-500">
+          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+          正在加载仪表盘
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 relative overflow-hidden">
-      {/* Soft Color Washes - Like distant aurora/nebula */}
-      <div className="absolute inset-0 opacity-40">
-        {/* Top Left - Soft Mint Green */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-radial from-emerald-100/30 to-transparent rounded-full blur-3xl -ml-32 -mt-32"></div>
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <header className="flex flex-col gap-5 border-b border-slate-200 pb-7 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-blue-700">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              内容管理中心
+            </div>
+            <h1 className="mt-2 text-3xl font-semibold tracking-normal text-slate-950">
+              早上好，{user?.username ?? "管理员"}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              在这里查看内容运营概况，并快速开始今天的工作。
+            </p>
+          </div>
 
-        {/* Top Right - Soft Pink */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-rose-100/30 to-transparent rounded-full blur-3xl -mr-32 -mt-32"></div>
+          {user ? (
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <span
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium ${roleStyles[user.role]}`}
+              >
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                {roleLabels[user.role]}
+              </span>
+              <Link
+                href="/admin/news/create"
+                className="inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                新建内容
+              </Link>
+            </div>
+          ) : null}
+        </header>
 
-        {/* Bottom Right - Soft Sky Blue */}
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-radial from-sky-100/30 to-transparent rounded-full blur-3xl -mr-32 -mb-32"></div>
+        {error ? (
+          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {error}
+          </div>
+        ) : null}
 
-        {/* Bottom Left - Hint of Pink */}
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-radial from-rose-100/20 to-transparent rounded-full blur-3xl -ml-32 -mb-32"></div>
-      </div>
+        <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label="系统用户"
+            value={stats?.totalUsers ?? "-"}
+            detail="拥有后台访问权限的账号"
+            icon={Users}
+            iconClassName="bg-blue-50 text-blue-700"
+          />
+          <StatCard
+            label="新闻内容"
+            value={stats?.totalNews ?? "-"}
+            detail="已创建的全部新闻条目"
+            icon={Newspaper}
+            iconClassName="bg-violet-50 text-violet-700"
+          />
+          <StatCard
+            label="已发布新闻"
+            value={stats?.publishedNews ?? "-"}
+            detail="正在官网展示的新闻内容"
+            icon={CheckCircle2}
+            iconClassName="bg-emerald-50 text-emerald-700"
+          />
+          <StatCard
+            label="待完善草稿"
+            value={stats?.draftNews ?? "-"}
+            detail="尚未发布，等待编辑处理"
+            icon={FilePenLine}
+            iconClassName="bg-amber-50 text-amber-700"
+          />
+        </section>
 
-      {error && (
-        <div className="fixed top-6 right-6 bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-md z-50">
-          <p className="font-medium">{error}</p>
-        </div>
-      )}
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        {/* Welcome Hero Section */}
-        <div className="mb-12">
-          <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${roleColors[user?.role || "VIEWER"]} p-8 sm:p-12 text-white shadow-lg`}>
-            {/* Background Pattern */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-40 -mt-40"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mb-32"></div>
-
-            {/* Content */}
-            <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-4xl">
-                  👤
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold mb-1">欢迎回来，{user?.username}！</h1>
-                  <p className="text-white/90 text-lg">管理你的系统，保持一切井然有序</p>
-                </div>
+        <div className="mt-7 grid gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <section>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-950">快捷操作</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  常用内容管理入口
+                </p>
               </div>
+            </div>
 
-              <div className="flex flex-wrap gap-4 items-center">
-                <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
-                  角色: {roleLabels[user?.role || "VIEWER"]}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+
+                return (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    className="group flex min-h-32 items-center gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                  >
+                    <span
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${action.iconClassName}`}
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-base font-semibold text-slate-900">
+                        {action.title}
+                      </span>
+                      <span className="mt-1 block text-sm leading-5 text-slate-500">
+                        {action.description}
+                      </span>
+                    </span>
+                    <ArrowRight className="h-5 w-5 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-700" />
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          <aside className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-950">内容状态</h2>
+                <p className="mt-1 text-sm text-slate-500">新闻发布进度</p>
+              </div>
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                <Layers3 className="h-5 w-5" aria-hidden="true" />
+              </span>
+            </div>
+
+            <div className="mt-7">
+              <div className="flex items-baseline justify-between">
+                <span className="text-3xl font-semibold text-slate-950">
+                  {publishRate}%
                 </span>
-                {user?.email && (
-                  <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
-                    {user.email}
-                  </span>
-                )}
+                <span className="text-sm text-slate-500">新闻已发布</span>
+              </div>
+              <div
+                className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"
+                aria-label={`新闻发布率 ${publishRate}%`}
+              >
+                <div
+                  className="h-full rounded-full bg-emerald-500 transition-all"
+                  style={{ width: `${publishRate}%` }}
+                />
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Stats Grid */}
-        {stats && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">系统概览</h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {/* Total Users */}
-              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-blue-200">
-                <div className="absolute top-6 right-6 text-4xl opacity-20">👥</div>
-                <div className="relative z-10">
-                  <p className="text-slate-600 text-sm font-medium mb-2">总用户数</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-blue-600">{stats.totalUsers}</span>
-                    <span className="text-xs text-slate-500">用户</span>
-                  </div>
-                </div>
+            <dl className="mt-7 space-y-4 border-t border-slate-100 pt-5 text-sm">
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-500">已发布</dt>
+                <dd className="font-semibold text-slate-900">
+                  {stats?.publishedNews ?? 0} 篇
+                </dd>
               </div>
-
-              {/* Total News */}
-              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-purple-200">
-                <div className="absolute top-6 right-6 text-4xl opacity-20">📰</div>
-                <div className="relative z-10">
-                  <p className="text-slate-600 text-sm font-medium mb-2">新闻总数</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-purple-600">{stats.totalNews}</span>
-                    <span className="text-xs text-slate-500">篇</span>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-500">草稿待处理</dt>
+                <dd className="font-semibold text-slate-900">
+                  {stats?.draftNews ?? 0} 篇
+                </dd>
               </div>
+            </dl>
 
-              {/* Published */}
-              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-green-200">
-                <div className="absolute top-6 right-6 text-4xl opacity-20">✅</div>
-                <div className="relative z-10">
-                  <p className="text-slate-600 text-sm font-medium mb-2">已发布</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-green-600">{stats.publishedNews}</span>
-                    <span className="text-xs text-slate-500">篇</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Drafts */}
-              <div className="group relative rounded-xl bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-orange-200">
-                <div className="absolute top-6 right-6 text-4xl opacity-20">📝</div>
-                <div className="relative z-10">
-                  <p className="text-slate-600 text-sm font-medium mb-2">草稿</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-orange-600">{stats.draftNews}</span>
-                    <span className="text-xs text-slate-500">篇</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Quick Actions */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">快速操作</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Users Management */}
-            <Link href="/admin/users" className="group block">
-              <div className="relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-blue-200 h-full">
-                {/* Top accent bar */}
-                <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-
-                <div className="p-8">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-3xl group-hover:scale-110 transition-transform">
-                    👥
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">用户管理</h3>
-                  <p className="text-slate-600 text-sm mb-6">创建、编辑和管理系统用户账户，分配角色和权限</p>
-
-                  <div className="inline-flex items-center gap-2 text-blue-600 font-medium text-sm group-hover:gap-3 transition-all">
-                    <span>进入系统</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+            <Link
+              href="/admin/news"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-900"
+            >
+              管理新闻内容
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-
-            {/* News Management */}
-            <Link href="/admin/news" className="group block">
-              <div className="relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100 hover:border-purple-200 h-full">
-                <div className="h-1 bg-gradient-to-r from-purple-400 to-purple-600"></div>
-
-                <div className="p-8">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-purple-50 text-3xl group-hover:scale-110 transition-transform">
-                    📰
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">新闻管理</h3>
-                  <p className="text-slate-600 text-sm mb-6">创建、编辑、发布和管理新闻文章内容</p>
-
-                  <div className="inline-flex items-center gap-2 text-purple-600 font-medium text-sm group-hover:gap-3 transition-all">
-                    <span>进入系统</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Media Management - Coming Soon */}
-            <div className="group block">
-              <div className="relative rounded-xl overflow-hidden bg-slate-50 shadow-sm border border-slate-200 h-full opacity-60">
-                <div className="h-1 bg-gradient-to-r from-gray-300 to-gray-400"></div>
-
-                <div className="p-8">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gray-100 text-3xl">
-                    🖼️
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-600 mb-2">媒体管理</h3>
-                  <p className="text-slate-500 text-sm mb-6">管理系统中的所有媒体资源和文件</p>
-
-                  <div className="inline-flex items-center gap-2 text-slate-400 font-medium text-sm">
-                    <span className="px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-xs font-semibold">即将推出</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Activity and Help Section */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Recent Activity */}
-          <div className="rounded-xl bg-white p-8 shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <span className="text-xl">📊</span>
-              最近活动
-            </h3>
-            <div className="text-center py-8">
-              <div className="text-5xl mb-3">✨</div>
-              <p className="text-slate-500 font-medium">暂无最近活动</p>
-              <p className="text-slate-400 text-sm mt-2">活动日志将在这里显示</p>
-            </div>
-          </div>
-
-          {/* Help & Tips */}
-          <div className="rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-8 border border-blue-100">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <span className="text-xl">💡</span>
-              快速提示
-            </h3>
-            <ul className="space-y-4">
-              <li className="flex gap-3">
-                <span className="text-blue-600 font-bold flex-shrink-0">→</span>
-                <span className="text-slate-700"><strong>用户管理：</strong>管理系统用户、分配角色权限</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-blue-600 font-bold flex-shrink-0">→</span>
-                <span className="text-slate-700"><strong>新闻管理：</strong>发布和管理公司新闻内容</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-blue-600 font-bold flex-shrink-0">→</span>
-                <span className="text-slate-700"><strong>权限检查：</strong>仅超级管理员可访问用户管理</span>
-              </li>
-            </ul>
-          </div>
+          </aside>
         </div>
       </div>
     </main>

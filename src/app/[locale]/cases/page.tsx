@@ -35,11 +35,6 @@ export default async function Cases({ params }: Props) {
 
       <section className="w-full bg-[#eef8ff] py-16 md:py-20">
         <div className="mx-auto max-w-[1280px] px-5 md:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-[#2463c5] md:text-4xl">
-              {locale === "zh" ? "应用案例" : "Cases"}
-            </h2>
-          </div>
 
           <CasesClient locale={locale} />
         </div>
