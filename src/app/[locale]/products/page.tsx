@@ -100,17 +100,18 @@ async function ProductsContent({ locale }: { locale: string }) {
         </section>
 
         <ProductCatalog />
-<DownloadBanner
-  image="/images/products/dy.jpg"
-  title={page.downloadProductTitle}
-  buttonText={t("focusSection.moreText")}
-/>
+        <DownloadBanner
+          image="/images/products/dy.jpg"
+          title={page.downloadProductTitle}
+          buttonText={t("focusSection.moreText")}
+          priority
+        />
 
-<DownloadBanner
-  image="/images/products/yj.jpg"
-  title={page.downloadBrochureTitle}
-  buttonText={t("focusSection.moreText")}
-/>
+        <DownloadBanner
+          image="/images/products/yj.jpg"
+          title={page.downloadBrochureTitle}
+          buttonText={t("focusSection.moreText")}
+        />
 
       </main>
 

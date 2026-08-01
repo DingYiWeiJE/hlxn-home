@@ -4,10 +4,12 @@ export function DownloadBanner({
   image,
   title,
   buttonText,
+  priority = false,
 }: {
   image: string;
   title: string;
   buttonText: string;
+  priority?: boolean;
 }) {
   return (
     <section className="relative isolate flex h-[350px] items-center justify-center overflow-hidden">
@@ -16,6 +18,8 @@ export function DownloadBanner({
         alt=""
         fill
         sizes="100vw"
+        priority={priority}
+        quality={85}
         className="-z-20 object-cover"
       />
 
