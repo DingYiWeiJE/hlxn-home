@@ -6,6 +6,7 @@ import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -366,6 +367,8 @@ export async function PATCH(
         },
       });
 
+    clearCacheByNamespace("categories");
+
     return ok(category);
   } catch (error) {
     return fail(error);
@@ -458,6 +461,8 @@ export async function DELETE(
         deletedAt: new Date(),
       },
     });
+
+    clearCacheByNamespace("categories");
 
     return ok({
       id,

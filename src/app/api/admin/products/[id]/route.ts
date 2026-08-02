@@ -10,6 +10,7 @@ import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
 import { updateProductSchema } from "@/lib/products/schemas";
 import { validateProductReferences } from "@/lib/products/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -653,6 +654,8 @@ export async function PATCH(
         },
       );
 
+    clearCacheByNamespace("products");
+
     return ok(
       formatProductDetail(product),
     );
@@ -704,6 +707,8 @@ export async function DELETE(
         deletedAt: new Date(),
       },
     });
+
+    clearCacheByNamespace("products");
 
     return ok({
       id,

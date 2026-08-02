@@ -14,6 +14,7 @@ import {
   createProductSchema,
 } from "@/lib/products/schemas";
 import { validateProductReferences } from "@/lib/products/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -571,6 +572,8 @@ export async function POST(request: Request) {
           });
         },
       );
+
+    clearCacheByNamespace("products");
 
     return ok(
       {

@@ -10,6 +10,7 @@ import {
   assertCanWriteStrategic,
 } from "@/lib/strategic/permissions";
 import { updateStrategicLocationSchema } from "@/lib/strategic/schemas";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -89,6 +90,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       },
     });
 
+    clearCacheByNamespace("strategic-locations");
+
     return ok(serializeItem(item));
   } catch (error) {
     return fail(error);
@@ -120,6 +123,8 @@ export async function DELETE(request: Request, context: RouteContext) {
         updatedById: actor.userId,
       },
     });
+
+    clearCacheByNamespace("strategic-locations");
 
     return ok({ id, deleted: true });
   } catch (error) {

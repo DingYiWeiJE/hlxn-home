@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
+import { withCache } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,8 @@ export async function GET(
   request: NextRequest,
 ) {
   try {
+    console.log(`[PRODUCTS-API] GET 方法被调用，locale=${request.nextUrl.searchParams.get('locale')}`);
+
     const query =
       productListQuerySchema.parse(
         Object.fromEntries(
@@ -71,199 +74,208 @@ export async function GET(
         ),
       );
 
-    const locale =
-      query.locale as ProductLocale;
+    const data = await withCache(
+      "products",
+      query,
+      async () => {
+        const locale =
+          query.locale as ProductLocale;
 
-    const where: Prisma.ProductWhereInput = {
-      locale,
-      status: ProductStatus.PUBLISHED,
-      deletedAt: null,
+        const where: Prisma.ProductWhereInput = {
+          locale,
+          status: ProductStatus.PUBLISHED,
+          deletedAt: null,
 
-      // 二级分类及其所属一级分类必须正常启用
-      secondaryCategory: {
-        enabled: true,
-        deletedAt: null,
-
-        parent: {
-          is: {
+          // 二级分类及其所属一级分类必须正常启用
+          secondaryCategory: {
             enabled: true,
             deletedAt: null,
+
+            parent: {
+              is: {
+                enabled: true,
+                deletedAt: null,
+              },
+            },
+
+            ...(query.primaryCategoryId
+              ? {
+                  parentId:
+                    query.primaryCategoryId,
+                }
+              : {}),
           },
-        },
 
-        ...(query.primaryCategoryId
-          ? {
-              parentId:
-                query.primaryCategoryId,
-            }
-          : {}),
-      },
+          ...(query.secondaryCategoryId
+            ? {
+                secondaryCategoryId:
+                  query.secondaryCategoryId,
+              }
+            : {}),
 
-      ...(query.secondaryCategoryId
-        ? {
-            secondaryCategoryId:
-              query.secondaryCategoryId,
-          }
-        : {}),
+          ...(query.keyword
+            ? {
+                OR: [
+                  {
+                    name: {
+                      contains: query.keyword,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    seriesName: {
+                      contains: query.keyword,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              }
+            : {}),
+        };
 
-      ...(query.keyword
-        ? {
-            OR: [
-              {
-                name: {
-                  contains: query.keyword,
-                  mode: "insensitive",
+        const [items, total] =
+          await prisma.$transaction([
+            prisma.product.findMany({
+              where,
+
+              skip:
+                (query.page - 1) *
+                query.pageSize,
+
+              take: query.pageSize,
+
+              orderBy: [
+                {
+                  sortOrder: "asc",
                 },
-              },
-              {
-                seriesName: {
-                  contains: query.keyword,
-                  mode: "insensitive",
+                {
+                  publishedAt: "desc",
                 },
-              },
-            ],
-          }
-        : {}),
-    };
+                {
+                  createdAt: "desc",
+                },
+              ],
 
-    const [items, total] =
-      await prisma.$transaction([
-        prisma.product.findMany({
-          where,
-
-          skip:
-            (query.page - 1) *
-            query.pageSize,
-
-          take: query.pageSize,
-
-          orderBy: [
-            {
-              sortOrder: "asc",
-            },
-            {
-              publishedAt: "desc",
-            },
-            {
-              createdAt: "desc",
-            },
-          ],
-
-          select: {
-            id: true,
-            locale: true,
-            name: true,
-            slug: true,
-            seriesName: true,
-            summaryParagraphs: true,
-            highlights: true,
-            publishedAt: true,
-
-            coverImageAsset: {
               select: {
                 id: true,
-                url: true,
-                width: true,
-                height: true,
-                alt: true,
-              },
-            },
-
-            secondaryCategory: {
-              select: {
-                id: true,
+                locale: true,
                 name: true,
-                nameEn: true,
                 slug: true,
+                seriesName: true,
+                summaryParagraphs: true,
+                highlights: true,
+                publishedAt: true,
 
-                parent: {
+                coverImageAsset: {
+                  select: {
+                    id: true,
+                    url: true,
+                    width: true,
+                    height: true,
+                    alt: true,
+                  },
+                },
+
+                secondaryCategory: {
                   select: {
                     id: true,
                     name: true,
                     nameEn: true,
                     slug: true,
+
+                    parent: {
+                      select: {
+                        id: true,
+                        name: true,
+                        nameEn: true,
+                        slug: true,
+                      },
+                    },
                   },
                 },
               },
+            }),
+
+            prisma.product.count({
+              where,
+            }),
+          ]);
+
+        const totalPages = Math.ceil(
+          total / query.pageSize,
+        );
+
+        return {
+          locale,
+
+          items: items.map((item) => ({
+            id: item.id,
+            locale: item.locale,
+            name: item.name,
+            slug: item.slug,
+            seriesName: item.seriesName,
+
+            summaryParagraphs:
+              item.summaryParagraphs,
+
+            highlights:
+              item.highlights,
+
+            coverImage:
+              item.coverImageAsset,
+
+            category: {
+              primary: {
+                id:
+                  item.secondaryCategory.parent!.id,
+                name: getCategoryName(
+                  item.secondaryCategory.parent!,
+                  locale,
+                ),
+                slug:
+                  item.secondaryCategory.parent!.slug,
+              },
+
+              secondary: {
+                id:
+                  item.secondaryCategory.id,
+
+                name: getCategoryName(
+                  item.secondaryCategory,
+                  locale,
+                ),
+
+                slug:
+                  item.secondaryCategory.slug,
+              },
             },
+
+            publishedAt:
+              item.publishedAt,
+
+            detailUrl:
+              `/${item.locale}/products/${item.slug}`,
+          })),
+
+          pagination: {
+            page: query.page,
+            pageSize: query.pageSize,
+            total,
+            totalPages,
+
+            hasNextPage:
+              query.page < totalPages,
+
+            hasPreviousPage:
+              query.page > 1,
           },
-        }),
-
-        prisma.product.count({
-          where,
-        }),
-      ]);
-
-    const totalPages = Math.ceil(
-      total / query.pageSize,
+        };
+      },
+      10 * 60 * 1000,
     );
 
     return ok(
-      {
-        locale,
-
-        items: items.map((item) => ({
-          id: item.id,
-          locale: item.locale,
-          name: item.name,
-          slug: item.slug,
-          seriesName: item.seriesName,
-
-          summaryParagraphs:
-            item.summaryParagraphs,
-
-          highlights:
-            item.highlights,
-
-          coverImage:
-            item.coverImageAsset,
-
-          category: {
-            primary: {
-              id:
-                item.secondaryCategory.parent!.id,
-              name: getCategoryName(
-                item.secondaryCategory.parent!,
-                locale,
-              ),
-              slug:
-                item.secondaryCategory.parent!.slug,
-            },
-
-            secondary: {
-              id:
-                item.secondaryCategory.id,
-
-              name: getCategoryName(
-                item.secondaryCategory,
-                locale,
-              ),
-
-              slug:
-                item.secondaryCategory.slug,
-            },
-          },
-
-          publishedAt:
-            item.publishedAt,
-
-          detailUrl:
-            `/${item.locale}/products/${item.slug}`,
-        })),
-
-        pagination: {
-          page: query.page,
-          pageSize: query.pageSize,
-          total,
-          totalPages,
-
-          hasNextPage:
-            query.page < totalPages,
-
-          hasPreviousPage:
-            query.page > 1,
-        },
-      },
+      data,
       {
         headers: {
           "Cache-Control":

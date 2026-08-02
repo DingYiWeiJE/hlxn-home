@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { fail, ok } from "@/lib/api/response";
 import { getPublicSolutions } from "@/lib/solutions/public";
 import { publicSolutionListQuerySchema } from "@/lib/solutions/schemas";
+import { withCache } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,12 @@ export async function GET(request: NextRequest) {
       Object.fromEntries(request.nextUrl.searchParams),
     );
 
-    const data = await getPublicSolutions(query);
+    const data = await withCache(
+      "solutions",
+      query,
+      () => getPublicSolutions(query),
+      10 * 60 * 1000,
+    );
 
     return ok(data, {
       headers: {

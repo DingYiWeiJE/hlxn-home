@@ -18,6 +18,7 @@ import {
   extractTextFromTiptapJson,
 } from "@/lib/news/tiptap";
 import { prisma } from "@/lib/prisma";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -495,6 +496,8 @@ export async function PATCH(
       newSlug: updated.slug,
     });
 
+    clearCacheByNamespace("news");
+
     return ok(
       formatNewsDetail(updated),
     );
@@ -559,6 +562,8 @@ export async function DELETE(
       newSlug:
         updated.slug,
     });
+
+    clearCacheByNamespace("news");
 
     return ok(updated);
   } catch (error) {

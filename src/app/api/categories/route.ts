@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
+import { withCache } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -41,152 +42,161 @@ export async function GET(
     const locale =
       query.locale as ProductLocale;
 
-    const [
-      primaryCategories,
-      secondaryCategories,
-    ] = await prisma.$transaction([
-      prisma.category.findMany({
-        where: {
-          level: CategoryLevel.LEVEL_ONE,
-          enabled: true,
-          deletedAt: null,
-        },
-        orderBy: [
-          {
-            sortOrder: "asc",
-          },
-          {
-            createdAt: "asc",
-          },
-        ],
-        select: {
-          id: true,
-          name: true,
-          nameEn: true,
-          slug: true,
-          sortOrder: true,
-
-          _count: {
-            select: {
-              children: {
-                where: {
-                  level: CategoryLevel.LEVEL_TWO,
-                  enabled: true,
-                  deletedAt: null,
-                },
-              },
-            },
-          },
-        },
-      }),
-
-      prisma.category.findMany({
-        where: {
-          level: CategoryLevel.LEVEL_TWO,
-          enabled: true,
-          deletedAt: null,
-
-          parent: {
-            is: {
+    const data = await withCache(
+      "categories",
+      query,
+      async () => {
+        const [
+          primaryCategories,
+          secondaryCategories,
+        ] = await prisma.$transaction([
+          prisma.category.findMany({
+            where: {
               level: CategoryLevel.LEVEL_ONE,
               enabled: true,
               deletedAt: null,
             },
-          },
-        },
-        orderBy: [
-          {
-            sortOrder: "asc",
-          },
-          {
-            createdAt: "asc",
-          },
-        ],
-        select: {
-          id: true,
-          name: true,
-          nameEn: true,
-          slug: true,
-          parentId: true,
-          sortOrder: true,
-
-          parent: {
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
             select: {
               id: true,
               name: true,
               nameEn: true,
               slug: true,
-            },
-          },
+              sortOrder: true,
 
-          _count: {
-            select: {
-              products: {
-                where: {
-                  locale,
-                  status: ProductStatus.PUBLISHED,
+              _count: {
+                select: {
+                  children: {
+                    where: {
+                      level: CategoryLevel.LEVEL_TWO,
+                      enabled: true,
+                      deletedAt: null,
+                    },
+                  },
+                },
+              },
+            },
+          }),
+
+          prisma.category.findMany({
+            where: {
+              level: CategoryLevel.LEVEL_TWO,
+              enabled: true,
+              deletedAt: null,
+
+              parent: {
+                is: {
+                  level: CategoryLevel.LEVEL_ONE,
+                  enabled: true,
                   deletedAt: null,
                 },
               },
             },
-          },
-        },
-      }),
-    ]);
+            orderBy: [
+              {
+                sortOrder: "asc",
+              },
+              {
+                createdAt: "asc",
+              },
+            ],
+            select: {
+              id: true,
+              name: true,
+              nameEn: true,
+              slug: true,
+              parentId: true,
+              sortOrder: true,
 
-    return ok(
-      {
-        primaryCategories:
-          primaryCategories.map(
-            (category) => ({
-              id: category.id,
-              name: getCategoryName(
-                category,
-                locale,
-              ),
-              nameZh: category.name,
-              nameEn: category.nameEn,
-              slug: category.slug,
-              sortOrder:
-                category.sortOrder,
-              secondaryCategoryCount:
-                category._count.children,
-            }),
-          ),
-
-        secondaryCategories:
-          secondaryCategories.map(
-            (category) => ({
-              id: category.id,
-              name: getCategoryName(
-                category,
-                locale,
-              ),
-              nameZh: category.name,
-              nameEn: category.nameEn,
-              slug: category.slug,
-              parentId: category.parentId,
-              sortOrder:
-                category.sortOrder,
-
-              primaryCategory: {
-                id: category.parent!.id,
-                name: getCategoryName(
-                  category.parent!,
-                  locale,
-                ),
-                nameZh:
-                  category.parent!.name,
-                nameEn:
-                  category.parent!.nameEn,
-                slug: category.parent!.slug,
+              parent: {
+                select: {
+                  id: true,
+                  name: true,
+                  nameEn: true,
+                  slug: true,
+                },
               },
 
-              publishedProductCount:
-                category._count.products,
-            }),
-          ),
+              _count: {
+                select: {
+                  products: {
+                    where: {
+                      locale,
+                      status: ProductStatus.PUBLISHED,
+                      deletedAt: null,
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        ]);
+
+        return {
+          primaryCategories:
+            primaryCategories.map(
+              (category) => ({
+                id: category.id,
+                name: getCategoryName(
+                  category,
+                  locale,
+                ),
+                nameZh: category.name,
+                nameEn: category.nameEn,
+                slug: category.slug,
+                sortOrder:
+                  category.sortOrder,
+                secondaryCategoryCount:
+                  category._count.children,
+              }),
+            ),
+
+          secondaryCategories:
+            secondaryCategories.map(
+              (category) => ({
+                id: category.id,
+                name: getCategoryName(
+                  category,
+                  locale,
+                ),
+                nameZh: category.name,
+                nameEn: category.nameEn,
+                slug: category.slug,
+                parentId: category.parentId,
+                sortOrder:
+                  category.sortOrder,
+
+                primaryCategory: {
+                  id: category.parent!.id,
+                  name: getCategoryName(
+                    category.parent!,
+                    locale,
+                  ),
+                  nameZh:
+                    category.parent!.name,
+                  nameEn:
+                    category.parent!.nameEn,
+                  slug: category.parent!.slug,
+                },
+
+                publishedProductCount:
+                  category._count.products,
+              }),
+            ),
+        };
       },
+      10 * 60 * 1000,
+    );
+
+    return ok(
+      data,
       {
         headers: {
           "Cache-Control":
@@ -212,3 +222,4 @@ function getCategoryName(
 
   return category.name;
 }
+

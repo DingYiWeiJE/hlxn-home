@@ -11,6 +11,7 @@ import {
 import {
   validateApplicationCaseImage,
 } from "@/lib/application-cases/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -168,6 +169,8 @@ export async function PATCH(
         },
       });
 
+    clearCacheByNamespace("application-cases");
+
     return ok(applicationCase);
   } catch (error) {
     return fail(error);
@@ -208,6 +211,8 @@ export async function DELETE(
       where: { id },
       data: { deletedAt: new Date() },
     });
+
+    clearCacheByNamespace("application-cases");
 
     return ok(null);
   } catch (error) {

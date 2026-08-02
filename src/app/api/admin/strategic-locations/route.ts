@@ -14,6 +14,7 @@ import {
   adminStrategicLocationListQuerySchema,
   createStrategicLocationSchema,
 } from "@/lib/strategic/schemas";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -135,6 +136,8 @@ export async function POST(request: Request) {
         updatedById: actor.userId,
       },
     });
+
+    clearCacheByNamespace("strategic-locations");
 
     return ok(
       {

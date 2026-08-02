@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { listPublishedNews, normalizeNewsListItem } from "@/lib/news/queries";
 
 type Locale = "zh" | "en";
 
@@ -23,14 +22,34 @@ type NewsCenterProps = {
 async function fetchNews(locale: Locale, maxItems = 3): Promise<NewsItem[]> {
   try {
     const pageSize = Math.min(Math.max(Math.trunc(maxItems), 1), 12);
-    const sourceItems = (await listPublishedNews(locale, pageSize)).map(normalizeNewsListItem);
+    const apiUrl = `http://localhost:3000/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
 
-    return sourceItems
+    console.log(`[NewsCenter] 开始获取新闻，URL=${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+      cache: "no-store",
+      next: { revalidate: 0 }
+    });
+
+    console.log(`[NewsCenter] 新闻 API 响应状态=${response.status}`);
+
+    if (!response.ok) {
+      console.error(`[NewsCenter] 新闻 API 失败，状态=${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+
+    if (!data.data?.items || !Array.isArray(data.data.items)) {
+      return [];
+    }
+
+    return data.data.items
       .slice(0, pageSize)
-      .map((item) => normalizeNewsItem(item, locale))
+      .map((item: any) => normalizeNewsItem(item, locale))
       .filter((item): item is NewsItem => item !== null);
   } catch (error) {
-    console.error("[NewsCenter] 获取新闻失败：", error);
+    console.error("[NewsCenter] 获取新闻异常：", error);
     return [];
   }
 }
@@ -138,7 +157,7 @@ function NewsCard({ item, locale }: { item: NewsItem; locale: Locale }) {
 }
 
 function normalizeNewsItem(
-  item: ReturnType<typeof normalizeNewsListItem>,
+  item: any,
   locale: Locale,
 ): NewsItem | null {
   const id = typeof item.id === "string" ? item.id.trim() : "";
@@ -161,8 +180,8 @@ function normalizeNewsItem(
   };
 }
 
-function resolveCoverImage(item: ReturnType<typeof normalizeNewsListItem>): string | null {
-  const value = item.coverImage?.url ?? null;
+function resolveCoverImage(item: any): string | null {
+  const value = item.coverImage?.url ?? item.coverImageAsset?.url ?? null;
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 

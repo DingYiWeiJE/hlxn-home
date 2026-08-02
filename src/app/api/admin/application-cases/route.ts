@@ -15,6 +15,7 @@ import {
 import {
   generateUniqueSlug,
 } from "@/lib/slug/generate-slug";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -237,6 +238,8 @@ export async function POST(request: Request) {
           updatedAt: true,
         },
       });
+
+    clearCacheByNamespace("application-cases");
 
     return ok(applicationCase, {
       status: 201,

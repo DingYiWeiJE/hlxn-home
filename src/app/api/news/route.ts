@@ -25,6 +25,7 @@ import { prisma } from "@/lib/prisma";
 import {
   generateUniqueSlug,
 } from "@/lib/slug/generate-slug";
+import { withCache, clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -93,6 +94,8 @@ export async function GET(
   request: NextRequest,
 ) {
   try {
+    console.log(`[NEWS-API] GET 方法被调用，locale=${request.nextUrl.searchParams.get('locale')}`);
+
     const query =
       listNewsQuerySchema.parse(
         Object.fromEntries(
@@ -100,130 +103,139 @@ export async function GET(
         ),
       );
 
-    const now = new Date();
+    const data = await withCache(
+      "news",
+      query,
+      async () => {
+        const now = new Date();
 
-    const where:
-      Prisma.NewsWhereInput = {
-      locale: query.locale,
-      status: "PUBLISHED",
-      deletedAt: null,
+        const where:
+          Prisma.NewsWhereInput = {
+          locale: query.locale,
+          status: "PUBLISHED",
+          deletedAt: null,
 
-      publishedAt: {
-        lte: now,
-      },
+          publishedAt: {
+            lte: now,
+          },
 
-      ...(query.featured ===
-      undefined
-        ? {}
-        : {
-            isFeatured:
-              query.featured,
-          }),
+          ...(query.featured ===
+          undefined
+            ? {}
+            : {
+                isFeatured:
+                  query.featured,
+              }),
 
-      ...(query.keyword
-        ? {
-            OR: [
-              {
-                title: {
-                  contains:
-                    query.keyword,
-                  mode:
-                    "insensitive",
-                },
-              },
-              {
-                summary: {
-                  contains:
-                    query.keyword,
-                  mode:
-                    "insensitive",
-                },
-              },
-              {
-                contentText: {
-                  contains:
-                    query.keyword,
-                  mode:
-                    "insensitive",
-                },
-              },
-            ],
-          }
-        : {}),
-    };
-
-    const [items, total] =
-      await prisma.$transaction([
-        prisma.news.findMany({
-          where,
-          select:
-            newsListSelect,
-
-          skip:
-            (query.page - 1) *
-            query.pageSize,
-
-          take:
-            query.pageSize,
-
-          orderBy:
-            query.sort ===
-                "publishedAt" &&
-              query.order ===
-                "desc"
-              ? [
+          ...(query.keyword
+            ? {
+                OR: [
                   {
-                    isFeatured:
-                      "desc",
+                    title: {
+                      contains:
+                        query.keyword,
+                      mode:
+                        "insensitive",
+                    },
                   },
                   {
-                    publishedAt:
-                      "desc",
+                    summary: {
+                      contains:
+                        query.keyword,
+                      mode:
+                        "insensitive",
+                    },
                   },
                   {
-                    createdAt:
-                      "desc",
-                  },
-                ]
-              : [
-                  {
-                    [query.sort]:
-                      query.order,
+                    contentText: {
+                      contains:
+                        query.keyword,
+                      mode:
+                        "insensitive",
+                    },
                   },
                 ],
-        }),
+              }
+            : {}),
+        };
 
-        prisma.news.count({
-          where,
-        }),
-      ]);
+        const [items, total] =
+          await prisma.$transaction([
+            prisma.news.findMany({
+              where,
+              select:
+                newsListSelect,
 
-    const totalPages =
-      Math.ceil(
-        total / query.pageSize,
-      );
+              skip:
+                (query.page - 1) *
+                query.pageSize,
 
-    return ok({
-      items:
-        items.map(
-          normalizeNewsListItem,
-        ),
+              take:
+                query.pageSize,
 
-      pagination: {
-        page: query.page,
-        pageSize:
-          query.pageSize,
-        total,
-        totalPages,
+              orderBy:
+                query.sort ===
+                    "publishedAt" &&
+                  query.order ===
+                    "desc"
+                  ? [
+                      {
+                        isFeatured:
+                          "desc",
+                      },
+                      {
+                        publishedAt:
+                          "desc",
+                      },
+                      {
+                        createdAt:
+                          "desc",
+                      },
+                    ]
+                  : [
+                      {
+                        [query.sort]:
+                          query.order,
+                      },
+                    ],
+            }),
 
-        hasNextPage:
-          query.page <
-          totalPages,
+            prisma.news.count({
+              where,
+            }),
+          ]);
 
-        hasPreviousPage:
-          query.page > 1,
+        const totalPages =
+          Math.ceil(
+            total / query.pageSize,
+          );
+
+        return {
+          items:
+            items.map(
+              normalizeNewsListItem,
+            ),
+
+          pagination: {
+            page: query.page,
+            pageSize:
+              query.pageSize,
+            total,
+            totalPages,
+
+            hasNextPage:
+              query.page <
+              totalPages,
+
+            hasPreviousPage:
+              query.page > 1,
+          },
+        };
       },
-    });
+      10 * 60 * 1000,
+    );
+
+    return ok(data);
   } catch (error) {
     return fail(error);
   }
@@ -418,6 +430,8 @@ export async function POST(
     revalidateNewsCache({
       newSlug: created.slug,
     });
+
+    clearCacheByNamespace("news");
 
     return ok(
       formatNewsDetail(created),

@@ -10,7 +10,6 @@ import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCa
 import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
 import NewsCenter from "./abHomeComponents/NewsCenter";
 import SiteFooter from "@/components/SiteFooter";
-import { listFeaturedProducts } from "@/lib/products/public";
 
 type Props = {
   params: Promise<{
@@ -37,14 +36,34 @@ async function fetchProducts(
   }
 
   try {
-    const products = await listFeaturedProducts(locale, 5);
+    const apiUrl = `http://localhost:3000/api/products?locale=${locale}&pageSize=5`;
 
-    return products.map((product) => ({
+    console.log(`[HomePage] 开始获取产品，URL=${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+      cache: "no-store",
+      next: { revalidate: 0 }
+    });
+
+    console.log(`[HomePage] 产品 API 响应状态=${response.status}`);
+
+    if (!response.ok) {
+      console.error(`[HomePage] 产品 API 失败，状态=${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+
+    if (!data.data?.items || !Array.isArray(data.data.items)) {
+      return [];
+    }
+
+    return data.data.items.map((product: any) => ({
       id: product.id,
       name: product.name,
       slug: product.slug,
       locale: product.locale,
-      coverImage: product.coverImageAsset,
+      coverImage: product.coverImage,
       summaryParagraphs: Array.isArray(product.summaryParagraphs)
         ? product.summaryParagraphs.filter(
             (paragraph): paragraph is string => typeof paragraph === "string",
@@ -52,7 +71,7 @@ async function fetchProducts(
         : [],
     }));
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error(`[HomePage] 获取产品异常:`, error);
     return [];
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withCache } from "@/lib/cache";
 
 const querySchema = z.object({
   locale: z.enum(["zh", "en"]),
@@ -15,60 +16,70 @@ export async function GET(request: NextRequest) {
       Object.fromEntries(request.nextUrl.searchParams),
     );
 
-    const [items, total] =
-      await prisma.$transaction([
-        prisma.applicationCase.findMany({
-          where: {
-            locale: query.locale,
-            deletedAt: null,
-          },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            caseDate: true,
-            contentParagraphs: true,
-            imageAsset: {
+    const data = await withCache(
+      "application-cases",
+      query,
+      async () => {
+        const [items, total] =
+          await prisma.$transaction([
+            prisma.applicationCase.findMany({
+              where: {
+                locale: query.locale,
+                deletedAt: null,
+              },
               select: {
                 id: true,
-                url: true,
-                width: true,
-                height: true,
-                alt: true,
+                title: true,
+                slug: true,
+                caseDate: true,
+                contentParagraphs: true,
+                imageAsset: {
+                  select: {
+                    id: true,
+                    url: true,
+                    width: true,
+                    height: true,
+                    alt: true,
+                  },
+                },
               },
-            },
-          },
-          orderBy: [
-            { caseDate: "desc" },
-            { createdAt: "desc" },
-          ],
-          skip: (query.page - 1) * query.pageSize,
-          take: query.pageSize,
-        }),
-        prisma.applicationCase.count({
-          where: {
-            locale: query.locale,
-            deletedAt: null,
-          },
-        }),
-      ]);
+              orderBy: [
+                { caseDate: "desc" },
+                { createdAt: "desc" },
+              ],
+              skip: (query.page - 1) * query.pageSize,
+              take: query.pageSize,
+            }),
+            prisma.applicationCase.count({
+              where: {
+                locale: query.locale,
+                deletedAt: null,
+              },
+            }),
+          ]);
 
-    const totalPages = Math.ceil(
-      total / query.pageSize,
+        const totalPages = Math.ceil(
+          total / query.pageSize,
+        );
+
+        return {
+          items,
+          pagination: {
+            page: query.page,
+            pageSize: query.pageSize,
+            total,
+            totalPages,
+            hasNextPage: query.page < totalPages,
+            hasPreviousPage: query.page > 1,
+          },
+        };
+      },
+      10 * 60 * 1000,
     );
 
-    return ok({
-      items,
-      pagination: {
-        page: query.page,
-        pageSize: query.pageSize,
-        total,
-        totalPages,
-        hasNextPage: query.page < totalPages,
-        hasPreviousPage: query.page > 1,
-      },
-    });
+    return ok(data);
   } catch (error) {
     return fail(error);
   }
 }
+
