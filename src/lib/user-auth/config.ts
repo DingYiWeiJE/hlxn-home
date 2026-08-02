@@ -1,7 +1,8 @@
 import { ApiError } from "@/lib/api/errors";
 
 export function getUserAuthConfig() {
-  const sessionSecret = process.env.USER_SESSION_SECRET;
+  const sessionSecret = '2bd5270ff3c7e024f4e5ecf417075f9955bd7425fe424b01f0b4c27ffa30dc0e';
+  // const sessionSecret = process.env.USER_SESSION_SECRET;
   const ttlSeconds = Number(process.env.USER_SESSION_TTL_SECONDS ?? "28800");
 
   if (!sessionSecret || sessionSecret.length < 32) {
