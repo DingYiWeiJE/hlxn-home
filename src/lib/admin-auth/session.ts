@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { shouldUseSecureCookies } from "@/lib/auth-cookie";
 import { adminCookieName, getAdminConfig } from "./config";
 
 type SessionPayload = {
@@ -76,7 +77,7 @@ export function getAdminCookieOptions() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookies(),
     path: "/",
     maxAge: ttlSeconds,
   };

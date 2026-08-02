@@ -87,6 +87,37 @@ export function normalizeNewsListItem(
   };
 }
 
+export async function listPublishedNews(
+  locale: NewsLocale,
+  pageSize: number,
+) {
+  const now = new Date();
+
+  return prisma.news.findMany({
+    where: {
+      locale,
+      status: "PUBLISHED",
+      deletedAt: null,
+      publishedAt: {
+        lte: now,
+      },
+    },
+    select: newsListSelect,
+    take: pageSize,
+    orderBy: [
+      {
+        isFeatured: "desc",
+      },
+      {
+        publishedAt: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+}
+
 export async function findPublishedNewsBySlug(
   slug: string,
   locale?: NewsLocale,

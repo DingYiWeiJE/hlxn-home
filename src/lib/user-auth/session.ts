@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { UserRole } from "@prisma/client";
+import { shouldUseSecureCookies } from "@/lib/auth-cookie";
 
 export const userCookieName = "hanly_user_session";
 
@@ -81,7 +82,7 @@ export function getUserCookieOptions(ttlSeconds: number) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookies(),
     path: "/",
     maxAge: ttlSeconds,
   };

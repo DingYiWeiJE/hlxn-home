@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import { headers } from "next/headers";
 import Navigation from "@/components/Navigation";
 import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
 import type { Metadata } from "next";
@@ -11,6 +10,7 @@ import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCa
 import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
 import NewsCenter from "./abHomeComponents/NewsCenter";
 import SiteFooter from "@/components/SiteFooter";
+import { listFeaturedProducts } from "@/lib/products/public";
 
 type Props = {
   params: Promise<{
@@ -29,72 +29,28 @@ type Product = {
   summaryParagraphs?: string[];
 };
 
-async function getSiteOrigin(): Promise<string> {
-  const configuredOrigin =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.APP_ORIGIN ??
-    process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  if (configuredOrigin) {
-    return configuredOrigin.replace(/\/+$/, "");
-  }
-
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ??
-    requestHeaders.get("host");
-
-  if (!host) {
-    return "http://localhost:3000";
-  }
-
-  const forwardedProtocol = requestHeaders.get(
-    "x-forwarded-proto"
-  );
-
-  const isLocal =
-    host.startsWith("localhost") ||
-    host.startsWith("127.0.0.1");
-
-  const protocol =
-    forwardedProtocol ?? (isLocal ? "http" : "https");
-
-  return `${protocol}://${host}`;
-}
-
 async function fetchProducts(
   locale: string
 ): Promise<Product[]> {
-  try {
-    const origin = await getSiteOrigin();
-    const query = new URLSearchParams({
-      locale,
-      pageSize: "5",
-    });
-
-    const response = await fetch(
-      `${origin}/api/products?${query.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      console.error("Failed to fetch products");
-      return [];
-    }
-
-    const result = await response.json();
-
-    if (result.success && Array.isArray(result.data.items)) {
-      return result.data.items;
-    }
-
+  if (locale !== "zh" && locale !== "en") {
     return [];
+  }
+
+  try {
+    const products = await listFeaturedProducts(locale, 5);
+
+    return products.map((product) => ({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      locale: product.locale,
+      coverImage: product.coverImageAsset,
+      summaryParagraphs: Array.isArray(product.summaryParagraphs)
+        ? product.summaryParagraphs.filter(
+            (paragraph): paragraph is string => typeof paragraph === "string",
+          )
+        : [],
+    }));
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];

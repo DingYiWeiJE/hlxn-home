@@ -1,27 +1,36 @@
 services:
   app:
-    build: .
+    image: hanly-home:v1
+    env_file:
+      - .env
     ports:
       - "80:3000"
     environment:
-      DATABASE_URL: postgresql://hanly_app:HanLy.26@postgres:5432/hanly?schema=public
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
+      DATABASE_URL: "postgresql://hanly_app:HanLy.26@postgres:5432/hanly?schema=public"
+    command: >
+      sh -c "npx prisma migrate deploy &&
+             npx prisma db seed &&
+             exec node server.js"
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--timeout=5", "http://localhost:3000/"]
+      test: ["CMD-SHELL", "wget -qO- --timeout=5 http://127.0.0.1:3000/ >/dev/null || exit 1"]
       interval: 10s
-      retries: 3
+      timeout: 6s
+      retries: 5
       start_period: 30s
 
   postgres:
     image: postgres:16
     environment:
       POSTGRES_USER: hanly_app
-      POSTGRES_PASSWORD: HanLy.26
+      POSTGRES_PASSWORD: "HanLy.26"
       POSTGRES_DB: hanly
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hanly_app"]
+      test: ["CMD-SHELL", "pg_isready -U hanly_app -d hanly"]
       interval: 5s
-      retries: 5
+      timeout: 5s
+      retries: 10
