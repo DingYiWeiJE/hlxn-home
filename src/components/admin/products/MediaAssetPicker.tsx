@@ -707,7 +707,7 @@ export default function MediaAssetPicker({
                               "产品素材"
                             }
                             fill
-                            unoptimized
+                            unoptimized={asset.url?.includes('img.aact.pw')}
                             sizes="(max-width: 640px) 100vw, 25vw"
                             className="object-contain p-3 transition duration-300 group-hover:scale-[1.03]"
                           />

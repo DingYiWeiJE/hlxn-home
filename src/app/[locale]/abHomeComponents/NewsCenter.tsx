@@ -47,7 +47,7 @@ async function fetchNews(locale: Locale, maxItems = 3): Promise<NewsItem[]> {
     return data.data.items
       .slice(0, pageSize)
       .map((item: any) => normalizeNewsItem(item, locale))
-      .filter((item): item is NewsItem => item !== null);
+      .filter((item: any): item is NewsItem => item !== null);
   } catch (error) {
     console.error("[NewsCenter] 获取新闻异常：", error);
     return [];

@@ -126,7 +126,7 @@ export default function ApplicationCaseImageUploader({
             },
           );
 
-          setTempPreview(null);
+          setTempPreview(data.data.url);
         } else {
           setError(
             data.error?.message ||
@@ -251,6 +251,7 @@ export default function ApplicationCaseImageUploader({
               alt="预览"
               fill
               className="object-cover"
+              unoptimized={previewUrl?.includes('img.aact.pw')}
             />
 
             {uploading && (

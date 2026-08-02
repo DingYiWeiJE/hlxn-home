@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "img.aact.pw",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "**",
       },
     ],

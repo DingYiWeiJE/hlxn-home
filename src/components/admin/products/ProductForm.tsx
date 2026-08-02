@@ -1347,7 +1347,7 @@ export default function ProductForm({
                         "产品封面"
                       }
                       fill
-                      unoptimized
+                      unoptimized={coverImage.url?.includes('img.aact.pw')}
                       sizes="360px"
                       className="object-contain p-4"
                     />
@@ -1443,7 +1443,7 @@ export default function ProductForm({
                         "产品介绍背景图"
                       }
                       fill
-                      unoptimized
+                      unoptimized={introBackgroundImage.url?.includes('img.aact.pw')}
                       sizes="360px"
                       className="object-cover"
                     />

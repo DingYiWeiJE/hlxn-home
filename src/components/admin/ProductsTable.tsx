@@ -230,7 +230,7 @@ export function ProductsTable({
                               .alt || product.name
                           }
                           fill
-                          unoptimized
+                          unoptimized={product.coverImage.url?.includes('img.aact.pw')}
                           sizes="80px"
                           className="object-contain p-1.5"
                         />

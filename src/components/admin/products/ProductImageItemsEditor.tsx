@@ -403,7 +403,7 @@ export default function ProductImageItemsEditor({
                               `${label}图片`
                             }
                             fill
-                            unoptimized
+                            unoptimized={item.asset.url?.includes('img.aact.pw')}
                             sizes="224px"
                             className="object-contain p-3"
                           />

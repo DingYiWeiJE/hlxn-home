@@ -252,6 +252,7 @@ function HistoryCard({
             src={item.imageAsset.url}
             alt={imageAlt}
             fill
+            unoptimized
             sizes="(max-width: 1024px) 100vw, 420px"
             className="object-cover"
           />

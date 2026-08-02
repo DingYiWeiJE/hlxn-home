@@ -66,7 +66,7 @@ async function fetchProducts(
       coverImage: product.coverImage,
       summaryParagraphs: Array.isArray(product.summaryParagraphs)
         ? product.summaryParagraphs.filter(
-            (paragraph): paragraph is string => typeof paragraph === "string",
+            (paragraph: any): paragraph is string => typeof paragraph === "string",
           )
         : [],
     }));

@@ -318,6 +318,7 @@ export default function CompanyHistoryList() {
                               fill
                               sizes="80px"
                               className="object-cover"
+                              unoptimized={item.imageAsset.url?.includes('img.aact.pw')}
                             />
                           </div>
                         ) : (
@@ -400,6 +401,7 @@ export default function CompanyHistoryList() {
                           fill
                           sizes="96px"
                           className="object-cover"
+                          unoptimized={item.imageAsset.url?.includes('img.aact.pw')}
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center">
