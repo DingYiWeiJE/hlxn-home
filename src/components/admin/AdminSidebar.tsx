@@ -334,7 +334,7 @@ export default function AdminSidebar() {
         </div>
 
         <nav
-          className="flex-1 space-y-1 overflow-y-auto px-4 py-5"
+          className="flex-1 space-y-1 overflow-y-auto px-4 py-5 scrollbar-transparent"
           aria-label="后台管理导航"
         >
           {navigationItems.map((item) => {
