@@ -145,8 +145,6 @@ async function uploadToQiniu(
       "📨 Qiniu response",
       {
         statusCode: result.resp?.statusCode,
-        hash: result.resp?.hash,
-        key: result.resp?.key,
       }
     );
 
