@@ -217,15 +217,39 @@ export function isAllowedImageUrl(input: string) {
     /*
      * 允许通过环境变量配置的其他可信图片域名。
      */
-    const configuredHosts = (
-      process.env.ALLOWED_EXTERNAL_IMAGE_HOSTS ?? ""
-    )
-      .split(",")
-      .map((host) => host.trim().toLowerCase())
-      .filter(Boolean);
+    const configuredHosts =
+      getAllowedExternalImageHosts();
 
-    return configuredHosts.includes(hostname);
+    return configuredHosts.has(hostname);
   } catch {
     return false;
   }
+}
+
+function getAllowedExternalImageHosts() {
+  const hosts = new Set(
+    (process.env.ALLOWED_EXTERNAL_IMAGE_HOSTS ?? "")
+      .split(",")
+      .map((host) => host.trim().toLowerCase())
+      .filter(Boolean),
+  );
+
+  for (const value of [
+    process.env.QINIU_DOMAIN,
+    process.env.NEXT_PUBLIC_QINIU_DOMAIN,
+  ]) {
+    if (!value) {
+      continue;
+    }
+
+    try {
+      hosts.add(
+        new URL(value).hostname.toLowerCase(),
+      );
+    } catch {
+      // Ignore malformed optional host settings.
+    }
+  }
+
+  return hosts;
 }

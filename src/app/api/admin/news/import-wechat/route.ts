@@ -30,6 +30,8 @@ export async function POST(
   request: Request,
 ) {
   try {
+    console.log("📌 [import-wechat] POST request received");
+
     await requireAdminActor();
     assertSameOriginRequest(request);
 
@@ -38,16 +40,36 @@ export async function POST(
         await request.json(),
       );
 
+    console.log("📌 [import-wechat] Parsing WeChat article:", input.url);
+
     const article =
       await parseWechatArticle(
         input.url,
       );
+
+    console.log(
+      "📌 [import-wechat] Article parsed, starting image localization",
+      {
+        title: article.title,
+        remoteImages: article.remoteImages.length,
+        remoteCoverImage: article.remoteCoverImage ? '✓' : '✗',
+      }
+    );
+
     const localized = await localizeWechatImages({
       content: article.content,
       remoteCoverImage: article.remoteCoverImage,
       remoteImages: article.remoteImages,
       articleTitle: article.title,
     });
+
+    console.log(
+      "📌 [import-wechat] Localization completed",
+      {
+        localizedImages: localized.localizedImages.length,
+        failedImages: localized.failedImages.length,
+      }
+    );
 
     return ok({
       title:

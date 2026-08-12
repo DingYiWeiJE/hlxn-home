@@ -1,6 +1,3 @@
-import { createReadStream, promises as fs } from "fs";
-import { Readable } from "stream";
-
 import {
   MediaAssetType,
   ProductStatus,
@@ -8,7 +5,6 @@ import {
 
 import { ApiError } from "@/lib/api/errors";
 import { fail } from "@/lib/api/response";
-import { resolveUploadPath } from "@/lib/media/paths";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -74,8 +70,7 @@ async function getDownloadAsset(assetId: string) {
       id: true,
       originalName: true,
       filename: true,
-      relativePath: true,
-      mimeType: true,
+      url: true,
       size: true,
     },
   });
@@ -84,22 +79,6 @@ async function getDownloadAsset(assetId: string) {
     throw new ApiError(
       "MEDIA_NOT_FOUND",
       "产品详情文件不存在或暂不可下载",
-      404,
-    );
-  }
-
-  const resolved = resolveUploadPath(
-    asset.relativePath,
-  );
-
-  const stat = await fs
-    .stat(resolved.absolutePath)
-    .catch(() => null);
-
-  if (!stat?.isFile()) {
-    throw new ApiError(
-      "MEDIA_NOT_FOUND",
-      "产品详情文件不存在",
       404,
     );
   }
@@ -116,8 +95,7 @@ async function getDownloadAsset(assetId: string) {
 
   return {
     asset,
-    absolutePath: resolved.absolutePath,
-    fileSize: stat.size,
+    fileSize: asset.size,
     downloadName,
   };
 }
@@ -161,24 +139,22 @@ export async function GET(
     const { assetId } = await context.params;
 
     const {
-      absolutePath,
+      asset,
       fileSize,
       downloadName,
     } = await getDownloadAsset(assetId);
 
-    const nodeStream =
-      createReadStream(absolutePath);
+    const headers = createDownloadHeaders({
+      fileSize,
+      downloadName,
+    });
 
-    const webStream = Readable.toWeb(
-      nodeStream,
-    ) as ReadableStream<Uint8Array>;
-
-    return new Response(webStream, {
-      status: 200,
-      headers: createDownloadHeaders({
-        fileSize,
-        downloadName,
-      }),
+    return new Response(null, {
+      status: 307,
+      headers: {
+        ...headers,
+        Location: asset.url,
+      },
     });
   } catch (error) {
     return fail(error);

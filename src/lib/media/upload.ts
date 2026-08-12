@@ -1,17 +1,15 @@
 import { createHash, randomBytes } from "crypto";
-import { promises as fs } from "fs";
 import path from "path";
 
 import { MediaAssetType } from "@prisma/client";
 import { fileTypeFromBuffer } from "file-type";
+import * as qiniu from "qiniu";
 import sharp from "sharp";
 
 import { ApiError } from "@/lib/api/errors";
 import { prisma } from "@/lib/prisma";
 
 import { getUploadConfig } from "./config";
-import { resolveUploadPath } from "./paths";
-import { buildMediaUrl } from "./url";
 
 const allowedImageMimeTypes = new Set([
   "image/jpeg",
@@ -83,6 +81,88 @@ function createChecksum(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
+function getQiniuMac(): qiniu.auth.digest.Mac {
+  const config = getUploadConfig();
+  return new qiniu.auth.digest.Mac(config.qiniuAccessKey, config.qiniuSecretKey);
+}
+
+function assertQiniuConfig(
+  config: ReturnType<typeof getUploadConfig>,
+) {
+  const missingFields = [
+    ["QINIU_ACCESS_KEY", config.qiniuAccessKey],
+    ["QINIU_SECRET_KEY", config.qiniuSecretKey],
+    ["QINIU_BUCKET", config.qiniuBucket],
+    ["QINIU_DOMAIN", config.qiniuDomain],
+  ]
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+
+  if (missingFields.length > 0) {
+    throw new Error(
+      `Missing Qiniu configuration: ${missingFields.join(", ")}`,
+    );
+  }
+}
+
+function getQiniuUploadToken(key: string): string {
+  const config = getUploadConfig();
+  assertQiniuConfig(config);
+  const mac = getQiniuMac();
+  const putPolicy = new qiniu.rs.PutPolicy({
+    scope: `${config.qiniuBucket}:${key}`,
+  });
+  return putPolicy.uploadToken(mac);
+}
+
+async function uploadToQiniu(
+  key: string,
+  content: Buffer,
+  mimeType: string,
+): Promise<string> {
+  const config = getUploadConfig();
+  console.log(
+    "🌐 uploadToQiniu",
+    {
+      key,
+      contentSize: content.length,
+      mimeType,
+      bucket: config.qiniuBucket,
+    }
+  );
+
+  assertQiniuConfig(config);
+  const token = getQiniuUploadToken(key);
+
+  const uploader = new qiniu.form_up.FormUploader(new qiniu.conf.Config({}));
+  const putExtra = new qiniu.form_up.PutExtra("", {}, mimeType);
+
+  try {
+    console.log("📤 Sending to Qiniu...");
+    const result = await uploader.put(token, key, content, putExtra);
+
+    console.log(
+      "📨 Qiniu response",
+      {
+        statusCode: result.resp?.statusCode,
+        hash: result.resp?.hash,
+        key: result.resp?.key,
+      }
+    );
+
+    if (result.resp?.statusCode === 200) {
+      const url = `${config.qiniuDomain}/${key}`;
+      console.log("✅ Qiniu upload successful:", url);
+      return url;
+    } else {
+      throw new Error(`Qiniu upload failed: ${result.resp?.statusCode}`);
+    }
+  } catch (error) {
+    console.error("❌ Qiniu upload error:", error);
+    throw error;
+  }
+}
+
 function getCurrentDatePath() {
   const now = new Date();
 
@@ -98,37 +178,6 @@ function formatMegabytes(bytes: number): string {
   return Number.isInteger(megabytes)
     ? String(megabytes)
     : megabytes.toFixed(1);
-}
-
-async function removeFile(filePath: string) {
-  await fs.rm(filePath, { force: true }).catch(() => undefined);
-}
-
-async function writeFileAtomically(
-  absolutePath: string,
-  filename: string,
-  content: Buffer,
-) {
-  const directory = path.dirname(absolutePath);
-  const temporaryPath = path.join(
-    directory,
-    `.${filename}.${process.pid}.${randomBytes(4).toString("hex")}.tmp`,
-  );
-
-  await fs.mkdir(directory, {
-    recursive: true,
-  });
-
-  try {
-    await fs.writeFile(temporaryPath, content, {
-      flag: "wx",
-    });
-
-    await fs.rename(temporaryPath, absolutePath);
-  } catch (error) {
-    await removeFile(temporaryPath);
-    throw error;
-  }
 }
 
 /**
@@ -149,6 +198,33 @@ export async function uploadImage(
   options: UploadImageOptions,
 ): Promise<UploadedMediaAsset> {
   const config = getUploadConfig();
+
+  console.log(
+    "📤 uploadImage called",
+    {
+      fileName: file.name,
+      fileSize: file.size,
+      scope: options.scope,
+      qiniuDomain: config.qiniuDomain,
+      qiniuBucket: config.qiniuBucket,
+    }
+  );
+
+  if (!config.qiniuDomain) {
+    console.error(
+      "❌ CRITICAL: qiniuDomain is empty!",
+      {
+        qiniuDomain: config.qiniuDomain,
+        env_QINIU_DOMAIN: process.env.QINIU_DOMAIN,
+        env_NEXT_PUBLIC_QINIU_DOMAIN: process.env.NEXT_PUBLIC_QINIU_DOMAIN,
+      }
+    );
+    throw new ApiError(
+      "UPLOAD_FAILED",
+      "七牛云配置错误：未设置 QINIU_DOMAIN",
+      500,
+    );
+  }
 
   if (file.size <= 0) {
     throw new ApiError(
@@ -195,7 +271,6 @@ export async function uploadImage(
   let width: number | null = null;
   let height: number | null = null;
   let filename = "";
-  let absolutePath = "";
   let relativePath = "";
 
   try {
@@ -240,8 +315,6 @@ export async function uploadImage(
     relativePath =
       `${options.scope}/images/${year}/${month}/${filename}`;
 
-    ({ absolutePath } = resolveUploadPath(relativePath));
-
     const metadata = await sharp(output, {
       animated: outputMimeType === "image/gif",
       limitInputPixels: false,
@@ -250,11 +323,7 @@ export async function uploadImage(
     width = metadata.width ?? null;
     height = metadata.height ?? null;
 
-    await writeFileAtomically(
-      absolutePath,
-      filename,
-      output,
-    );
+    await uploadToQiniu(relativePath, output, outputMimeType);
   } catch (error) {
     console.error("Image upload failed", error);
 
@@ -265,8 +334,18 @@ export async function uploadImage(
     );
   }
 
-  const url = buildMediaUrl(relativePath);
+  const url = `${config.qiniuDomain}/${relativePath}`;
   const checksum = createChecksum(output);
+
+  console.log(
+    "💾 Creating MediaAsset in database",
+    {
+      url,
+      relativePath,
+      mimeType: outputMimeType,
+      size: output.length,
+    }
+  );
 
   try {
     return await prisma.mediaAsset.create({
@@ -288,10 +367,8 @@ export async function uploadImage(
       select: mediaAssetSelect,
     });
   } catch (error) {
-    await removeFile(absolutePath);
-
     console.error(
-      "MediaAsset creation failed after image write",
+      "❌ MediaAsset creation failed after image write",
       error,
     );
 
@@ -362,14 +439,8 @@ export async function uploadPdf(
   const relativePath =
     `${options.scope}/pdfs/${year}/${month}/${filename}`;
 
-  const { absolutePath } = resolveUploadPath(relativePath);
-
   try {
-    await writeFileAtomically(
-      absolutePath,
-      filename,
-      input,
-    );
+    await uploadToQiniu(relativePath, input, "application/pdf");
   } catch (error) {
     console.error("PDF upload failed", error);
 
@@ -380,7 +451,7 @@ export async function uploadPdf(
     );
   }
 
-  const url = buildMediaUrl(relativePath);
+  const url = `${config.qiniuDomain}/${relativePath}`;
   const checksum = createChecksum(input);
 
   try {
@@ -403,8 +474,6 @@ export async function uploadPdf(
       select: mediaAssetSelect,
     });
   } catch (error) {
-    await removeFile(absolutePath);
-
     console.error(
       "MediaAsset creation failed after PDF write",
       error,

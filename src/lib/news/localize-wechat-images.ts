@@ -71,6 +71,14 @@ type LocalizeWechatImagesInput = {
 export async function localizeWechatImages(
   input: LocalizeWechatImagesInput,
 ): Promise<LocalizeWechatImagesResult> {
+  console.log(
+    "🔄 Starting image localization",
+    {
+      coverImageUrl: input.remoteCoverImage ? "✓" : "✗",
+      totalImages: input.remoteImages.length,
+    }
+  );
+
   const requestedImages = buildImageQueue(input);
   const localizedByUrl = new Map<string, UploadedMediaAsset>();
   const localizedImages: LocalizedImage[] = [];
@@ -80,9 +88,24 @@ export async function localizeWechatImages(
 
   for (const image of requestedImages.slice(0, MAX_ARTICLE_IMAGES)) {
     try {
+      console.log(
+        "🔍 Processing image:",
+        {
+          sourceUrl: image.url.substring(0, 80),
+        }
+      );
+
       const existingAsset = await findExistingWechatAsset(image.url);
 
       if (existingAsset) {
+        console.log(
+          "♻️ Found existing asset (using cache):",
+          {
+            assetId: existingAsset.id,
+            url: existingAsset.url,
+          }
+        );
+
         localizedByUrl.set(image.url, existingAsset);
 
         localizedImages.push({
@@ -94,7 +117,18 @@ export async function localizeWechatImages(
         continue;
       }
 
+      console.log("📥 No existing asset, downloading from WeChat...");
+
       const downloaded = await downloadWechatImage(image.url);
+
+      console.log(
+        "📥 Image downloaded",
+        {
+          sourceUrl: image.url,
+          downloadedBytes: downloaded.buffer.length,
+          contentType: downloaded.contentType,
+        }
+      );
 
       totalDownloadedBytes += downloaded.buffer.length;
 
@@ -128,11 +162,29 @@ export async function localizeWechatImages(
         },
       );
 
+      console.log(
+        "📤 Uploading image:",
+        {
+          sourceUrl: image.url,
+          fileName: originalName,
+        }
+      );
+
       const asset = await uploadImage(file, {
         scope: "news",
         alt: image.alt,
         createdById: null,
       });
+
+      console.log(
+        "✅ Image uploaded successfully:",
+        {
+          assetId: asset.id,
+          generatedUrl: asset.url,
+          relativePath: asset.relativePath,
+          correctUrl: asset.url.startsWith('http') ? '✓' : '❌ WRONG',
+        }
+      );
 
       localizedByUrl.set(image.url, asset);
 
@@ -143,9 +195,12 @@ export async function localizeWechatImages(
       });
     } catch (error) {
       console.error(
-        "Wechat image localization failed",
-        image.url,
-        error,
+        "❌ Wechat image localization failed",
+        {
+          sourceUrl: image.url,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : undefined,
+        }
       );
 
       failedImages.push({
@@ -170,6 +225,15 @@ export async function localizeWechatImages(
   const coverImageAsset = input.remoteCoverImage
     ? localizedByUrl.get(input.remoteCoverImage) ?? null
     : null;
+
+  console.log(
+    "✅ Image localization completed",
+    {
+      successCount: localizedImages.length,
+      failedCount: failedImages.length,
+      coverImageAssetId: coverImageAsset?.id ?? 'N/A',
+    }
+  );
 
   return {
     content: replaceTiptapImageUrls(
@@ -257,6 +321,8 @@ async function downloadWechatImage(
   contentType: string;
 }> {
   const config = getUploadConfig();
+  console.log("🔍 [downloadWechatImage] Starting download:", sourceUrl);
+
   let currentUrl = validateWechatImageUrl(sourceUrl);
 
   for (
@@ -274,6 +340,9 @@ async function downloadWechatImage(
     let response: Response;
 
     try {
+      console.log(
+        `🔍 [downloadWechatImage] Fetch attempt ${redirectCount + 1}/${MAX_REDIRECTS + 1}`
+      );
       response = await fetch(currentUrl, {
         method: "GET",
         redirect: "manual",
@@ -289,7 +358,16 @@ async function downloadWechatImage(
             "Chrome/131.0.0.0 Safari/537.36",
         },
       });
+
+      console.log(
+        `📨 [downloadWechatImage] Response received: ${response.status}`
+      );
     } catch (error) {
+      console.error(
+        "❌ [downloadWechatImage] Fetch error:",
+        error instanceof Error ? error.message : String(error)
+      );
+
       if (
         error instanceof Error &&
         error.name === "AbortError"

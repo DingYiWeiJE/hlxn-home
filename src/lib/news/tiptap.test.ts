@@ -29,6 +29,29 @@ describe("tiptap utilities", () => {
     expect(extractImageUrlsFromTiptapJson(validateTiptapDocument(doc))).toEqual(["/media/news/2026/07/demo.webp"]);
   });
 
+  it("allows images from the configured Qiniu domain", () => {
+    const previousQiniuDomain = process.env.QINIU_DOMAIN;
+    process.env.QINIU_DOMAIN = "https://img.aact.pw";
+
+    try {
+      expect(() =>
+        validateTiptapDocument({
+          type: "doc",
+          content: [
+            {
+              type: "image",
+              attrs: {
+                src: "https://img.aact.pw/news/images/2026/08/demo.webp",
+              },
+            },
+          ],
+        }),
+      ).not.toThrow();
+    } finally {
+      process.env.QINIU_DOMAIN = previousQiniuDomain;
+    }
+  });
+
   it("rejects javascript links", () => {
     expect(() =>
       validateTiptapDocument({

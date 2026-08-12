@@ -38,6 +38,7 @@ type UploadResponse = {
   success: boolean;
   data?: {
     url: string;
+    relativePath: string;
   };
   error?: {
     message?: string;
@@ -154,7 +155,8 @@ export default function NewsEditor({
       if (
         !response.ok ||
         !result.success ||
-        !result.data?.url
+        !result.data?.url ||
+        !result.data?.relativePath
       ) {
         window.alert(
           result.error?.message ??
@@ -164,11 +166,16 @@ export default function NewsEditor({
         return;
       }
 
+      const proxyUrl =
+        `/api/media/${encodeURIComponent(
+          result.data.relativePath,
+        )}`;
+
       editor
         .chain()
         .focus()
         .setImage({
-          src: result.data.url,
+          src: proxyUrl,
           alt:
             file.name ||
             "新闻图片",
