@@ -3,8 +3,8 @@
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Dropdown from "./Dropdown";
 
 type Props = {
   hasbg?: boolean;
@@ -21,8 +21,6 @@ export default function WebNavigation({
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
-  const [newsDropdownOpen, setNewsDropdownOpen] = useState(false);
 
   const isActive = (href: string) => {
     const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
@@ -37,15 +35,123 @@ export default function WebNavigation({
     if (targetUrl) {
       const hash = typeof window !== "undefined" ? window.location.hash : "";
       router.push(`${targetUrl}${hash}`);
-      setLanguageDropdownOpen(false);
       return;
     }
 
     const pathWithoutLocale = pathname.replace(`/${locale}`, "");
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     router.push(`/${lang}${pathWithoutLocale}${hash}`);
-    setLanguageDropdownOpen(false);
   };
+
+  const newsDropdownItems = [
+    {
+      label: "updates",
+      element: (
+        <Link
+          href={`/${locale}/news`}
+          className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
+          style={{
+            backgroundColor: isActive(`/${locale}/news`)
+              ? "rgba(37, 99, 235, 1)"
+              : "rgba(100, 116, 139, 0.4)",
+          }}
+          onMouseEnter={(e) => {
+            if (!isActive(`/${locale}/news`)) {
+              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isActive(`/${locale}/news`)) {
+              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)";
+            }
+          }}
+        >
+          {t("nav.newsSubmenu.updates")}
+        </Link>
+      ),
+    },
+    {
+      label: "exhibitions",
+      element: (
+        <Link
+          href={`/${locale}/news/exhibitions`}
+          className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
+          style={{
+            backgroundColor: isActive(`/${locale}/news/exhibitions`)
+              ? "rgba(37, 99, 235, 1)"
+              : "rgba(100, 116, 139, 0.4)",
+          }}
+          onMouseEnter={(e) => {
+            if (!isActive(`/${locale}/news/exhibitions`)) {
+              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isActive(`/${locale}/news/exhibitions`)) {
+              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)";
+            }
+          }}
+        >
+          {t("nav.newsSubmenu.exhibitions")}
+        </Link>
+      ),
+    },
+  ];
+
+  const languageDropdownItems = [
+    {
+      label: "zh",
+      element: (
+        <button
+          onClick={() => switchLanguage("zh")}
+          className={`block w-full text-left px-4 py-2 transition ${
+            locale === "zh" ? "bg-blue-600 text-white font-bold" : "text-white"
+          }`}
+          style={
+            locale !== "zh"
+              ? { backgroundColor: "rgba(100, 116, 139, 0.4)" }
+              : {}
+          }
+          onMouseEnter={(e) =>
+            locale !== "zh" &&
+            (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)")
+          }
+          onMouseLeave={(e) =>
+            locale !== "zh" &&
+            (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)")
+          }
+        >
+          中文
+        </button>
+      ),
+    },
+    {
+      label: "en",
+      element: (
+        <button
+          onClick={() => switchLanguage("en")}
+          className={`block w-full text-left px-4 py-2 transition ${
+            locale === "en" ? "bg-blue-600 text-white font-bold" : "text-white"
+          }`}
+          style={
+            locale !== "en"
+              ? { backgroundColor: "rgba(100, 116, 139, 0.4)" }
+              : {}
+          }
+          onMouseEnter={(e) =>
+            locale !== "en" &&
+            (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)")
+          }
+          onMouseLeave={(e) =>
+            locale !== "en" &&
+            (e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)")
+          }
+        >
+          English
+        </button>
+      ),
+    },
+  ];
 
   return (
     <div className="hidden md:flex items-center space-x-8">
@@ -101,76 +207,20 @@ export default function WebNavigation({
       </Link>
 
       {/* News with Dropdown */}
-      <div
-        className="relative group"
-        onMouseEnter={() => setNewsDropdownOpen(true)}
-        onMouseLeave={() => setNewsDropdownOpen(false)}
-      >
-        <button
-          className={`transition ${
-            isActive(`/${locale}/news`)
-              ? "text-white text-lg font-bold"
-              : "text-white hover:text-gray-300"
-          }`}
-        >
-          {t("nav.news")}
-        </button>
-        {newsDropdownOpen && (
-          <div className="absolute left-0 top-full pt-2 w-56">
-            <div
-              className="backdrop-blur-md rounded shadow-lg overflow-hidden whitespace-nowrap"
-              style={{ backgroundColor: "rgba(100, 116, 139, 0.6)" }}
-            >
-              <Link
-                href={`/${locale}/news`}
-                className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
-                style={{
-                  backgroundColor: isActive(`/${locale}/news`)
-                    ? "rgba(37, 99, 235, 1)"
-                    : "rgba(100, 116, 139, 0.4)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive(`/${locale}/news`)) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.8)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive(`/${locale}/news`)) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.4)";
-                  }
-                }}
-              >
-                {t("nav.newsSubmenu.updates")}
-              </Link>
-              <Link
-                href={`/${locale}/news/exhibitions`}
-                className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
-                style={{
-                  backgroundColor: isActive(`/${locale}/news/exhibitions`)
-                    ? "rgba(37, 99, 235, 1)"
-                    : "rgba(100, 116, 139, 0.4)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive(`/${locale}/news/exhibitions`)) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.8)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive(`/${locale}/news/exhibitions`)) {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.4)";
-                  }
-                }}
-              >
-                {t("nav.newsSubmenu.exhibitions")}
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+      <Dropdown
+        trigger={
+          <button
+            className={`transition ${
+              isActive(`/${locale}/news`)
+                ? "text-white text-lg font-bold"
+                : "text-white hover:text-gray-300"
+            }`}
+          >
+            {t("nav.news")}
+          </button>
+        }
+        items={newsDropdownItems}
+      />
 
       <Link
         href={`/${locale}/contact`}
@@ -183,82 +233,23 @@ export default function WebNavigation({
         {t("nav.contact")}
       </Link>
 
-      {/* Language Dropdown - Only for Web */}
+      {/* Language Dropdown */}
       {!hasbg && (
-        <div
-          className="relative group"
-          onMouseEnter={() => setLanguageDropdownOpen(true)}
-          onMouseLeave={() => setLanguageDropdownOpen(false)}
-        >
-          <button className="p-2 text-white hover:text-gray-300 transition">
-            <Image
-              src="/Language.svg"
-              alt="Language"
-              width={24}
-              height={24}
-              className="w-6 h-6"
-            />
-          </button>
-          {languageDropdownOpen && (
-            <div className="absolute right-0 top-full pt-1 w-32">
-              <div
-                className="backdrop-blur-md rounded shadow-lg overflow-hidden"
-                style={{ backgroundColor: "rgba(100, 116, 139, 0.6)" }}
-              >
-                <button
-                  onClick={() => switchLanguage("zh")}
-                  className={`block w-full text-left px-4 py-2 transition ${
-                    locale === "zh"
-                      ? "bg-blue-600 text-white font-bold"
-                      : "text-white"
-                  }`}
-                  style={
-                    locale !== "zh"
-                      ? { backgroundColor: "rgba(100, 116, 139, 0.4)" }
-                      : {}
-                  }
-                  onMouseEnter={(e) =>
-                    locale !== "zh" &&
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.8)")
-                  }
-                  onMouseLeave={(e) =>
-                    locale !== "zh" &&
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.4)")
-                  }
-                >
-                  中文
-                </button>
-                <button
-                  onClick={() => switchLanguage("en")}
-                  className={`block w-full text-left px-4 py-2 transition ${
-                    locale === "en"
-                      ? "bg-blue-600 text-white font-bold"
-                      : "text-white"
-                  }`}
-                  style={
-                    locale !== "en"
-                      ? { backgroundColor: "rgba(100, 116, 139, 0.4)" }
-                      : {}
-                  }
-                  onMouseEnter={(e) =>
-                    locale !== "en" &&
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.8)")
-                  }
-                  onMouseLeave={(e) =>
-                    locale !== "en" &&
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(100, 116, 139, 0.4)")
-                  }
-                >
-                  English
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <Dropdown
+          position="right"
+          trigger={
+            <button className="p-2 text-white hover:text-gray-300 transition">
+              <Image
+                src="/Language.svg"
+                alt="Language"
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+            </button>
+          }
+          items={languageDropdownItems}
+        />
       )}
     </div>
   );
