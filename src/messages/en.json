@@ -6,6 +6,10 @@
     "solutions": "Solutions",
     "cases": "Cases",
     "news": "News",
+    "newsSubmenu": {
+      "updates": "News & Updates",
+      "exhibitions": "Exhibitions & Events"
+    },
     "contact": "Contact Us",
     "language": "Language"
   },

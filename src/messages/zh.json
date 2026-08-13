@@ -6,6 +6,10 @@
     "solutions": "解决方案",
     "cases": "应用案例",
     "news": "新闻中心",
+    "newsSubmenu": {
+      "updates": "新闻动态",
+      "exhibitions": "展会活动"
+    },
     "contact": "联系我们",
     "language": "语言"
   },
