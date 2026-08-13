@@ -14,6 +14,7 @@ import type { TiptapNode } from "@/lib/news/tiptap";
 export type NewsMediaAsset = {
   id: string;
   url: string;
+  relativePath?: string | null;
   filename?: string | null;
   originalName?: string | null;
   mimeType?: string | null;
@@ -26,6 +27,7 @@ export type NewsMediaAsset = {
 type NewsLocale = "zh" | "en";
 type NewsStatus = "DRAFT" | "PUBLISHED";
 type NewsSourceType = "MANUAL" | "WECHAT";
+type NewsType = "DYNAMIC" | "EVENT";
 
 type NewsFormState = {
   title: string;
@@ -38,6 +40,7 @@ type NewsFormState = {
   authorName: string;
   status: NewsStatus;
   isFeatured: boolean;
+  newsType: NewsType;
   publishedAt: string;
 
   content: TiptapNode;
@@ -209,6 +212,9 @@ function createInitialForm(
     isFeatured:
       value?.isFeatured ?? false,
 
+    newsType:
+      value?.newsType ?? "DYNAMIC",
+
     publishedAt:
       toDateTimeLocal(
         value?.publishedAt,
@@ -353,13 +359,18 @@ export default function NewsForm({
   ] = useState("");
 
   const [
-    coverPickerOpen,
-    setCoverPickerOpen,
+    allowNavigation,
+    setAllowNavigation,
   ] = useState(false);
 
   const [
-    allowNavigation,
-    setAllowNavigation,
+    uploading,
+    setUploading,
+  ] = useState(false);
+
+  const [
+    imageLoading,
+    setImageLoading,
   ] = useState(false);
 
   const dirty = useMemo(
@@ -542,6 +553,9 @@ export default function NewsForm({
 
       isFeatured:
         form.isFeatured,
+
+      newsType:
+        form.newsType,
 
       publishedAt:
         form.publishedAt
@@ -881,30 +895,6 @@ export default function NewsForm({
     setWechatUrl("");
   }
 
-  function selectCover(
-    asset: NewsMediaAsset,
-  ) {
-    setSelectedCover(asset);
-
-    updateForm(
-      "coverImageAssetId",
-      asset.id,
-    );
-
-    if (
-      !form.coverImageAlt.trim()
-    ) {
-      updateForm(
-        "coverImageAlt",
-        asset.alt ||
-          form.title ||
-          "",
-      );
-    }
-
-    setCoverPickerOpen(false);
-  }
-
   function removeCover() {
     setSelectedCover(null);
 
@@ -912,6 +902,88 @@ export default function NewsForm({
       "coverImageAssetId",
       null,
     );
+  }
+
+  async function uploadCover(
+    file: File,
+  ) {
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "IMAGE");
+      formData.append(
+        "purpose",
+        "NEWS_COVER",
+      );
+      formData.append(
+        "alt",
+        form.title ||
+          file.name,
+      );
+
+      const response =
+        await fetch(
+          "/api/admin/assets/upload",
+          {
+            method: "POST",
+            credentials:
+              "include",
+            body: formData,
+          },
+        );
+
+      const result =
+        (await response.json()) as {
+          success?: boolean;
+          data?: NewsMediaAsset;
+          error?: {
+            message?: string;
+          };
+        };
+
+      if (
+        !response.ok ||
+        !result.success ||
+        !result.data
+      ) {
+        throw new Error(
+          result.error?.message ??
+            "图片上传失败",
+        );
+      }
+
+      const asset = result.data;
+
+      setSelectedCover(asset);
+
+      setImageLoading(true);
+
+      updateForm(
+        "coverImageAssetId",
+        asset.id,
+      );
+
+      if (
+        !form.coverImageAlt.trim()
+      ) {
+        updateForm(
+          "coverImageAlt",
+          asset.alt ||
+            form.title ||
+            "",
+        );
+      }
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "图片上传失败，请重试",
+      );
+    } finally {
+      setUploading(false);
+    }
   }
 
   const isSaving =
@@ -1090,6 +1162,44 @@ export default function NewsForm({
             </Field>
 
             <Field
+              label="新闻类型"
+              required
+              error={
+                fieldErrors
+                  .newsType?.[0]
+              }
+            >
+              <select
+                value={
+                  form.newsType
+                }
+                onChange={(
+                  event,
+                ) =>
+                  updateForm(
+                    "newsType",
+                    event.target
+                      .value as NewsType,
+                  )
+                }
+                className={inputClass(
+                  Boolean(
+                    fieldErrors
+                      .newsType,
+                  ),
+                )}
+              >
+                <option value="DYNAMIC">
+                  动态
+                </option>
+
+                <option value="EVENT">
+                  活动
+                </option>
+              </select>
+            </Field>
+
+            <Field
               label="作者"
               error={
                 fieldErrors
@@ -1209,93 +1319,120 @@ export default function NewsForm({
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              从本地素材库选择图片。公众号导入时，原文封面也会下载到素材库。
+              上传高质量的新闻封面图片。建议尺寸 16:9。
             </p>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <div className="grid gap-5 lg:grid-cols-2">
             <div className="overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50">
               {selectedCover?.url ? (
-                <div className="relative aspect-video">
+                <div className="relative h-80 w-full bg-slate-100">
+                  {imageLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-200/50">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-slate-600"></div>
+                    </div>
+                  )}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
                       selectedCover.url
+                        ? `${selectedCover.url}?t=${selectedCover.id}`
+                        : undefined
                     }
                     alt={
                       form.coverImageAlt ||
                       form.title ||
                       "新闻封面"
                     }
+                    loading="eager"
+                    onLoad={() =>
+                      setImageLoading(false)
+                    }
                     className="h-full w-full object-cover"
                   />
                 </div>
               ) : (
-                <div className="flex aspect-video items-center justify-center px-6 text-center text-sm text-slate-400">
-                  尚未选择新闻封面
+                <div className="flex h-80 w-full items-center justify-center px-6 text-center text-sm text-slate-400">
+                  尚未上传新闻封面
                 </div>
               )}
             </div>
 
             <div className="space-y-4">
-              {selectedCover && (
-                <div className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                  <p className="font-medium text-slate-800">
-                    {selectedCover.originalName ||
-                      selectedCover.filename ||
-                      "已选择图片"}
-                  </p>
 
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                    {selectedCover.width &&
-                      selectedCover.height && (
-                        <span>
-                          {
-                            selectedCover.width
-                          }
-                          ×
-                          {
-                            selectedCover.height
-                          }
-                        </span>
-                      )}
+              <div className="space-y-3">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                    上传图片
+                  </span>
 
-                    {selectedCover.size !==
-                      undefined &&
-                      selectedCover.size !==
-                        null && (
-                        <span>
-                          {formatFileSize(
-                            selectedCover.size,
-                          )}
-                        </span>
-                      )}
+                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-slate-300 px-6 py-8 transition hover:border-slate-400">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={
+                        uploading ||
+                        isSaving
+                      }
+                      onChange={(
+                        event,
+                      ) => {
+                        const file =
+                          event.target
+                            .files?.[0];
+
+                        if (file) {
+                          void uploadCover(
+                            file,
+                          );
+                        }
+
+                        event.target.value =
+                          "";
+                      }}
+                      className="sr-only"
+                    />
+
+                    <div className="cursor-pointer text-center">
+                      <svg
+                        className="mx-auto h-8 w-8 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+
+                      <p className="mt-2 text-sm font-medium text-slate-900">
+                        {uploading
+                          ? "上传中..."
+                          : "点击或拖拽上传图片"}
+                      </p>
+
+                      <p className="text-xs text-slate-500">
+                        PNG, JPG, GIF 等格式，最大
+                        10MB
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCoverPickerOpen(
-                      true,
-                    )
-                  }
-                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                >
-                  {selectedCover
-                    ? "更换封面"
-                    : "选择封面"}
-                </button>
+                </label>
 
                 {selectedCover && (
                   <button
                     type="button"
+                    disabled={
+                      uploading ||
+                      isSaving
+                    }
                     onClick={
                       removeCover
                     }
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                    className="w-full rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700 transition hover:bg-red-100 disabled:opacity-60"
                   >
                     移除封面
                   </button>
@@ -1571,292 +1708,8 @@ export default function NewsForm({
         </div>
       </div>
 
-      <NewsCoverPicker
-        open={
-          coverPickerOpen
-        }
-        selectedId={
-          form.coverImageAssetId
-        }
-        onClose={() =>
-          setCoverPickerOpen(
-            false,
-          )
-        }
-        onSelect={
-          selectCover
-        }
-      />
+      {/* NewsCoverPicker removed - now using direct file upload */}
     </>
-  );
-}
-
-function NewsCoverPicker({
-  open,
-  selectedId,
-  onClose,
-  onSelect,
-}: {
-  open: boolean;
-  selectedId:
-    | string
-    | null;
-  onClose: () => void;
-  onSelect: (
-    asset: NewsMediaAsset,
-  ) => void;
-}) {
-  const [
-    assets,
-    setAssets,
-  ] = useState<
-    NewsMediaAsset[]
-  >([]);
-
-  const [
-    keyword,
-    setKeyword,
-  ] = useState("");
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    void loadAssets("");
-  }, [open]);
-
-  async function loadAssets(
-    searchKeyword: string,
-  ) {
-    setLoading(true);
-    setError("");
-
-    try {
-      const parameters =
-        new URLSearchParams({
-          type: "IMAGE",
-          enabled: "true",
-          deleted: "false",
-          page: "1",
-          pageSize: "60",
-        });
-
-      if (
-        searchKeyword.trim()
-      ) {
-        parameters.set(
-          "keyword",
-          searchKeyword.trim(),
-        );
-      }
-
-      const response =
-        await fetch(
-          `/api/admin/assets?${parameters.toString()}`,
-          {
-            credentials:
-              "include",
-          },
-        );
-
-      const result =
-        (await response.json()) as ApiResponse<{
-          items:
-            NewsMediaAsset[];
-        }>;
-
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        setError(
-          result.error?.message ??
-            "素材加载失败",
-        );
-
-        return;
-      }
-
-      setAssets(
-        result.data?.items ??
-          [],
-      );
-    } catch {
-      setError(
-        "素材加载失败，请稍后重试",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              选择新闻封面
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              从本地图片素材库中选择一张图片。
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={
-              onClose
-            }
-            className="rounded-lg px-3 py-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-          >
-            关闭
-          </button>
-        </div>
-
-        <div className="border-b border-slate-200 px-5 py-4">
-          <div className="flex gap-3">
-            <input
-              value={
-                keyword
-              }
-              onChange={(
-                event,
-              ) =>
-                setKeyword(
-                  event.target
-                    .value,
-                )
-              }
-              onKeyDown={(
-                event,
-              ) => {
-                if (
-                  event.key ===
-                  "Enter"
-                ) {
-                  void loadAssets(
-                    keyword,
-                  );
-                }
-              }}
-              placeholder="搜索文件名或图片说明"
-              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-
-            <button
-              type="button"
-              disabled={
-                loading
-              }
-              onClick={() =>
-                void loadAssets(
-                  keyword,
-                )
-              }
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-60"
-            >
-              搜索
-            </button>
-          </div>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex min-h-64 items-center justify-center text-sm text-slate-500">
-              正在加载素材...
-            </div>
-          ) : assets.length ===
-            0 ? (
-            <div className="flex min-h-64 items-center justify-center text-sm text-slate-500">
-              暂无可用图片素材
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {assets.map(
-                (asset) => {
-                  const selected =
-                    asset.id ===
-                    selectedId;
-
-                  return (
-                    <button
-                      key={
-                        asset.id
-                      }
-                      type="button"
-                      onClick={() =>
-                        onSelect(
-                          asset,
-                        )
-                      }
-                      className={`overflow-hidden rounded-xl border text-left transition ${
-                        selected
-                          ? "border-blue-500 ring-2 ring-blue-100"
-                          : "border-slate-200 hover:border-slate-400"
-                      }`}
-                    >
-                      <div className="aspect-video bg-slate-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={
-                            asset.url
-                          }
-                          alt={
-                            asset.alt ||
-                            asset.originalName ||
-                            asset.filename ||
-                            "素材图片"
-                          }
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-
-                      <div className="p-3">
-                        <p className="truncate text-sm font-medium text-slate-800">
-                          {asset.originalName ||
-                            asset.filename ||
-                            "未命名图片"}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {asset.width &&
-                          asset.height
-                            ? `${asset.width} × ${asset.height}`
-                            : "图片素材"}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                },
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 

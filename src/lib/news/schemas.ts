@@ -20,6 +20,9 @@ export const newsStatusSchema = z.enum([
 export const newsSourceTypeSchema =
   z.enum(["MANUAL", "WECHAT"]);
 
+export const newsTypeSchema =
+  z.enum(["DYNAMIC", "EVENT"]);
+
 const booleanQuerySchema = z
   .enum(["true", "false"])
   .transform(
@@ -115,6 +118,9 @@ const listQueryFields = {
   featured:
     booleanQuerySchema.optional(),
 
+  newsType:
+    newsTypeSchema.optional(),
+
   sort: z
     .enum([
       "publishedAt",
@@ -145,6 +151,9 @@ export const adminListNewsQuerySchema =
 
     status:
       newsStatusSchema.optional(),
+
+    newsType:
+      newsTypeSchema.optional(),
 
     deleted:
       booleanQuerySchema.optional(),
@@ -210,6 +219,9 @@ const createNewsObject = z.object({
 
   isFeatured:
     z.boolean().default(false),
+
+  newsType:
+    newsTypeSchema.default("DYNAMIC"),
 
   publishedAt:
     optionalDateInput,
@@ -319,6 +331,9 @@ export const newsPatchSchema = z
 
     isFeatured:
       z.boolean().optional(),
+
+    newsType:
+      newsTypeSchema.optional(),
 
     publishedAt:
       optionalDateInput,

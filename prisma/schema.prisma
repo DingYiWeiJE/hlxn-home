@@ -55,6 +55,11 @@ enum NewsSourceType {
   WECHAT
 }
 
+enum NewsType {
+  DYNAMIC
+  EVENT
+}
+
 model News {
   id String @id @default(cuid())
 
@@ -81,6 +86,7 @@ model News {
 
   status     NewsStatus @default(DRAFT)
   isFeatured Boolean    @default(false)
+  newsType   NewsType   @default(DYNAMIC)
 
   // 内容来源
   sourceType NewsSourceType @default(MANUAL)

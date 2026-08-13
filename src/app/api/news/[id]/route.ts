@@ -395,6 +395,14 @@ export async function PATCH(
           }
         : {}),
 
+      ...(input.newsType !==
+      undefined
+        ? {
+            newsType:
+              input.newsType,
+          }
+        : {}),
+
       ...(input.publishedAt !==
       undefined
         ? {

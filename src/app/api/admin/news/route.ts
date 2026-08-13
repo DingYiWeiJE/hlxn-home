@@ -51,6 +51,13 @@ export async function GET(
           }
         : {}),
 
+      ...(query.newsType
+        ? {
+            newsType:
+              query.newsType,
+          }
+        : {}),
+
       ...(query.featured ===
       undefined
         ? {}

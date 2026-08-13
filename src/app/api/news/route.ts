@@ -127,6 +127,13 @@ export async function GET(
                   query.featured,
               }),
 
+          ...(query.newsType
+            ? {
+                newsType:
+                  query.newsType,
+              }
+            : {}),
+
           ...(query.keyword
             ? {
                 OR: [
@@ -384,6 +391,9 @@ export async function POST(
 
                 isFeatured:
                   input.isFeatured,
+
+                newsType:
+                  input.newsType,
 
                 publishedAt,
 
