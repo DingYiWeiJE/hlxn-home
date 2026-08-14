@@ -14,7 +14,7 @@ export default function HeroContent() {
         </h1>
 
         {/* 第二行副标题 */}
-        <h2 className="text-[33px] md:text-[70px] text-white font-bold text-center leading-tight">
+        <h2 className="text-[33px] md:text-[70px] md:px-[70] text-white font-bold text-center leading-tight">
           {t("homeSubtitle")}
         </h2>
 
