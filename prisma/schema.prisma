@@ -765,3 +765,58 @@ model ContactSubmissionNote {
   @@index([createdById])
   @@index([deletedAt])
 }
+
+// ============================================================
+// 访问统计相关
+// ============================================================
+
+model AnalyticsSession {
+  id String @id @default(cuid())
+
+  sessionId     String   @unique
+  visitorId     String
+  startedAt     DateTime @default(now())
+  lastActiveAt  DateTime @default(now())
+  ipHash        String?
+  userAgent     String?
+  isBot         Boolean  @default(false)
+
+  pageViews AnalyticsPageView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([visitorId])
+  @@index([startedAt])
+  @@index([isBot])
+}
+
+enum AnalyticsResourceType {
+  page
+  product
+  news
+  solution
+  case
+  contact
+}
+
+model AnalyticsPageView {
+  id String @id @default(cuid())
+
+  eventId      String   @unique
+  visitorId    String
+  sessionId    String
+  session      AnalyticsSession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+
+  resourceType AnalyticsResourceType
+  resourceId   String?
+  path         String
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([visitorId])
+  @@index([resourceType, createdAt])
+  @@index([resourceType, resourceId, createdAt])
+  @@index([createdAt])
+}

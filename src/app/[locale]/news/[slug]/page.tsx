@@ -8,6 +8,7 @@ import TiptapContent from "@/components/news/TiptapContent";
 import type { TiptapNode } from "@/lib/news/tiptap";
 import Footer from "@/components/SiteFooter";
 import Navigation from "@/components/Navigation";
+import { NewsTracker } from "@/components/analytics/Tracker";
 
 type Props = {
   params: Promise<{
@@ -101,6 +102,7 @@ export default async function NewsDetail({ params }: Props) {
       <div className="border-b border-slate-100 bg-white">
         <Navigation hasbg/>
       </div>
+      <NewsTracker newsId={news.id} />
     <main className="mx-auto max-w-4xl px-4 py-30 bg-white">
 
       {news.coverImageAsset?.url && (

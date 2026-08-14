@@ -3,6 +3,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import ContactPageClient from "@/components/contact/ContactPageClient";
+import { ContactTracker } from "@/components/analytics/Tracker";
 
 type Props = {
   params: Promise<{
@@ -31,6 +32,7 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <ContactTracker />
       <div
         className="relative h-[60vh] bg-cover bg-center flex flex-col"
         style={{

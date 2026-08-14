@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
+import { ProductTracker } from "@/components/analytics/Tracker";
 
 type ProductLocale = "zh" | "en";
 
@@ -262,6 +263,8 @@ export default async function ProductDetailPage({
       <div className="border-b border-slate-100 bg-white">
         <Navigation hasbg/>
       </div>
+
+      <ProductTracker productId={product.id} />
 
       <main className="flex-1">
         {/* 产品顶部主视觉 */}

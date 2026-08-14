@@ -7,6 +7,7 @@ import { setRequestLocale } from "next-intl/server";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
+import { SolutionTracker } from "@/components/analytics/Tracker";
 import {
   getPublicSolutionDetail,
   resolveSolutionLocaleSwitchUrls,
@@ -163,6 +164,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
       <div className="border-b border-slate-100 bg-white">
         <Navigation hasbg localeSwitchUrls={switchUrls} />
       </div>
+      <SolutionTracker solutionId={solution.id} />
 
       <main className="flex-1">
         {/* 页面头图 */}

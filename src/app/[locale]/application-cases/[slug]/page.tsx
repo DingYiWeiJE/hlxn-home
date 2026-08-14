@@ -4,6 +4,7 @@ import Image from "next/image";
 import { setRequestLocale } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import SiteFooter from "@/components/SiteFooter";
+import { CaseTracker } from "@/components/analytics/Tracker";
 
 type ApplicationCase = {
   id: string;
@@ -95,6 +96,7 @@ export default async function ApplicationCaseDetail({
   return (
     <div className="flex min-h-screen flex-col">
       <Navigation hasbg/>
+      <CaseTracker caseId={caseData.id} />
 
       <main className="flex-1">
         <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-12">

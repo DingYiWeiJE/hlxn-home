@@ -390,11 +390,7 @@ export default function ProductImageItemsEditor({
                       <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white lg:w-56">
                         {item.asset ? (
                           <Image
-                            src={
-                              item
-                                .asset
-                                .url
-                            }
+                            src={'http://img.aact.pw/test.svg'}
                             alt={
                               item
                                 .asset
