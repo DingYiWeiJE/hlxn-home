@@ -2,14 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   useEffect,
   useRef,
   useState,
 } from "react";
+import { newsEmitter } from "@/lib/events";
 
 type Locale = "zh" | "en";
+type NewsType = "DYNAMIC" | "EVENT";
 
 interface NewsItem {
   id: string;
@@ -94,6 +96,8 @@ const text = {
     jump: "跳转",
     paginationLabel: "新闻列表分页",
     goToPage: "前往第",
+    categoryDynamic: "新闻动态",
+    categoryEvent: "展会活动",
   },
 
   en: {
@@ -110,6 +114,8 @@ const text = {
     jump: "Go",
     paginationLabel: "News pagination",
     goToPage: "Go to page",
+    categoryDynamic: "News & Updates",
+    categoryEvent: "Exhibitions & Events",
   },
 } satisfies Record<Locale, Record<string, string>>;
 
@@ -117,12 +123,33 @@ export default function NewsList() {
   const params = useParams<{
     locale: string;
   }>();
+  const searchParams =
+    useSearchParams();
 
   const locale = normalizeLocale(
     params.locale,
   );
 
   const labels = text[locale];
+
+  const tabs: Array<{
+    type: NewsType;
+    label: string;
+  }> = [
+    {
+      type: "DYNAMIC",
+      label: labels.categoryDynamic,
+    },
+    {
+      type: "EVENT",
+      label: labels.categoryEvent,
+    },
+  ];
+
+  const initialNewsType: NewsType =
+    (searchParams.get(
+      "type",
+    ) as NewsType) ?? "DYNAMIC";
 
   const sectionRef =
     useRef<HTMLElement>(null);
@@ -145,6 +172,11 @@ export default function NewsList() {
   const [error, setError] =
     useState("");
 
+  const [newsType, setNewsType] =
+    useState<NewsType>(
+      initialNewsType,
+    );
+
   /*
    * 在 /zh/news 和 /en/news 之间切换时，
    * 自动回到第一页。
@@ -155,7 +187,51 @@ export default function NewsList() {
   }, [locale]);
 
   /*
-   * 根据当前路由语言及页码请求真实新闻。
+   * 切换新闻分类时重置分页。
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+    setJumpPage("1");
+  }, [newsType]);
+
+  /*
+   * 监听导航菜单的事件，切换 tab。
+   */
+  useEffect(() => {
+    const handleChangeNewsType = (
+      type: NewsType,
+    ) => {
+      setNewsType(type);
+      setCurrentPage(1);
+      setJumpPage("1");
+
+      window.requestAnimationFrame(
+        () => {
+          sectionRef.current?.scrollIntoView(
+            {
+              behavior: "smooth",
+              block: "start",
+            },
+          );
+        },
+      );
+    };
+
+    newsEmitter.on(
+      "changeNewsType",
+      handleChangeNewsType,
+    );
+
+    return () => {
+      newsEmitter.off(
+        "changeNewsType",
+        handleChangeNewsType,
+      );
+    };
+  }, []);
+
+  /*
+   * 根据当前路由语言、分类及页码请求真实新闻。
    */
   useEffect(() => {
     const controller =
@@ -169,6 +245,7 @@ export default function NewsList() {
         const query =
           new URLSearchParams({
             locale,
+            newsType,
             page: String(
               currentPage,
             ),
@@ -280,6 +357,7 @@ export default function NewsList() {
     };
   }, [
     locale,
+    newsType,
     currentPage,
     labels.fetchError,
   ]);
@@ -335,6 +413,41 @@ export default function NewsList() {
       className="w-full scroll-mt-24 bg-white py-10 sm:py-12 lg:py-16"
     >
       <div className="mx-auto w-full max-w-[1360px] px-5 sm:px-6 lg:px-8">
+        <div className="mb-8 flex border-b border-slate-200">
+          {tabs.map((tab) => (
+            <button
+              key={tab.type}
+              type="button"
+              onClick={() => {
+                setNewsType(tab.type);
+                window.requestAnimationFrame(
+                  () => {
+                    sectionRef.current?.scrollIntoView(
+                      {
+                        behavior: "smooth",
+                        block: "start",
+                      },
+                    );
+                  },
+                );
+              }}
+              className={[
+                "px-6 py-3 font-medium text-base transition-colors border-b-2 -mb-px",
+                newsType === tab.type
+                  ? "text-[#2463c5] border-[#2463c5]"
+                  : "text-slate-600 border-transparent hover:text-slate-900",
+              ].join(" ")}
+              aria-current={
+                newsType === tab.type
+                  ? "page"
+                  : undefined
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {isLoading ? (
           <NewsListSkeleton />
         ) : error ? (

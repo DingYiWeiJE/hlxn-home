@@ -91,7 +91,9 @@
   },
   "news": {
     "title": "News",
-    "back": "Back to News List"
+    "back": "Back to News List",
+    "categoryDynamic": "News & Updates",
+    "categoryEvent": "Exhibitions & Events"
   },
   "newsPage": {
     "title": "News & Updates",

@@ -4,6 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { newsEmitter } from "@/lib/events";
 import Dropdown from "./Dropdown";
 
 type Props = {
@@ -23,9 +24,19 @@ export default function WebNavigation({
   const router = useRouter();
 
   const isActive = (href: string) => {
-    const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
-    const hrefWithoutLocale = href.replace(`/${locale}`, "") || "/";
-    return pathWithoutLocale === hrefWithoutLocale;
+    const pathWithoutLocale =
+      pathname.replace(
+        `/${locale}`,
+        "",
+      ) || "/";
+    const hrefWithoutLocale =
+      href
+        .replace(`/${locale}`, "")
+        .replace(/\?.*$/, "") || "/";
+    return (
+      pathWithoutLocale ===
+      hrefWithoutLocale
+    );
   };
 
   const switchLanguage = (lang: string) => {
@@ -47,53 +58,69 @@ export default function WebNavigation({
     {
       label: "updates",
       element: (
-        <Link
-          href={`/${locale}/news`}
-          className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
-          style={{
-            backgroundColor: isActive(`/${locale}/news`)
-              ? "rgba(37, 99, 235, 1)"
-              : "rgba(100, 116, 139, 0.4)",
-          }}
-          onMouseEnter={(e) => {
-            if (!isActive(`/${locale}/news`)) {
-              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)";
+        <button
+          onClick={(e) => {
+            const isNewsPage =
+              pathname ===
+              `/${locale}/news`;
+
+            if (isNewsPage) {
+              e.preventDefault();
+              newsEmitter.emit(
+                "changeNewsType",
+                "DYNAMIC",
+              );
+            } else {
+              window.location.href =
+                `/${locale}/news`;
             }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
           }}
           onMouseLeave={(e) => {
-            if (!isActive(`/${locale}/news`)) {
-              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)";
-            }
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
           }}
         >
           {t("nav.newsSubmenu.updates")}
-        </Link>
+        </button>
       ),
     },
     {
       label: "exhibitions",
       element: (
-        <Link
-          href={`/${locale}/news/exhibitions`}
-          className="block px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap"
-          style={{
-            backgroundColor: isActive(`/${locale}/news/exhibitions`)
-              ? "rgba(37, 99, 235, 1)"
-              : "rgba(100, 116, 139, 0.4)",
-          }}
-          onMouseEnter={(e) => {
-            if (!isActive(`/${locale}/news/exhibitions`)) {
-              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.8)";
+        <button
+          onClick={(e) => {
+            const isNewsPage =
+              pathname ===
+              `/${locale}/news`;
+
+            if (isNewsPage) {
+              e.preventDefault();
+              newsEmitter.emit(
+                "changeNewsType",
+                "EVENT",
+              );
+            } else {
+              window.location.href =
+                `/${locale}/news?type=EVENT`;
             }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
           }}
           onMouseLeave={(e) => {
-            if (!isActive(`/${locale}/news/exhibitions`)) {
-              e.currentTarget.style.backgroundColor = "rgba(100, 116, 139, 0.4)";
-            }
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
           }}
         >
           {t("nav.newsSubmenu.exhibitions")}
-        </Link>
+        </button>
       ),
     },
   ];
