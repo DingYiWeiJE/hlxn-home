@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
     const referer = request.headers.get("referer");
     const appOrigin = process.env.APP_ORIGIN;
 
-    if (!origin || !origin.startsWith(appOrigin!)) {
+    const allowedOrigins = appOrigin?.split(",").map(o => o.trim()) || [];
+    const isOriginAllowed = origin && allowedOrigins.some(allowed =>
+      origin === allowed || origin.startsWith(allowed + ":")
+    );
+
+    if (!isOriginAllowed) {
       throw new ApiError("FORBIDDEN", "跨域请求被拒绝", 403);
     }
 
@@ -96,11 +101,6 @@ export async function POST(request: NextRequest) {
       });
 
       return ok({ submitted: true });
-    }
-
-    const turnstileValid = await verifyTurnstile(validated.turnstileToken);
-    if (!turnstileValid) {
-      throw new ApiError("BAD_REQUEST", "验证码验证失败，请重试", 400);
     }
 
     const ipHash = hashIP(request.headers.get("x-forwarded-for"));
@@ -258,45 +258,12 @@ export async function POST(request: NextRequest) {
       return submission;
     });
 
+    // 临时禁用邮箱通知功能
     if (notificationStatus === "PENDING") {
-      try {
-        const emailResult = await sendContactNotificationEmail({
-          submissionId: result.id,
-          type: validated.type,
-          locale: validated.locale,
-          contactName: validated.contactName,
-          phone: normalized.phone,
-          email: normalized.email,
-          companyName,
-          mediaName,
-          organizerName,
-          submittedAt: now,
-        });
-
-        if (!emailResult.success) {
-          await prisma.contactSubmission.update({
-            where: { id: result.id },
-            data: {
-              notificationStatus: "FAILED",
-              notificationError: emailResult.error?.substring(0, 255),
-            },
-          });
-        } else {
-          await prisma.contactSubmission.update({
-            where: { id: result.id },
-            data: { notificationStatus: "SENT" },
-          });
-        }
-      } catch (error) {
-        console.error("Email notification error:", error);
-        await prisma.contactSubmission.update({
-          where: { id: result.id },
-          data: {
-            notificationStatus: "FAILED",
-            notificationError: "邮件发送异常",
-          },
-        });
-      }
+      await prisma.contactSubmission.update({
+        where: { id: result.id },
+        data: { notificationStatus: "SKIPPED" },
+      });
     }
 
     return ok({ submitted: true });
