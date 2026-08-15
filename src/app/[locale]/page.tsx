@@ -36,7 +36,9 @@ async function fetchProducts(
   }
 
   try {
-    const apiUrl = `/api/products?locale=${locale}&pageSize=5`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const apiUrl = `${baseUrl}/api/products?locale=${locale}&pageSize=5`;
 
     console.log(`[HomePage] 开始获取产品，URL=${apiUrl}`);
 

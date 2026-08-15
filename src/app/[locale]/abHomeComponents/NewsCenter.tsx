@@ -22,7 +22,9 @@ type NewsCenterProps = {
 async function fetchNews(locale: Locale, maxItems = 3): Promise<NewsItem[]> {
   try {
     const pageSize = Math.min(Math.max(Math.trunc(maxItems), 1), 12);
-    const apiUrl = `/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const apiUrl = `${baseUrl}/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
 
     console.log(`[NewsCenter] 开始获取新闻，URL=${apiUrl}`);
 
