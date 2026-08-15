@@ -209,8 +209,13 @@ function renderImageNode(
       node.attrs?.width,
     );
 
-  // 为图片 URL 添加缓存破坏参数，基于 URL 本身确保稳定性
-  const imageUrl = `${src}${src.includes('?') ? '&' : '?'}v=1`;
+  // 如果是相对路径（代理 URL），直接使用
+  // 如果是绝对路径（七牛云 URL），添加查询参数确保一致性
+  const imageUrl = src.startsWith('/')
+    ? src
+    : src.includes('?')
+      ? `${src}&_t=1`
+      : `${src}?_t=1`;
 
   return (
     <figure
