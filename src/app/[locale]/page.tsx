@@ -36,7 +36,7 @@ async function fetchProducts(
   }
 
   try {
-    const apiUrl = `http://localhost:3000/api/products?locale=${locale}&pageSize=5`;
+    const apiUrl = `/api/products?locale=${locale}&pageSize=5`;
 
     console.log(`[HomePage] 开始获取产品，URL=${apiUrl}`);
 

@@ -22,7 +22,7 @@ type NewsCenterProps = {
 async function fetchNews(locale: Locale, maxItems = 3): Promise<NewsItem[]> {
   try {
     const pageSize = Math.min(Math.max(Math.trunc(maxItems), 1), 12);
-    const apiUrl = `http://localhost:3000/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
+    const apiUrl = `/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
 
     console.log(`[NewsCenter] 开始获取新闻，URL=${apiUrl}`);
 
