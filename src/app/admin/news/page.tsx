@@ -117,7 +117,10 @@ export default function AdminNewsPage() {
   const [error, setError] =
     useState("");
 
-  const [actionId, setActionId] =
+  const [restoreActionId, setRestoreActionId] =
+    useState<string | null>(null);
+
+  const [deleteActionId, setDeleteActionId] =
     useState<string | null>(null);
 
   const loadNews = useCallback(
@@ -258,7 +261,7 @@ export default function AdminNewsPage() {
       return;
     }
 
-    setActionId(item.id);
+    setDeleteActionId(item.id);
     setError("");
 
     try {
@@ -304,7 +307,7 @@ export default function AdminNewsPage() {
         "新闻删除失败，请稍后重试",
       );
     } finally {
-      setActionId(null);
+      setDeleteActionId(null);
     }
   }
 
@@ -313,24 +316,24 @@ export default function AdminNewsPage() {
   ) {
     const confirmed =
       window.confirm(
-        `确认恢复新闻“${item.title}”吗？`,
+        `确认恢复新闻”${item.title}”吗？`,
       );
 
     if (!confirmed) {
       return;
     }
 
-    setActionId(item.id);
-    setError("");
+    setRestoreActionId(item.id);
+    setError('');
 
     try {
       const response =
         await fetch(
           `/api/news/${item.id}/restore`,
           {
-            method: "POST",
+            method: 'POST',
             credentials:
-              "include",
+              'include',
           },
         );
 
@@ -345,13 +348,13 @@ export default function AdminNewsPage() {
       ) {
         window.alert(
           result.error?.message ??
-            "新闻恢复失败",
+            '新闻恢复失败',
         );
         return;
       }
 
       window.alert(
-        "新闻已恢复",
+        '新闻已恢复',
       );
 
       if (
@@ -367,10 +370,76 @@ export default function AdminNewsPage() {
       }
     } catch {
       window.alert(
-        "新闻恢复失败，请稍后重试",
+        '新闻恢复失败，请稍后重试',
       );
     } finally {
-      setActionId(null);
+      setRestoreActionId(null);
+    }
+  }
+
+  async function permanentDeleteNews(
+    item: NewsItem,
+  ) {
+    const confirmed =
+      window.confirm(
+        `确认永久删除新闻”${item.title}”吗？\n\n此操作不可撤销，新闻将被彻底删除。`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteActionId(item.id);
+    setError('');
+
+    try {
+      const response =
+        await fetch(
+          `/api/news/${item.id}/permanent-delete`,
+          {
+            method: 'DELETE',
+            credentials:
+              'include',
+          },
+        );
+
+      const result =
+        (await response.json()) as ApiResponse<{
+          id: string;
+        }>;
+
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        window.alert(
+          result.error?.message ??
+            '永久删除失败',
+        );
+        return;
+      }
+
+      window.alert(
+        '新闻已永久删除',
+      );
+
+      if (
+        items.length === 1 &&
+        page > 1
+      ) {
+        setPage(
+          (current) =>
+            current - 1,
+        );
+      } else {
+        await loadNews();
+      }
+    } catch {
+      window.alert(
+        '永久删除失败，请稍后重试',
+      );
+    } finally {
+      setDeleteActionId(null);
     }
   }
 
@@ -602,8 +671,12 @@ export default function AdminNewsPage() {
                         ?.url ??
                       item.coverImage;
 
-                    const busy =
-                      actionId ===
+                    const restoreBusy =
+                      restoreActionId ===
+                      item.id;
+
+                    const deleteBusy =
+                      deleteActionId ===
                       item.id;
 
                     return (
@@ -713,20 +786,37 @@ export default function AdminNewsPage() {
 
                         <td className="whitespace-nowrap px-5 py-4 text-right">
                           {view === "trash" ? (
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                restoreNews(
-                                  item,
-                                )
-                              }
-                              className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {busy
-                                ? "恢复中..."
-                                : "恢复"}
-                            </button>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                disabled={restoreBusy}
+                                onClick={() =>
+                                  restoreNews(
+                                    item,
+                                  )
+                                }
+                                className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {restoreBusy
+                                  ? "恢复中..."
+                                  : "恢复"}
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={deleteBusy}
+                                onClick={() =>
+                                  permanentDeleteNews(
+                                    item,
+                                  )
+                                }
+                                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {deleteBusy
+                                  ? "删除中..."
+                                  : "永久删除"}
+                              </button>
+                            </div>
                           ) : (
                             <div className="flex justify-end gap-2">
                               <Link
@@ -749,7 +839,7 @@ export default function AdminNewsPage() {
 
                               <button
                                 type="button"
-                                disabled={busy}
+                                disabled={deleteBusy}
                                 onClick={() =>
                                   deleteNews(
                                     item,
@@ -757,7 +847,7 @@ export default function AdminNewsPage() {
                                 }
                                 className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                               >
-                                {busy
+                                {deleteBusy
                                   ? "删除中..."
                                   : "删除"}
                               </button>
