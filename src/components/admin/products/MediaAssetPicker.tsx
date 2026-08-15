@@ -495,7 +495,7 @@ export default function MediaAssetPicker({
 
   const accept =
     type === "IMAGE"
-      ? "image/jpeg,image/png,image/webp,image/gif"
+      ? "image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
       : "application/pdf";
 
   return (
