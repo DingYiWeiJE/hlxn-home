@@ -4,6 +4,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { prisma } from "@/lib/prisma";
 import { revalidateNewsCache } from "@/lib/news/cache";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,7 @@ export async function POST(request: Request, { params }: Params) {
       data: { deletedAt: null },
     });
     revalidateNewsCache({ newSlug: restored.slug });
+    clearCacheByNamespace("news");
     return ok(restored);
   } catch (error) {
     return fail(error);

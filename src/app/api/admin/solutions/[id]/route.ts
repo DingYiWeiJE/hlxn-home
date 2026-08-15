@@ -7,6 +7,7 @@ import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
 import { updateSolutionSchema } from "@/lib/solutions/schemas";
 import { validateSolutionReferences } from "@/lib/solutions/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -356,6 +357,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       });
     });
 
+    clearCacheByNamespace("solutions");
+
     return ok(formatSolutionDetail(solution));
   } catch (error) {
     return fail(error);
@@ -392,6 +395,8 @@ export async function DELETE(request: Request, context: RouteContext) {
         updatedBy: actor.userId,
       },
     });
+
+    clearCacheByNamespace("solutions");
 
     return ok({
       id,

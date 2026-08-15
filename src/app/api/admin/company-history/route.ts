@@ -12,6 +12,7 @@ import {
 import { parseDateInputToUtcNoon } from "@/lib/company-history/date";
 import { assertCanWriteCompanyHistory } from "@/lib/company-history/permissions";
 import { validateCompanyHistoryImage } from "@/lib/company-history/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -169,6 +170,8 @@ export async function POST(request: Request) {
         },
       }),
     );
+
+    clearCacheByNamespace("company-history");
 
     return ok(item, { status: 201 });
   } catch (error) {

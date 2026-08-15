@@ -12,6 +12,7 @@ import {
   createSolutionSchema,
 } from "@/lib/solutions/schemas";
 import { validateSolutionReferences } from "@/lib/solutions/validation";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -236,6 +237,8 @@ export async function POST(request: Request) {
         },
       });
     });
+
+    clearCacheByNamespace("solutions");
 
     return ok(solution, {
       status: 201,

@@ -13,6 +13,7 @@ import {
 } from "@/lib/company-history/permissions";
 import { validateCompanyHistoryImage } from "@/lib/company-history/validation";
 import { prisma } from "@/lib/prisma";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -111,6 +112,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       }),
     );
 
+    clearCacheByNamespace("company-history");
+
     return ok(item);
   } catch (error) {
     return fail(error);
@@ -139,6 +142,8 @@ export async function DELETE(request: Request, context: RouteContext) {
         where: { id },
       }),
     );
+
+    clearCacheByNamespace("company-history");
 
     return ok({ id, deleted: true });
   } catch (error) {

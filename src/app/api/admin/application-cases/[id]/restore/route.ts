@@ -5,6 +5,7 @@ import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -83,6 +84,8 @@ export async function POST(
           updatedAt: true,
         },
       });
+
+    clearCacheByNamespace("application-cases");
 
     return ok(restored);
   } catch (error) {
