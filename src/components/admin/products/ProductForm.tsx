@@ -1251,7 +1251,7 @@ export default function ProductForm({
             <ProductImageItemsEditor
               label="应用场景"
               description="每项可选择已有应用场景图片，也可直接上传新的应用场景图片。"
-              purpose="PRODUCT_APPLICATION"
+              purpose="PRODUCT_ADVANTAGE"
               items={applications}
               onChange={setApplications}
               addButtonText="添加应用场景"

@@ -76,20 +76,6 @@ const statusColors: Record<string, string> = {
   SPAM: "bg-red-100 text-red-800",
 };
 
-const riskLevelLabels: Record<string, string> = {
-  LOW: "低",
-  MEDIUM: "中",
-  HIGH: "高",
-  BLOCKED: "阻止",
-};
-
-const riskLevelColors: Record<string, string> = {
-  LOW: "bg-green-50 text-green-700",
-  MEDIUM: "bg-yellow-50 text-yellow-700",
-  HIGH: "bg-orange-50 text-orange-700",
-  BLOCKED: "bg-red-50 text-red-700",
-};
-
 function StatCard({
   label,
   value,
@@ -120,7 +106,6 @@ export default function ContactSubmissionsPage() {
   const [keyword, setKeyword] = useState("");
   const [type, setType] = useState("");
   const [status, setStatus] = useState("");
-  const [riskLevel, setRiskLevel] = useState("");
   const [pagination, setPagination] = useState<DataTablePaginationProps>({
     page: 1,
     pageSize: 20,
@@ -144,7 +129,6 @@ export default function ContactSubmissionsPage() {
       if (keyword) url.searchParams.set("keyword", keyword);
       if (type) url.searchParams.set("type", type);
       if (status) url.searchParams.set("status", status);
-      if (riskLevel) url.searchParams.set("riskLevel", riskLevel);
 
       const response = await fetch(url.toString());
 
@@ -169,7 +153,7 @@ export default function ContactSubmissionsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, keyword, type, status, riskLevel]);
+  }, [page, keyword, type, status]);
 
   useEffect(() => {
     void loadSubmissions();
@@ -179,7 +163,6 @@ export default function ContactSubmissionsPage() {
     () => ({
       total: pagination.total,
       pending: submissions.filter((s) => s.status === "PENDING").length,
-      highRisk: submissions.filter((s) => s.riskLevel === "HIGH" || s.riskLevel === "BLOCKED").length,
       duplicate: submissions.filter((s) => s.isDuplicate).length,
     }),
     [submissions, pagination.total]
@@ -249,20 +232,6 @@ export default function ContactSubmissionsPage() {
         ),
       },
       {
-        key: "riskLevel",
-        label: "风险",
-        render: (submission) => (
-          <span
-            className={[
-              "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
-              riskLevelColors[submission.riskLevel] || "bg-slate-50 text-slate-700",
-            ].join(" ")}
-          >
-            {riskLevelLabels[submission.riskLevel]}
-          </span>
-        ),
-      },
-      {
         key: "submittedAt",
         label: "提交时间",
         render: (submission) => (
@@ -310,7 +279,7 @@ export default function ContactSubmissionsPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            管理通过联系表单提交的所有客户线索。支持按类型、状态、风险等级筛选和搜索。
+            管理通过联系表单提交的所有客户线索。支持按类型、状态筛选和搜索。
           </p>
         </div>
 
@@ -328,7 +297,7 @@ export default function ContactSubmissionsPage() {
       </header>
 
       {/* 统计卡片 */}
-      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="总提交数"
           value={stats.total}
@@ -338,11 +307,6 @@ export default function ContactSubmissionsPage() {
           label="待处理"
           value={stats.pending}
           description="未处理的线索"
-        />
-        <StatCard
-          label="高风险"
-          value={stats.highRisk}
-          description="需要特别关注"
         />
         <StatCard
           label="可能重复"
@@ -358,7 +322,7 @@ export default function ContactSubmissionsPage() {
           <h2 className="text-sm font-semibold text-slate-900">筛选条件</h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-4">
           <input
             type="text"
             placeholder="搜索联系人、邮箱、电话"
@@ -399,27 +363,11 @@ export default function ContactSubmissionsPage() {
             <option value="COMPLETED">已完成</option>
           </select>
 
-          <select
-            value={riskLevel}
-            onChange={(e) => {
-              setRiskLevel(e.target.value);
-              setPage(1);
-            }}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">所有风险</option>
-            <option value="LOW">低</option>
-            <option value="MEDIUM">中</option>
-            <option value="HIGH">高</option>
-            <option value="BLOCKED">阻止</option>
-          </select>
-
           <button
             onClick={() => {
               setKeyword("");
               setType("");
               setStatus("");
-              setRiskLevel("");
               setPage(1);
             }}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
