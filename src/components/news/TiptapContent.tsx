@@ -209,18 +209,14 @@ function renderImageNode(
       node.attrs?.width,
     );
 
-  // 如果是相对路径（代理 URL），直接使用
-  // 如果是绝对 URL（七牛云），提取相对路径并转换为代理 URL
-  let imageUrl = src;
-  if (!src.startsWith('/')) {
-    // 这是七牛云绝对 URL，提取相对路径
-    // 格式: https://img.aact.pw/news/images/2026/08/xxx.webp
-    // 提取: news/images/2026/08/xxx.webp
-    const match = src.match(/https?:\/\/[^/]+\/(.+?)(?:\?|$)/);
-    if (match && match[1]) {
-      imageUrl = `/api/media/${encodeURIComponent(match[1])}`;
-    }
-  }
+  // 为七牛云图片添加查询参数，参考编辑页面实现
+  // 相对路径代理 URL 不需要修改，直接使用
+  // 绝对 URL 添加时间戳作为缓存破坏参数
+  const imageUrl = src.startsWith('/')
+    ? src
+    : src.includes('?')
+      ? `${src}&t=${Date.now()}`
+      : `${src}?t=${Date.now()}`;
 
   return (
     <figure

@@ -33,7 +33,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         select: {
           id: true,
           url: true,
-          relativePath: true,
         },
       },
     },
@@ -80,7 +79,6 @@ export default async function NewsDetail({ params }: Props) {
         select: {
           id: true,
           url: true,
-          relativePath: true,
         },
       },
 
@@ -113,7 +111,7 @@ export default async function NewsDetail({ params }: Props) {
           <div className="relative aspect-video bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/media/${encodeURIComponent(news.coverImageAsset.relativePath)}`}
+              src={`${news.coverImageAsset.url}?t=${news.coverImageAsset.id || news.id}`}
               alt={news.coverImageAlt || news.title}
               loading="eager"
               decoding="async"
