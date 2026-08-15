@@ -210,12 +210,17 @@ function renderImageNode(
     );
 
   // 如果是相对路径（代理 URL），直接使用
-  // 如果是绝对路径（七牛云 URL），添加查询参数确保一致性
-  const imageUrl = src.startsWith('/')
-    ? src
-    : src.includes('?')
-      ? `${src}&_t=1`
-      : `${src}?_t=1`;
+  // 如果是绝对 URL（七牛云），提取相对路径并转换为代理 URL
+  let imageUrl = src;
+  if (!src.startsWith('/')) {
+    // 这是七牛云绝对 URL，提取相对路径
+    // 格式: https://img.aact.pw/news/images/2026/08/xxx.webp
+    // 提取: news/images/2026/08/xxx.webp
+    const match = src.match(/https?:\/\/[^/]+\/(.+?)(?:\?|$)/);
+    if (match && match[1]) {
+      imageUrl = `/api/media/${encodeURIComponent(match[1])}`;
+    }
+  }
 
   return (
     <figure
