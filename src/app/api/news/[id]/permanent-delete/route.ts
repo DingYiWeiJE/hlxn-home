@@ -3,6 +3,7 @@ import { fail, ok } from "@/lib/api/response";
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { prisma } from "@/lib/prisma";
+import { clearCacheByNamespace } from "@/lib/cache/helpers";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,8 @@ export async function DELETE(
     await prisma.news.delete({
       where: { id },
     });
+
+    clearCacheByNamespace("news");
 
     return ok({ id });
   } catch (error) {
