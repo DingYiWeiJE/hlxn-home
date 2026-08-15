@@ -209,15 +209,6 @@ function renderImageNode(
       node.attrs?.width,
     );
 
-  // 为七牛云图片添加查询参数，参考编辑页面实现
-  // 相对路径代理 URL 不需要修改，直接使用
-  // 绝对 URL 添加时间戳作为缓存破坏参数
-  const imageUrl = src.startsWith('/')
-    ? src
-    : src.includes('?')
-      ? `${src}&t=${Date.now()}`
-      : `${src}?t=${Date.now()}`;
-
   return (
     <figure
       key={key}
@@ -225,7 +216,7 @@ function renderImageNode(
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={imageUrl}
+        src={src}
         alt={alt}
         title={title}
         loading="lazy"
