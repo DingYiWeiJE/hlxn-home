@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       summary: true,
       coverImageAsset: {
         select: {
+          id: true,
           url: true,
         },
       },
@@ -76,6 +77,7 @@ export default async function NewsDetail({ params }: Props) {
 
       coverImageAsset: {
         select: {
+          id: true,
           url: true,
         },
       },
