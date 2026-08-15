@@ -209,6 +209,9 @@ function renderImageNode(
       node.attrs?.width,
     );
 
+  // 为图片 URL 添加缓存破坏参数，基于 URL 本身确保稳定性
+  const imageUrl = `${src}${src.includes('?') ? '&' : '?'}v=1`;
+
   return (
     <figure
       key={key}
@@ -216,7 +219,7 @@ function renderImageNode(
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={imageUrl}
         alt={alt}
         title={title}
         loading="lazy"

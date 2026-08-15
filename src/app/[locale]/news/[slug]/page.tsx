@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -108,11 +107,13 @@ export default async function NewsDetail({ params }: Props) {
       {news.coverImageAsset?.url && (
         <div className="mb-8 overflow-hidden rounded-lg">
           <div className="relative aspect-video bg-slate-100">
-            <Image
-              src={news.coverImageAsset.url}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${news.coverImageAsset.url}?t=${news.coverImageAsset.id || news.id}`}
               alt={news.coverImageAlt || news.title}
-              fill
-              className="object-cover"
+              loading="eager"
+              decoding="async"
+              className="h-full w-full object-cover"
             />
           </div>
         </div>
