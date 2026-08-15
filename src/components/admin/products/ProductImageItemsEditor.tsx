@@ -64,9 +64,8 @@ type ProductImageItemsEditorProps = {
   description?: string;
 
   /**
-   * 用于隔离素材：
-   * 产品优势只能看到 PRODUCT_ADVANTAGE；
-   * 应用场景只能看到 PRODUCT_APPLICATION。
+   * 产品优势和应用场景共用图库资源。
+   * 两个字段都会看到相同的图片库。
    */
   purpose: ProductImagePurpose;
 
@@ -632,9 +631,7 @@ export default function ProductImageItemsEditor({
           null
         }
         type="IMAGE"
-        purpose={
-          purpose as ProductMediaPurpose
-        }
+        purpose="PRODUCT_ADVANTAGE"
         title={`选择或上传${label}图片`}
         selectedAssetId={
           selectedPickerItem

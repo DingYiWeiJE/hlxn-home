@@ -39,9 +39,9 @@ export type ProductReferenceInput = {
  * 图片用途：
  * - 产品封面：PRODUCT_COVER
  * - 产品介绍背景：PRODUCT_INTRO_BACKGROUND
- * - 产品优势：PRODUCT_ADVANTAGE
- * - 应用场景：PRODUCT_APPLICATION
+ * - 产品优势/应用场景（共用图库）：PRODUCT_ADVANTAGE, PRODUCT_APPLICATION
  *
+ * 注意：产品优势和应用场景图片共用一个图库资源，两个字段可以引用相同的图片素材。
  * GENERAL 仅用于兼容迁移前已经上传的历史素材。
  */
 export async function validateProductReferences(
@@ -84,9 +84,12 @@ export async function validateProductReferences(
     items:
       input.advantages,
 
-    expectedPurpose:
+    expectedPurposes: [
       MediaAssetPurpose
         .PRODUCT_ADVANTAGE,
+      MediaAssetPurpose
+        .PRODUCT_APPLICATION,
+    ],
 
     fieldName:
       "advantages",
@@ -99,9 +102,12 @@ export async function validateProductReferences(
     items:
       input.applications,
 
-    expectedPurpose:
+    expectedPurposes: [
+      MediaAssetPurpose
+        .PRODUCT_ADVANTAGE,
       MediaAssetPurpose
         .PRODUCT_APPLICATION,
+    ],
 
     fieldName:
       "applications",
@@ -230,15 +236,15 @@ async function validateSingleImageAsset({
 
 async function validateImageAssetList({
   items,
-  expectedPurpose,
+  expectedPurposes,
   fieldName,
   errorMessage,
 }: {
   items?:
     ProductImageReference[];
 
-  expectedPurpose:
-    MediaAssetPurpose;
+  expectedPurposes:
+    MediaAssetPurpose[];
 
   fieldName: string;
   errorMessage: string;
@@ -274,7 +280,7 @@ async function validateImageAssetList({
 
         purpose: {
           in: [
-            expectedPurpose,
+            ...expectedPurposes,
             MediaAssetPurpose.GENERAL,
           ],
         },
