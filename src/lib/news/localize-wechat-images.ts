@@ -438,7 +438,7 @@ async function downloadWechatImage(
 
 // 该功能仅供管理员导入经过人工选择的微信公众号文章。
 // 微信图片 CDN 域名可能发生变化，因此这里不维护 hostname 白名单。
-// 仍保留 HTTPS、请求超时、重定向次数及图片大小等限制。
+// 仍保留 HTTP/HTTPS 协议验证、请求超时、重定向次数及图片大小等限制。
 function validateWechatImageUrl(
   input: string,
 ): string {
@@ -450,8 +450,8 @@ function validateWechatImageUrl(
     throw new Error("微信图片地址格式不正确");
   }
 
-  if (url.protocol !== "https:") {
-    throw new Error("微信图片必须使用 HTTPS");
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("微信图片必须使用 HTTP 或 HTTPS");
   }
 
   url.hash = "";

@@ -197,6 +197,17 @@ export function isAllowedImageUrl(input: string) {
 
     const hostname = parsed.hostname.toLowerCase();
 
+    // 允许微信 CDN 的 HTTP 和 HTTPS 图片
+    // 微信 CDN 的域名可能发生变化，因此这里不维护完整的 hostname 列表
+    // 但基于 qpic.cn 和 qlogo.cn 的规律进行匹配
+    if (
+      hostname.endsWith(".qpic.cn") ||
+      hostname.endsWith(".qlogo.cn") ||
+      hostname === "res.wx.qq.com"
+    ) {
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    }
+
     /*
      * 允许通过环境变量配置的可信图片域名。
      * 七牛云在本地开发时允许 HTTP，其他外部域名仍要求 HTTPS。
