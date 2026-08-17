@@ -142,15 +142,6 @@ const allowedLocalImagePrefixes = [
   "/uploads/",
 ];
 
-const allowedWechatImageHosts = new Set([
-  "mmbiz.qpic.cn",
-  "mmecoa.qpic.cn",
-  "mmbiz.qlogo.cn",
-  "wx.qlogo.cn",
-  "thirdwx.qlogo.cn",
-  "res.wx.qq.com",
-]);
-
 export function isAllowedImageUrl(input: string) {
   const value = input.trim();
 
@@ -207,14 +198,7 @@ export function isAllowedImageUrl(input: string) {
     const hostname = parsed.hostname.toLowerCase();
 
     /*
-     * 个别微信图片本地化失败时，允许暂时保留微信原图。
-     */
-    if (allowedWechatImageHosts.has(hostname)) {
-      return true;
-    }
-
-    /*
-     * 允许通过环境变量配置的其他可信图片域名。
+     * 允许通过环境变量配置的可信图片域名。
      * 七牛云在本地开发时允许 HTTP，其他外部域名仍要求 HTTPS。
      */
     const configuredHosts =

@@ -19,15 +19,6 @@ const MAX_REDIRECTS = 3;
 const MAX_ARTICLE_IMAGES = 80;
 const MAX_TOTAL_IMAGE_BYTES = 50 * 1024 * 1024;
 
-const allowedWechatImageHosts = new Set([
-  "mmbiz.qpic.cn",
-  "mmbiz.qlogo.cn",
-  "mmecoa.qpic.cn",
-  "wx.qlogo.cn",
-  "thirdwx.qlogo.cn",
-  "res.wx.qq.com",
-]);
-
 const mediaAssetSelect = {
   id: true,
   type: true,
@@ -240,7 +231,7 @@ export async function localizeWechatImages(
     content: replaceTiptapImageUrls(
       input.content,
       localizedByUrl,
-    ),
+    ) as TiptapNode,
     coverImageAsset,
     localizedImages,
     failedImages,
@@ -445,6 +436,9 @@ async function downloadWechatImage(
   throw new Error("微信图片下载失败");
 }
 
+// 该功能仅供管理员导入经过人工选择的微信公众号文章。
+// 微信图片 CDN 域名可能发生变化，因此这里不维护 hostname 白名单。
+// 仍保留 HTTPS、请求超时、重定向次数及图片大小等限制。
 function validateWechatImageUrl(
   input: string,
 ): string {
@@ -458,14 +452,6 @@ function validateWechatImageUrl(
 
   if (url.protocol !== "https:") {
     throw new Error("微信图片必须使用 HTTPS");
-  }
-
-  const hostname = url.hostname.toLowerCase();
-
-  if (!allowedWechatImageHosts.has(hostname)) {
-    throw new Error(
-      `不允许下载该图片域名：${hostname}`,
-    );
   }
 
   url.hash = "";
@@ -538,11 +524,8 @@ function getImageExtension(
 function replaceTiptapImageUrls(
   node: TiptapNode,
   localizedByUrl: Map<string, UploadedMediaAsset>,
-): TiptapNode {
-  const nextNode = {
-    ...node,
-  } as TiptapNode;
-
+): TiptapNode | null {
+  // 如果是 image 节点且下载失败，返回 null 表示删除
   if (
     node.type === "image" &&
     node.attrs &&
@@ -551,20 +534,32 @@ function replaceTiptapImageUrls(
     const asset = localizedByUrl.get(node.attrs.src);
 
     if (asset) {
-      nextNode.attrs = {
-        ...node.attrs,
-        src: asset.url,
+      return {
+        ...node,
+        attrs: {
+          ...node.attrs,
+          src: asset.url,
+        },
       };
+    } else {
+      // 下载失败的图片删除
+      return null;
     }
   }
 
+  const nextNode = {
+    ...node,
+  } as TiptapNode;
+
   if (Array.isArray(node.content)) {
-    nextNode.content = node.content.map((child) =>
-      replaceTiptapImageUrls(
-        child,
-        localizedByUrl,
-      ),
-    );
+    nextNode.content = node.content
+      .map((child) =>
+        replaceTiptapImageUrls(
+          child,
+          localizedByUrl,
+        ),
+      )
+      .filter((child): child is TiptapNode => child !== null);
   }
 
   return nextNode;
