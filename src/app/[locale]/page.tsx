@@ -159,10 +159,10 @@ export default async function Home({ params }: Props) {
       <ImageCarousel
         images={[
           '/images/home/case-1.jpg',
-          '/images/home/case-2.jpg',
-          '/images/home/case-3.jpg',
-          '/images/home/case-4.jpg',
-          '/images/home/case-5.jpg',
+          // '/images/home/case-2.jpg',
+          // '/images/home/case-3.jpg',
+          // '/images/home/case-4.jpg',
+          // '/images/home/case-5.jpg',
           '/images/home/case-6.jpg',
         ]}
         imagePriorityCount={3}
