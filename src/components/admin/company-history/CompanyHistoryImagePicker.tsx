@@ -3,6 +3,7 @@
 import { Check, ImageIcon, Loader2, Search, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useState } from "react";
+import { isQiniuUrl } from "@/lib/config";
 
 type Asset = {
   id: string;
@@ -197,7 +198,7 @@ export default function CompanyHistoryImagePicker({
               fill
               sizes="(max-width: 768px) 100vw, 360px"
               className="object-cover"
-              unoptimized={selected.url?.includes('img.aact.pw')}
+              unoptimized={isQiniuUrl(selected.url)}
             />
           </div>
         </div>
@@ -339,7 +340,7 @@ export default function CompanyHistoryImagePicker({
                             fill
                             sizes="(max-width: 768px) 50vw, 240px"
                             className="object-cover"
-                            unoptimized={asset.url?.includes('img.aact.pw')}
+                            unoptimized={isQiniuUrl(asset.url)}
                           />
                           {isSelected ? (
                             <span className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">

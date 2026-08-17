@@ -3,6 +3,17 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
+// 获取七牛域名的主机名
+const getQiniuHostname = (): string => {
+  const domain = process.env.NEXT_PUBLIC_QINIU_DOMAIN || 'https://img.aact.pw';
+  try {
+    const url = new URL(domain);
+    return url.hostname;
+  } catch {
+    return 'img.aact.pw';
+  }
+};
+
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
@@ -10,7 +21,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "img.aact.pw",
+        hostname: getQiniuHostname(),
         pathname: "/**",
       },
       {

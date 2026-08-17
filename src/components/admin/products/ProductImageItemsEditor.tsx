@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { isQiniuUrl } from "@/lib/config";
 
 import MediaAssetPicker, {
   type ProductMediaAsset,
@@ -402,7 +403,7 @@ export default function ProductImageItemsEditor({
                               `${label}图片`
                             }
                             fill
-                            unoptimized={item.asset.url?.includes('img.aact.pw')}
+                            unoptimized={isQiniuUrl(item.asset.url)}
                             sizes="224px"
                             className="object-contain p-3"
                           />

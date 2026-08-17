@@ -4,16 +4,20 @@ import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
+const pw = "changeme123"
+const uname = "evay"
+const em = "evay@hanli.com"
+
 async function main() {
   // Create default super admin
-  const hashedPassword = await bcrypt.hash("changeme123", 12);
+  const hashedPassword = await bcrypt.hash(pw, 12);
   const admin = await prisma.user.upsert({
-    where: { username: "admin" },
+    where: { username: uname },
     update: {},
     create: {
       id: uuidv4(),
-      username: "admin",
-      email: "admin@hanli.com",
+      username: uname,
+      email: em,
       password: hashedPassword,
       role: UserRole.SUPER_ADMIN,
       isActive: true,

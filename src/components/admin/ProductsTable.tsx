@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { isQiniuUrl } from "@/lib/config";
 
 export type ProductLocale = "zh" | "en";
 
@@ -230,7 +231,7 @@ export function ProductsTable({
                               .alt || product.name
                           }
                           fill
-                          unoptimized={product.coverImage.url?.includes('img.aact.pw')}
+                          unoptimized={isQiniuUrl(product.coverImage.url)}
                           sizes="80px"
                           className="object-contain p-1.5"
                         />
