@@ -148,7 +148,7 @@ export default function CompanyHistoryList() {
 
   async function handleDelete(item: Item) {
     const confirmed = window.confirm(
-      `确认物理删除“${item.displayTime}${item.title ? ` - ${item.title}` : ""}”吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
+      `确认物理删除"${item.displayTime}${item.title ? ` - ${item.title}` : ""}"吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
     );
 
     if (!confirmed) {

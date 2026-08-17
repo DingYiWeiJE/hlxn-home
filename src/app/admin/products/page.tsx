@@ -13,6 +13,8 @@ import {
   Languages,
   FileText,
   FolderTree,
+  Trash,
+  RotateCcw,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -236,6 +238,10 @@ export default function AdminProductsPage() {
   const [categories, setCategories] =
     useState<any[]>([]);
 
+  const [tab, setTab] = useState<"active" | "trash">(
+    "active",
+  );
+
   const [pagination, setPagination] =
     useState<Pagination>({
       page: 1,
@@ -291,6 +297,11 @@ export default function AdminProductsPage() {
 
   const [deletingId, setDeletingId] =
     useState<string | null>(null);
+
+  const [
+    permanentlyDeletingId,
+    setPermanentlyDeletingId,
+  ] = useState<string | null>(null);
 
   const primaryCategories = useMemo(
     () =>
@@ -368,12 +379,18 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="min-w-0">
-                <Link
-                  href={`/admin/products/${product.id}/edit`}
-                  className="block truncate text-sm font-semibold text-slate-950 transition hover:text-blue-600"
-                >
-                  {product.name}
-                </Link>
+                {tab === "active" ? (
+                  <Link
+                    href={`/admin/products/${product.id}/edit`}
+                    className="block truncate text-sm font-semibold text-slate-950 transition hover:text-blue-600"
+                  >
+                    {product.name}
+                  </Link>
+                ) : (
+                  <p className="block truncate text-sm font-semibold text-slate-950">
+                    {product.name}
+                  </p>
+                )}
 
                 {product.seriesName ? (
                   <p className="mt-1 truncate text-xs text-slate-500">
@@ -495,38 +512,81 @@ export default function AdminProductsPage() {
           key: "actions",
           label: "操作",
           className: "px-5 py-4 text-right",
-          render: (product) => (
-            <div className="flex justify-end gap-2">
-              <Link
-                href={`/admin/products/${product.id}/edit`}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                aria-label={`编辑 ${product.name}`}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Link>
+          render: (product) =>
+            tab === "active" ? (
+              <div className="flex justify-end gap-2">
+                <Link
+                  href={`/admin/products/${product.id}/edit`}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  aria-label={`编辑 ${product.name}`}
+                >
+                  <Edit3 className="h-4 w-4" />
+                </Link>
 
-              <button
-                type="button"
-                onClick={() =>
-                  void handleDelete(product)
-                }
-                disabled={
-                  deletingId === product.id
-                }
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                aria-label={`删除 ${product.name}`}
-              >
-                {deletingId === product.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          ),
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handleDelete(product)
+                  }
+                  disabled={
+                    deletingId === product.id
+                  }
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  aria-label={`删除 ${product.name}`}
+                >
+                  {deletingId === product.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handleRestore(product)
+                  }
+                  disabled={
+                    deletingId === product.id
+                  }
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-green-200 hover:bg-green-50 hover:text-green-600 disabled:opacity-50"
+                  aria-label={`恢复 ${product.name}`}
+                  title="恢复产品"
+                >
+                  {deletingId === product.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    void handlePermanentDelete(product)
+                  }
+                  disabled={
+                    permanentlyDeletingId ===
+                    product.id
+                  }
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                  aria-label={`永久删除 ${product.name}`}
+                  title="永久删除产品"
+                >
+                  {permanentlyDeletingId ===
+                  product.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            ),
         },
       ],
-      [deletingId],
+      [deletingId, permanentlyDeletingId, tab],
     );
 
   const loadCategories =
@@ -580,6 +640,13 @@ export default function AdminProductsPage() {
             sort: "createdAt",
             order: "desc",
           });
+
+        if (tab === "trash") {
+          searchParams.set(
+            "deleted",
+            "true",
+          );
+        }
 
         if (
           selectedLocale !== "ALL"
@@ -657,6 +724,7 @@ export default function AdminProductsPage() {
       }
     },
     [
+      tab,
       keyword,
       primaryCategoryId,
       secondaryCategoryId,
@@ -704,7 +772,7 @@ export default function AdminProductsPage() {
   ) {
     const confirmed =
       window.confirm(
-        `确认删除产品“${product.name}”吗？\n\n产品会被软删除并自动下线，素材文件不会被删除。`,
+        `确认删除产品"${product.name}"吗？\n\n产品会被软删除并自动下线，素材文件不会被删除。`,
       );
 
     if (!confirmed) {
@@ -712,13 +780,13 @@ export default function AdminProductsPage() {
     }
 
     setDeletingId(product.id);
-    setPageError("");
+    setPageError('');
 
     try {
       const response = await fetch(
         `/api/admin/products/${product.id}`,
         {
-          method: "DELETE",
+          method: 'DELETE',
         },
       );
 
@@ -752,14 +820,108 @@ export default function AdminProductsPage() {
     }
   }
 
-  function handleSearch(
-    event: React.FormEvent<HTMLFormElement>,
+  async function handleRestore(
+    product: ProductItem,
   ) {
-    event.preventDefault();
+    const confirmed =
+      window.confirm(
+        `确认恢复产品"${product.name}"吗？`,
+      );
 
-    setKeyword(
-      keywordInput.trim(),
-    );
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(product.id);
+    setPageError('');
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${product.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            status: "DRAFT",
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const result =
+          (await response.json()) as DeleteProductResponse;
+
+        throw new Error(
+          getErrorMessage(result),
+        );
+      }
+
+      await loadProducts(1);
+    } catch (error) {
+      setPageError(
+        error instanceof Error
+          ? error.message
+          : "产品恢复失败",
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  async function handlePermanentDelete(
+    product: ProductItem,
+  ) {
+    const confirmed =
+      window.confirm(
+        `确认永久删除产品"${product.name}"吗？\n\n此操作无法撤销，所有相关数据将被永久删除。`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setPermanentlyDeletingId(product.id);
+    setPageError('');
+
+    try {
+      const response = await fetch(
+        `/api/admin/products/${product.id}?permanent=true`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      const result =
+        (await response.json()) as DeleteProductResponse;
+
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        throw new Error(
+          getErrorMessage(result),
+        );
+      }
+
+      const nextPage =
+        products.length === 1 &&
+        pagination.page > 1
+          ? pagination.page - 1
+          : pagination.page;
+
+      await loadProducts(nextPage);
+    } catch (error) {
+      setPageError(
+        error instanceof Error
+          ? error.message
+          : "产品永久删除失败",
+      );
+    } finally {
+      setPermanentlyDeletingId(null);
+    }
   }
 
   function clearFilters() {
@@ -880,9 +1042,42 @@ export default function AdminProductsPage() {
       </section>
 
       <section className="mt-7 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex gap-0 border-b border-slate-200">
+          <button
+            type="button"
+            onClick={() => {
+              setTab("active");
+              void loadProducts(1);
+            }}
+            className={[
+              "px-5 py-4 font-semibold transition",
+              tab === "active"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "border-b-2 border-transparent text-slate-600 hover:text-slate-900",
+            ].join(" ")}
+          >
+            所有产品
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setTab("trash");
+              void loadProducts(1);
+            }}
+            className={[
+              "px-5 py-4 font-semibold transition",
+              tab === "trash"
+                ? "border-b-2 border-blue-600 text-blue-600"
+                : "border-b-2 border-transparent text-slate-600 hover:text-slate-900",
+            ].join(" ")}
+          >
+            回收站
+          </button>
+        </div>
+
         <div className="border-b border-slate-200 p-5">
-          <form
-            onSubmit={handleSearch}
+          <div
             className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6"
           >
             <label className="relative block sm:col-span-2 lg:col-span-2">
@@ -890,11 +1085,14 @@ export default function AdminProductsPage() {
 
               <input
                 value={keywordInput}
-                onChange={(event) =>
+                onChange={(event) => {
                   setKeywordInput(
                     event.target.value,
-                  )
-                }
+                  );
+                  setKeyword(
+                    event.target.value.trim(),
+                  );
+                }}
                 placeholder="搜索产品名称、系列或 Slug"
                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               />
@@ -924,33 +1122,35 @@ export default function AdminProductsPage() {
               </option>
             </SelectField>
 
-            <SelectField
-              value={selectedStatus}
-              onChange={(value) =>
-                setSelectedStatus(
-                  value as
-                    | "ALL"
-                    | ProductStatus,
-                )
-              }
-              disabled={false}
-            >
-              <option value="ALL">
-                全部状态
-              </option>
+            {tab === "active" && (
+              <SelectField
+                value={selectedStatus}
+                onChange={(value) =>
+                  setSelectedStatus(
+                    value as
+                      | "ALL"
+                      | ProductStatus,
+                  )
+                }
+                disabled={false}
+              >
+                <option value="ALL">
+                  全部状态
+                </option>
 
-              <option value="DRAFT">
-                草稿
-              </option>
+                <option value="DRAFT">
+                  草稿
+                </option>
 
-              <option value="PUBLISHED">
-                已发布
-              </option>
+                <option value="PUBLISHED">
+                  已发布
+                </option>
 
-              <option value="OFFLINE">
-                已下线
-              </option>
-            </SelectField>
+                <option value="OFFLINE">
+                  已下线
+                </option>
+              </SelectField>
+            )}
 
             <SelectField
               value={primaryCategoryId}
@@ -1008,23 +1208,7 @@ export default function AdminProductsPage() {
               )}
             </SelectField>
 
-            <div className="flex gap-2 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <button
-                type="submit"
-                className="h-11 flex-1 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
-                查询
-              </button>
-
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-              >
-                重置
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
 
         {pageError ? (

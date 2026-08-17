@@ -499,7 +499,7 @@ export default function AdminCategoriesPage() {
 
   async function handleDelete(category: CategoryItem) {
     const confirmed = window.confirm(
-      `确认删除分类“${category.name}”吗？\n\n有关联子分类或产品时，系统会阻止删除。`,
+      `确认删除分类"${category.name}"吗？\n\n有关联子分类或产品时，系统会阻止删除。`,
     );
 
     if (!confirmed) {
