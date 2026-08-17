@@ -22,6 +22,7 @@ const MAX_TOTAL_IMAGE_BYTES = 50 * 1024 * 1024;
 const allowedWechatImageHosts = new Set([
   "mmbiz.qpic.cn",
   "mmbiz.qlogo.cn",
+  "mmecoa.qpic.cn",
   "wx.qlogo.cn",
   "thirdwx.qlogo.cn",
   "res.wx.qq.com",
@@ -522,14 +523,16 @@ function getImageExtension(
       return extension;
     }
   } catch {
-    // 使用默认扩展名
+    // 无法从 URL 提取扩展名
   }
 
   /*
-   * uploadImage 会根据真实文件内容识别类型，
-   * 此扩展名只用于原始文件名和去重。
+   * uploadImage 会根据真实文件内容自动转换为 WebP（GIF 除外）。
+   * 当 Content-Type 无法识别且 URL 中也没有扩展名时，
+   * 默认假设为 WebP，因为这是最终保存到七牛云的格式。
+   * 如果是 GIF 会有 image/gif Content-Type，已在上面处理。
    */
-  return ".img";
+  return ".webp";
 }
 
 function replaceTiptapImageUrls(

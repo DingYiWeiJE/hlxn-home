@@ -198,7 +198,6 @@ export function isAllowedImageUrl(input: string) {
     const parsed = new URL(value);
 
     if (
-      parsed.protocol !== "https:" ||
       parsed.username ||
       parsed.password
     ) {
@@ -216,11 +215,22 @@ export function isAllowedImageUrl(input: string) {
 
     /*
      * 允许通过环境变量配置的其他可信图片域名。
+     * 七牛云在本地开发时允许 HTTP，其他外部域名仍要求 HTTPS。
      */
     const configuredHosts =
       getAllowedExternalImageHosts();
 
-    return configuredHosts.has(hostname);
+    if (!configuredHosts.has(hostname)) {
+      return false;
+    }
+
+    // 七牛云域名允许 HTTP 或 HTTPS，其他域名只允许 HTTPS
+    const qiniuHosts = getQiniuHosts();
+    if (qiniuHosts.has(hostname)) {
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    }
+
+    return parsed.protocol === "https:";
   } catch {
     return false;
   }
@@ -233,6 +243,29 @@ function getAllowedExternalImageHosts() {
       .map((host) => host.trim().toLowerCase())
       .filter(Boolean),
   );
+
+  for (const value of [
+    process.env.QINIU_DOMAIN,
+    process.env.NEXT_PUBLIC_QINIU_DOMAIN,
+  ]) {
+    if (!value) {
+      continue;
+    }
+
+    try {
+      hosts.add(
+        new URL(value).hostname.toLowerCase(),
+      );
+    } catch {
+      // Ignore malformed optional host settings.
+    }
+  }
+
+  return hosts;
+}
+
+function getQiniuHosts() {
+  const hosts = new Set<string>();
 
   for (const value of [
     process.env.QINIU_DOMAIN,
