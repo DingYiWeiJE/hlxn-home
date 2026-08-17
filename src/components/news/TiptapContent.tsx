@@ -221,7 +221,7 @@ function renderImageNode(
         title={title}
         loading="lazy"
         decoding="async"
-        className="block h-auto rounded-md"
+        className="block h-auto w-full rounded-md"
         style={
           importedWidth
             ? {
@@ -233,9 +233,6 @@ function renderImageNode(
                   "auto",
               }
             : {
-                width: "auto",
-                maxWidth:
-                  "min(100%, 760px)",
                 height:
                   "auto",
               }

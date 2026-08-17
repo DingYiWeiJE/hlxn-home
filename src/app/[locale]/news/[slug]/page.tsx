@@ -104,7 +104,7 @@ export default async function NewsDetail({ params }: Props) {
         <Navigation hasbg/>
       </div>
       <NewsTracker newsId={news.id} />
-    <main className="w-full mx-auto max-w-4xl px-4 py-30 bg-white min-h-screen">
+    <main className="w-full mx-auto max-w-4xl px-4 py-30 pt-[80px] bg-white min-h-screen">
 
       {news.coverImageAsset?.url && (
         <div className="mb-8 overflow-hidden rounded-lg">
