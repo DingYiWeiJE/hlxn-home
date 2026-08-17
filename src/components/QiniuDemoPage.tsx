@@ -94,7 +94,7 @@ export function QiniuDemoPage() {
 
 const file = e.target.files[0]
 const result = await uploadImageToQiniu(file, '图片描述')
-console.log(result.url) // https://img.aact.pw/...`}
+console.log(result.url) // 返回七牛配置的域名地址`}
             </pre>
           </div>
 
@@ -104,7 +104,7 @@ console.log(result.url) // https://img.aact.pw/...`}
 {`import Image from 'next/image'
 
 <Image
-  src="https://img.aact.pw/image.jpg"
+  src={\`\${qiniuConfig.domain}/image.jpg\`}
   alt="描述"
   width={800}
   height={600}

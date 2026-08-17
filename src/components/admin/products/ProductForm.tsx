@@ -22,6 +22,7 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import { isQiniuUrl } from "@/lib/config";
 
 import DynamicTextList from "@/components/admin/products/DynamicTextList";
 import MediaAssetPicker, {
@@ -1347,7 +1348,7 @@ export default function ProductForm({
                         "产品封面"
                       }
                       fill
-                      unoptimized={coverImage.url?.includes('img.aact.pw')}
+                      unoptimized={isQiniuUrl(coverImage.url)}
                       sizes="360px"
                       className="object-contain p-4"
                     />
@@ -1443,7 +1444,7 @@ export default function ProductForm({
                         "产品介绍背景图"
                       }
                       fill
-                      unoptimized={introBackgroundImage.url?.includes('img.aact.pw')}
+                      unoptimized={isQiniuUrl(introBackgroundImage.url)}
                       sizes="360px"
                       className="object-cover"
                     />

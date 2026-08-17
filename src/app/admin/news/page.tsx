@@ -254,7 +254,7 @@ export default function AdminNewsPage() {
   ) {
     const confirmed =
       window.confirm(
-        `确认删除新闻“${item.title}”吗？\n\n删除后可以在回收站中恢复。`,
+        `确认删除新闻"${item.title}"吗？\n\n删除后可以在回收站中恢复。`,
       );
 
     if (!confirmed) {
@@ -316,7 +316,7 @@ export default function AdminNewsPage() {
   ) {
     const confirmed =
       window.confirm(
-        `确认恢复新闻”${item.title}”吗？`,
+        `确认恢复新闻"${item.title}"吗？`,
       );
 
     if (!confirmed) {
@@ -382,7 +382,7 @@ export default function AdminNewsPage() {
   ) {
     const confirmed =
       window.confirm(
-        `确认永久删除新闻”${item.title}”吗？\n\n此操作不可撤销，新闻将被彻底删除。`,
+        `确认永久删除新闻"${item.title}"吗？\n\n此操作不可撤销，新闻将被彻底删除。`,
       );
 
     if (!confirmed) {

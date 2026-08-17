@@ -2,6 +2,8 @@
  * 七牛图床工具函数库
  */
 
+import { qiniuConfig } from '../config';
+
 export interface UploadResult {
   url: string
   id: string
@@ -50,8 +52,7 @@ export function getQiniuImageUrl(
     format?: 'jpg' | 'png' | 'gif' | 'webp'
   }
 ): string {
-  const domain = process.env.NEXT_PUBLIC_QINIU_DOMAIN || 'https://img.aact.pw'
-  const baseUrl = `${domain}/${key}`
+  const baseUrl = `${qiniuConfig.domain}/${key}`
 
   if (!options) return baseUrl
 

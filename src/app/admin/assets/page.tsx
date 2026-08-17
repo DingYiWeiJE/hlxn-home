@@ -362,7 +362,7 @@ export default function AdminAssetsPage() {
       asset.filename;
 
     const confirmed = window.confirm(
-      `确认删除素材“${displayName}”吗？\n\n正在被产品使用的素材无法删除。`,
+      `确认删除素材"${displayName}"吗？\n\n正在被产品使用的素材无法删除。`,
     );
 
     if (!confirmed) {

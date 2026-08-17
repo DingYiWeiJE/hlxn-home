@@ -668,6 +668,9 @@ export async function PATCH(
  * 软删除产品
  *
  * DELETE /api/admin/products/:id
+ *
+ * 查询参数：
+ * permanent=true 时执行永久删除
  */
 export async function DELETE(
   request: Request,
@@ -678,6 +681,46 @@ export async function DELETE(
     assertSameOriginRequest(request);
 
     const { id } = await context.params;
+    const url = new URL(request.url);
+    const isPermanent =
+      url.searchParams.get("permanent") === "true";
+
+    if (isPermanent) {
+      const product =
+        await prisma.product.findFirst({
+          where: {
+            id,
+            deletedAt: {
+              not: null,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (!product) {
+        throw new ApiError(
+          "NOT_FOUND",
+          "产品不存在或未被删除",
+          404,
+        );
+      }
+
+      await prisma.product.delete({
+        where: {
+          id,
+        },
+      });
+
+      clearCacheByNamespace("products");
+
+      return ok({
+        id,
+        deleted: true,
+        permanent: true,
+      });
+    }
 
     const product =
       await prisma.product.findFirst({

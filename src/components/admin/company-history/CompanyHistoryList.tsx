@@ -4,6 +4,7 @@ import { Edit3, Eye, History, Loader2, Plus, RefreshCw, Search, Trash2 } from "l
 import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { isQiniuUrl } from "@/lib/config";
 
 type Locale = "zh" | "en";
 
@@ -148,7 +149,7 @@ export default function CompanyHistoryList() {
 
   async function handleDelete(item: Item) {
     const confirmed = window.confirm(
-      `确认物理删除“${item.displayTime}${item.title ? ` - ${item.title}` : ""}”吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
+      `确认物理删除"${item.displayTime}${item.title ? ` - ${item.title}` : ""}"吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
     );
 
     if (!confirmed) {
@@ -318,7 +319,7 @@ export default function CompanyHistoryList() {
                               fill
                               sizes="80px"
                               className="object-cover"
-                              unoptimized={item.imageAsset.url?.includes('img.aact.pw')}
+                              unoptimized={isQiniuUrl(item.imageAsset.url)}
                             />
                           </div>
                         ) : (
@@ -401,7 +402,7 @@ export default function CompanyHistoryList() {
                           fill
                           sizes="96px"
                           className="object-cover"
-                          unoptimized={item.imageAsset.url?.includes('img.aact.pw')}
+                          unoptimized={isQiniuUrl(item.imageAsset.url)}
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center">

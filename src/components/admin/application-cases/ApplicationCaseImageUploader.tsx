@@ -7,6 +7,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Image from "next/image";
+import { isQiniuUrl } from "@/lib/config";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -251,7 +252,7 @@ export default function ApplicationCaseImageUploader({
               alt="预览"
               fill
               className="object-cover"
-              unoptimized={previewUrl?.includes('img.aact.pw')}
+              unoptimized={isQiniuUrl(previewUrl)}
             />
 
             {uploading && (

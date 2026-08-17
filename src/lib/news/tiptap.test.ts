@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractImageUrlsFromTiptapJson, extractTextFromTiptapJson, validateTiptapDocument } from "./tiptap";
+import { qiniuConfig } from "@/lib/config";
 
 const doc = {
   type: "doc",
@@ -31,7 +32,7 @@ describe("tiptap utilities", () => {
 
   it("allows images from the configured Qiniu domain", () => {
     const previousQiniuDomain = process.env.QINIU_DOMAIN;
-    process.env.QINIU_DOMAIN = "https://img.aact.pw";
+    process.env.QINIU_DOMAIN = qiniuConfig.domain;
 
     try {
       expect(() =>
@@ -41,7 +42,7 @@ describe("tiptap utilities", () => {
             {
               type: "image",
               attrs: {
-                src: "https://img.aact.pw/news/images/2026/08/demo.webp",
+                src: `${qiniuConfig.domain}/news/images/2026/08/demo.webp`,
               },
             },
           ],
