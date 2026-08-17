@@ -3,6 +3,7 @@ import type { CompanyHistoryPublicItem } from "@/lib/company-history/types";
 
 type Props = {
   items: CompanyHistoryPublicItem[];
+  locale: string;
   labels: {
     title: string;
     previous: string;
@@ -15,7 +16,7 @@ type Props = {
   };
 };
 
-export default function CompanyHistorySection({ items, labels }: Props) {
+export default function CompanyHistorySection({ items, locale, labels }: Props) {
   return (
     <section className="bg-[#f6fbff] py-16 lg:py-24">
       <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
@@ -36,6 +37,7 @@ export default function CompanyHistorySection({ items, labels }: Props) {
           <div className="mt-10">
             <CompanyHistoryTimeline
               items={items}
+              locale={locale}
               labels={{
                 previous: labels.previous,
                 next: labels.next,

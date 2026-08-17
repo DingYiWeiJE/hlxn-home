@@ -14,6 +14,7 @@ import type { CompanyHistoryPublicItem } from "@/lib/company-history/types";
 
 type Props = {
   items: CompanyHistoryPublicItem[];
+  locale: string;
   labels: {
     previous: string;
     next: string;
@@ -23,7 +24,7 @@ type Props = {
   };
 };
 
-export default function CompanyHistoryTimeline({ items, labels }: Props) {
+export default function CompanyHistoryTimeline({ items, locale, labels }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
     pointerId: number;
@@ -179,7 +180,7 @@ export default function CompanyHistoryTimeline({ items, labels }: Props) {
                 </time>
               </div>
 
-              <HistoryCard item={item} labels={labels} />
+              <HistoryCard item={item} locale={locale} labels={labels} />
             </article>
           ))}
         </div>
@@ -207,7 +208,7 @@ export default function CompanyHistoryTimeline({ items, labels }: Props) {
               <time className="mb-3 inline-block rounded-full bg-white px-4 py-1 text-sm font-bold text-[#2365c4] shadow-sm">
                 {item.displayTime}
               </time>
-              <HistoryCard item={item} labels={labels} />
+              <HistoryCard item={item} locale={locale} labels={labels} />
             </div>
           </article>
         ))}
@@ -218,28 +219,31 @@ export default function CompanyHistoryTimeline({ items, labels }: Props) {
 
 function HistoryCard({
   item,
+  locale,
   labels,
 }: {
   item: CompanyHistoryPublicItem;
+  locale: string;
   labels: Props["labels"];
 }) {
   const imageAlt =
     item.imageAsset?.alt ||
     item.title ||
     `${item.displayTime} ${labels.itemLabel}`;
+  const isEnglish = locale === "en";
 
   return (
     <div className="overflow-hidden rounded-lg border border-[#cfe7f7] bg-white shadow-sm">
       <div className="p-5 md:p-6">
         {item.title ? (
-          <h3 className="text-lg font-bold leading-7 text-[#07101f]">
+          <h3 className="text-lg text-center font-bold leading-7 text-[#07101f]">
             {item.title}
           </h3>
         ) : null}
 
         <div className={item.title ? "mt-3 space-y-3" : "space-y-3"}>
           {item.detailParagraphs.map((paragraph, index) => (
-            <p key={index} className="text-sm leading-7 text-[#27384b] md:text-base">
+            <p key={index} className={`text-sm leading-7 text-[#27384b] md:text-base${isEnglish ? " text-center" : ""}`}>
               {paragraph}
             </p>
           ))}

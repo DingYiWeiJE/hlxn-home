@@ -125,6 +125,7 @@ async function AboutContent({
         <VisionMissionSection locale={locale} />
         <CompanyHistorySection
           items={historyItems}
+          locale={locale}
           labels={{
             title: t("aboutPage.history.title"),
             previous: t("aboutPage.history.previous"),
