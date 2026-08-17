@@ -662,10 +662,9 @@ export default function NewsEditor({
           "[&_.tiptap_hr]:border-t",
           "[&_.tiptap_hr]:border-slate-300",
 
-          "[&_.tiptap_img]:mx-auto",
           "[&_.tiptap_img]:my-6",
           "[&_.tiptap_img]:h-auto",
-          "[&_.tiptap_img]:max-w-full",
+          "[&_.tiptap_img]:w-full",
           "[&_.tiptap_img]:rounded-lg",
 
           "[&_.ProseMirror-selectednode]:outline",
