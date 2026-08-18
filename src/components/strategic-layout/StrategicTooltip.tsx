@@ -29,7 +29,7 @@ export function renderStrategicTooltip(
     : "";
 
   return `
-    <div style="font-family:Arial,Helvetica,sans-serif;color:#0f2742;min-width:280px;max-width:320px;">
+    <div style="font-family:OPPOSans2_En_design-Regular, 微软雅黑, Arial, PingFangSC-Light, 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', tahoma, sans-serif;color:#0f2742;min-width:280px;max-width:320px;">
       ${imageHtml}
       <strong style="display:block;margin-bottom:8px;font-size:14px;">${location.name}</strong>
       <div style="color:#49647d;font-size:12px;line-height:1.8;">

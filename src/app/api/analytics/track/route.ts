@@ -116,6 +116,19 @@ export async function POST(request: NextRequest) {
       return ok({ duplicated: true });
     }
 
+    // 确保 session 存在，如不存在则创建
+    await prisma.analyticsSession.upsert({
+      where: { sessionId: validatedData.sessionId },
+      update: { lastActiveAt: new Date() },
+      create: {
+        sessionId: validatedData.sessionId,
+        visitorId: validatedData.visitorId,
+        ipHash,
+        userAgent,
+        isBot: botFlag,
+      },
+    });
+
     // 记录页面访问
     await prisma.analyticsPageView.create({
       data: {

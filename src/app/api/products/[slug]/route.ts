@@ -10,6 +10,7 @@ import { z } from "zod";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
+import { withCache } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -376,42 +377,51 @@ export async function GET(
     const locale =
       query.locale as ProductLocale;
 
-    const product =
-      await prisma.product.findFirst({
-        where: {
-          slug: normalizedSlug,
-          locale,
-          status: ProductStatus.PUBLISHED,
-          deletedAt: null,
-
-          secondaryCategory: {
-            is: {
-              enabled: true,
+    const data = await withCache(
+      "products",
+      { slug: normalizedSlug, locale },
+      async () => {
+        const product =
+          await prisma.product.findFirst({
+            where: {
+              slug: normalizedSlug,
+              locale,
+              status: ProductStatus.PUBLISHED,
               deletedAt: null,
 
-              parent: {
+              secondaryCategory: {
                 is: {
                   enabled: true,
                   deletedAt: null,
+
+                  parent: {
+                    is: {
+                      enabled: true,
+                      deletedAt: null,
+                    },
+                  },
                 },
               },
             },
-          },
-        },
 
-        select: productDetailSelect,
-      });
+            select: productDetailSelect,
+          });
 
-    if (!product) {
-      throw new ApiError(
-        "NOT_FOUND",
-        "当前语言下的产品不存在或暂未发布",
-        404,
-      );
-    }
+        if (!product) {
+          throw new ApiError(
+            "NOT_FOUND",
+            "当前语言下的产品不存在或暂未发布",
+            404,
+          );
+        }
+
+        return formatProductDetail(product);
+      },
+      10 * 60 * 1000,
+    );
 
     return ok(
-      formatProductDetail(product),
+      data,
       {
         headers: {
           "Cache-Control":
