@@ -359,7 +359,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
           }
 
           const value = typeof data?.value === "number" ? data.value : 0;
-          return `<div style="font-family:Arial,Helvetica,sans-serif;color:#0f2742;"><strong>${itemParams.name ?? ""}</strong><br/><span style="color:#49647d;font-size:12px;">${currentUi.locationCount}：${value}</span></div>`;
+          return `<div style="font-family:OPPOSans2_En_design-Regular, 微软雅黑, Arial, PingFangSC-Light, 'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', tahoma, sans-serif;color:#0f2742;"><strong>${itemParams.name ?? ""}</strong><br/><span style="color:#49647d;font-size:12px;">${currentUi.locationCount}：${value}</span></div>`;
         },
       },
       visualMap: {
