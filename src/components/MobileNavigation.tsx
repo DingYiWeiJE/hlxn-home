@@ -7,18 +7,23 @@ import { usePathname, useRouter } from "next/navigation";
 type Props = {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
+  isWhiteBg: boolean;
   localeSwitchUrls?: Partial<Record<"zh" | "en", string>>;
 };
 
 export default function MobileNavigation({
   mobileMenuOpen,
   setMobileMenuOpen,
+  isWhiteBg,
   localeSwitchUrls,
 }: Props) {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const textColor = isWhiteBg ? "text-black" : "text-white";
+  const hoverBgColor = isWhiteBg ? "hover:bg-gray-200" : "hover:bg-black hover:bg-opacity-50";
+  const activeTextColor = isWhiteBg ? "text-black" : "text-white";
 
   const isActive = (href: string) => {
     const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
@@ -48,14 +53,14 @@ export default function MobileNavigation({
   return (
     <div
       className="md:hidden pb-4 space-y-2 backdrop-blur-md rounded-lg"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
+      style={{ backgroundColor: isWhiteBg ? "rgba(255, 255, 255, 0.95)" : "rgba(0, 0, 0, 0.2)" }}
     >
       <Link
         href={`/${locale}`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -65,8 +70,8 @@ export default function MobileNavigation({
         href={`/${locale}/about`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/about`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -76,8 +81,8 @@ export default function MobileNavigation({
         href={`/${locale}/products`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/products`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -87,8 +92,8 @@ export default function MobileNavigation({
         href={`/${locale}/solutions`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/solutions`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -98,8 +103,8 @@ export default function MobileNavigation({
         href={`/${locale}/cases`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/cases`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -109,8 +114,8 @@ export default function MobileNavigation({
         href={`/${locale}/news`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/news`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -120,8 +125,8 @@ export default function MobileNavigation({
         href={`/${locale}/contact`}
         className={`block px-4 py-2 rounded transition ${
           isActive(`/${locale}/contact`)
-            ? "text-white text-lg font-bold"
-            : "text-white hover:text-gray-300"
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverBgColor}`
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -130,7 +135,7 @@ export default function MobileNavigation({
 
       {/* Mobile Language Selector */}
       <div className="px-4 py-2 space-y-2">
-        <p className="text-white text-sm font-semibold">语言 / Language</p>
+        <p className={`${textColor} text-sm font-semibold`}>语言 / Language</p>
         <button
           onClick={() => {
             switchLanguage("zh");
@@ -139,7 +144,7 @@ export default function MobileNavigation({
           className={`block w-full text-left px-3 py-2 rounded transition ${
             locale === "zh"
               ? "bg-blue-600 text-white font-bold"
-              : "text-white hover:bg-black hover:bg-opacity-50"
+              : `${textColor} ${hoverBgColor}`
           }`}
         >
           中文
@@ -152,7 +157,7 @@ export default function MobileNavigation({
           className={`block w-full text-left px-3 py-2 rounded transition ${
             locale === "en"
               ? "bg-blue-600 text-white font-bold"
-              : "text-white hover:bg-black hover:bg-opacity-50"
+              : `${textColor} ${hoverBgColor}`
           }`}
         >
           English
