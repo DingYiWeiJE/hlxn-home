@@ -3,13 +3,12 @@ import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
-import Image from "next/image";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import CompanyHistorySection from "@/components/about/CompanyHistorySection";
 import StrategicLayoutMapSection from "@/components/strategic-layout/StrategicLayoutMapSection";
 import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
+import DevelopmentHistory from "@/components/about/DevelopmentHistory";
 
 type Props = {
   params: Promise<{
@@ -123,20 +122,7 @@ async function AboutContent({
       <main>
         <CompanyIntroSection locale={locale} />
         <VisionMissionSection locale={locale} />
-        <CompanyHistorySection
-          items={historyItems}
-          locale={locale}
-          labels={{
-            title: t("aboutPage.history.title"),
-            previous: t("aboutPage.history.previous"),
-            next: t("aboutPage.history.next"),
-            scrollHint: t("aboutPage.history.scrollHint"),
-            emptyTitle: t("aboutPage.history.emptyTitle"),
-            emptyDescription: t("aboutPage.history.emptyDescription"),
-            timelineLabel: t("aboutPage.history.timelineLabel"),
-            itemLabel: t("aboutPage.history.itemLabel"),
-          }}
-        />
+        <DevelopmentHistory />
         <PatentSection locale={locale} />
         <StrategicLayoutMapSection locale={locale} />
         <MapSection locale={locale} />
