@@ -73,7 +73,7 @@ function renderNode(
         <p
           key={key}
           style={alignmentStyle}
-          className="my-4 text-base leading-8 text-slate-800"
+          className="my-4 text-[1.5rem] leading-[3rem] text-slate-800 whitespace-pre-wrap"
         >
           {children}
         </p>
@@ -221,14 +221,14 @@ function renderImageNode(
         title={title}
         loading="lazy"
         decoding="async"
-        className="block h-auto w-full rounded-md"
+        className="block h-auto w-4/5 rounded-md"
         style={
           importedWidth
             ? {
                 width:
                   importedWidth,
                 maxWidth:
-                  "100%",
+                  "80%",
                 height:
                   "auto",
               }

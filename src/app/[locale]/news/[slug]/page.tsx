@@ -99,50 +99,33 @@ export default async function NewsDetail({ params }: Props) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#e7f6ff]">
+    <div className="flex min-h-screen flex-col bg-[white]">
       <div className="border-b border-slate-100 bg-white">
         <Navigation hasbg/>
       </div>
-      <NewsTracker newsId={news.id} />
-    <main className="w-full mx-auto max-w-4xl px-4 py-30 pt-[80px] bg-white min-h-screen">
-
-      {news.coverImageAsset?.url && (
-        <div className="mb-8 overflow-hidden rounded-lg">
-          <div className="relative aspect-video bg-slate-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`${news.coverImageAsset.url}?t=${news.coverImageAsset.id || news.id}`}
-              alt={news.coverImageAlt || news.title}
-              loading="eager"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </div>
-      )}
-
-      <article className="space-y-6">
-        <header className="border-b border-slate-200 pb-6">
-          <h1 className="mb-4 text-4xl font-bold">{news.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-slate-600">
+      <header className="border-b border-slate-200 bg-[#3060AC] p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[1200px]">
+          <h1 className="mb-4 text-4xl font-bold text-white">{news.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-slate-200">
             {news.publishedAt && (
               <time dateTime={news.publishedAt.toISOString()}>
                 {news.publishedAt.toLocaleString()}
               </time>
             )}
           </div>
-          {news.summary && (
-            <p className="mt-4 text-lg text-slate-700">{news.summary}</p>
+        </div>
+      </header>
+      <NewsTracker newsId={news.id} />
+      <main className="w-full mx-auto max-w-[1200px] px-4 py-30 pt-[80px] bg-white min-h-screen">
+        
+        <article className="space-y-6">
+          {news.content && (
+            <div className="prose prose-sm max-w-none">
+              <TiptapContent content={news.content as TiptapNode} />
+            </div>
           )}
-        </header>
-
-        {news.content && (
-          <div className="prose prose-sm max-w-none">
-            <TiptapContent content={news.content as TiptapNode} />
-          </div>
-        )}
-      </article>
-    </main>
+        </article>
+      </main>
       <Footer locale={locale} />
     </div>
   );
