@@ -27,7 +27,7 @@ const allowedNodes = new Set([
   "image",
 ]);
 
-const allowedMarks = new Set(["bold", "italic", "underline", "link"]);
+const allowedMarks = new Set(["bold", "italic", "underline", "link", "textStyle"]);
 const maxContentBytes = 512 * 1024;
 
 export const emptyTiptapDocument: TiptapNode = { type: "doc", content: [] };

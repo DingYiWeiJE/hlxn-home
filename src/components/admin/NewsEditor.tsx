@@ -8,6 +8,8 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
 import {
   Bold,
   Heading2,
@@ -25,6 +27,7 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  Palette,
 } from "lucide-react";
 
 import type { TiptapNode } from "@/lib/news/tiptap";
@@ -61,6 +64,12 @@ export default function NewsEditor({
       }),
 
       Underline,
+
+      TextStyle,
+
+      Color.configure({
+        types: ["textStyle"],
+      }),
 
       TextAlign.configure({
         types: [
@@ -313,11 +322,11 @@ export default function NewsEditor({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-300 bg-white">
+    <div className="flex flex-col h-screen rounded-lg border border-slate-300 bg-white">
       <div
         role="toolbar"
         aria-label="新闻正文编辑工具栏"
-        className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2"
+        className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2 flex-shrink-0"
       >
         <ToolbarButton
           label="二级标题"
@@ -460,6 +469,27 @@ export default function NewsEditor({
             size={19}
           />
         </ToolbarButton>
+
+        <ToolbarDivider />
+
+        <div className="inline-flex h-9 items-center gap-2">
+          <Palette size={19} className="text-slate-700" />
+          <input
+            type="color"
+            title="文字颜色"
+            value={editor.getAttributes("textStyle").color || "#000000"}
+            onChange={(event) =>
+              editor
+                .chain()
+                .focus()
+                .setColor(
+                  event.target.value,
+                )
+                .run()
+            }
+            className="h-7 w-12 cursor-pointer rounded border border-slate-300"
+          />
+        </div>
 
         <ToolbarDivider />
 
@@ -610,9 +640,8 @@ export default function NewsEditor({
       <EditorContent
         editor={editor}
         className={[
-          "min-h-72 px-5 py-4 text-slate-900",
+          "flex-1 overflow-y-auto px-5 py-4 text-slate-900",
 
-          "[&_.tiptap]:min-h-64",
           "[&_.tiptap]:outline-none",
           "[&_.tiptap]:leading-8",
 

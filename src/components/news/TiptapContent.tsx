@@ -308,6 +308,27 @@ function applyMark(
         </u>
       );
 
+    case "textStyle": {
+      const color =
+        typeof mark.attrs?.color ===
+        "string"
+          ? mark.attrs.color
+          : undefined;
+
+      if (!color) {
+        return content;
+      }
+
+      return (
+        <span
+          key={key}
+          style={{ color }}
+        >
+          {content}
+        </span>
+      );
+    }
+
     case "link": {
       const href =
         typeof mark.attrs?.href ===
