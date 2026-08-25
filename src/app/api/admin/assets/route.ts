@@ -176,7 +176,7 @@ export async function GET(
                 productPdfs: true,
                 newsCovers: true,
                 applicationCaseImages: true,
-                companyHistoryImages: true,
+                companyHistoryEvents: true,
               },
             },
           },
@@ -210,7 +210,7 @@ export async function GET(
             item._count.productPdfs +
             item._count.newsCovers +
             item._count.applicationCaseImages +
-            item._count.companyHistoryImages;
+            item._count.companyHistoryEvents;
 
           return {
             id: item.id,
@@ -267,9 +267,9 @@ export async function GET(
                 item._count
                   .applicationCaseImages,
 
-              companyHistoryImages:
+              companyHistoryEvents:
                 item._count
-                  .companyHistoryImages,
+                  .companyHistoryEvents,
 
               solutionWorkingPrincipleBackgrounds:
                 item._count

@@ -10,14 +10,16 @@ type Locale = "zh" | "en";
 
 type Item = {
   id: string;
-  locale: Locale;
-  displayTime: string;
-  sortDate: string;
+  time: string;
+  content: string;
   sortOrder: number;
-  title: string | null;
-  detailParagraphCount: number;
-  createdAt: string;
-  updatedAt: string;
+  historyYear: {
+    id: string;
+    locale: Locale;
+    year: number;
+    sortDate: string;
+    sortOrder: number;
+  };
   imageAsset: {
     id: string;
     url: string;
@@ -25,6 +27,8 @@ type Item = {
     height: number | null;
     alt: string | null;
   } | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type Pagination = {
@@ -149,7 +153,7 @@ export default function CompanyHistoryList() {
 
   async function handleDelete(item: Item) {
     const confirmed = window.confirm(
-      `确认物理删除"${item.displayTime}${item.title ? ` - ${item.title}` : ""}"吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
+      `确认物理删除"${item.historyYear.year}年 ${item.time} - ${item.content.substring(0, 30)}"吗？\n\n删除后没有回收站，无法恢复。图片素材和本地图片文件不会被删除。`,
     );
 
     if (!confirmed) {
@@ -207,7 +211,7 @@ export default function CompanyHistoryList() {
               value={keywordInput}
               onChange={(event) => setKeywordInput(event.target.value)}
               className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              placeholder="搜索展示时间或标题"
+              placeholder="搜索时间或内容"
             />
           </label>
 
@@ -250,8 +254,7 @@ export default function CompanyHistoryList() {
             <option value="sortDate:desc">排序时间降序</option>
             <option value="sortOrder:asc">排序值升序</option>
             <option value="createdAt:desc">创建时间降序</option>
-            <option value="updatedAt:desc">更新时间降序</option>
-            <option value="displayTime:asc">展示时间升序</option>
+            <option value="year:asc">年份升序</option>
           </select>
 
           <div className="flex gap-2">
@@ -297,10 +300,9 @@ export default function CompanyHistoryList() {
                 <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <tr>
                     <th className="px-5 py-4">图片</th>
-                    <th className="px-5 py-4">展示时间</th>
-                    <th className="px-5 py-4">排序时间</th>
-                    <th className="px-5 py-4">事件标题</th>
-                    <th className="px-5 py-4">段落数</th>
+                    <th className="px-5 py-4">年份</th>
+                    <th className="px-5 py-4">事件时间</th>
+                    <th className="px-5 py-4">事件内容</th>
                     <th className="px-5 py-4">语言</th>
                     <th className="px-5 py-4">排序值</th>
                     <th className="px-5 py-4">创建/更新</th>
@@ -315,7 +317,7 @@ export default function CompanyHistoryList() {
                           <div className="relative h-14 w-20 overflow-hidden rounded-lg bg-slate-100">
                             <Image
                               src={item.imageAsset.url}
-                              alt={item.imageAsset.alt || item.title || item.displayTime}
+                              alt={item.imageAsset.alt || item.time}
                               fill
                               sizes="80px"
                               className="object-cover"
@@ -329,20 +331,17 @@ export default function CompanyHistoryList() {
                         )}
                       </td>
                       <td className="px-5 py-4 font-semibold text-slate-900">
-                        {item.displayTime}
+                        {item.historyYear.year}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
-                        {formatDate(item.sortDate)}
+                        {item.time}
                       </td>
                       <td className="max-w-xs px-5 py-4 text-sm text-slate-700">
-                        <span className="line-clamp-2">{item.title || "-"}</span>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {item.detailParagraphCount}
+                        <span className="line-clamp-2">{item.content}</span>
                       </td>
                       <td className="px-5 py-4">
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                          {item.locale === "zh" ? "中文" : "英文"}
+                          {item.historyYear.locale === "zh" ? "中文" : "英文"}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
@@ -355,7 +354,7 @@ export default function CompanyHistoryList() {
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-2">
                           <Link
-                            href={`/${item.locale}/about`}
+                            href={`/${item.historyYear.locale}/about`}
                             target="_blank"
                             className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                           >
@@ -398,7 +397,7 @@ export default function CompanyHistoryList() {
                       {item.imageAsset ? (
                         <Image
                           src={item.imageAsset.url}
-                          alt={item.imageAsset.alt || item.title || item.displayTime}
+                          alt={item.imageAsset.alt || item.time}
                           fill
                           sizes="96px"
                           className="object-cover"
@@ -413,25 +412,23 @@ export default function CompanyHistoryList() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold text-slate-950">
-                          {item.displayTime}
+                          {item.historyYear.year}年 {item.time}
                         </span>
                         <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                          {item.locale === "zh" ? "中文" : "英文"}
+                          {item.historyYear.locale === "zh" ? "中文" : "英文"}
                         </span>
                       </div>
-                      {item.title ? (
-                        <p className="mt-1 line-clamp-2 text-sm text-slate-700">
-                          {item.title}
-                        </p>
-                      ) : null}
+                      <p className="mt-1 line-clamp-2 text-sm text-slate-700">
+                        {item.content}
+                      </p>
                       <p className="mt-2 text-xs text-slate-500">
-                        排序时间 {formatDate(item.sortDate)} / 排序值 {item.sortOrder} / 段落 {item.detailParagraphCount}
+                        排序值 {item.sortOrder}
                       </p>
                     </div>
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     <Link
-                      href={`/${item.locale}/about`}
+                      href={`/${item.historyYear.locale}/about`}
                       target="_blank"
                       className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600"
                     >

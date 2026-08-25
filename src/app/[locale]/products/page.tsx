@@ -61,11 +61,11 @@ async function ProductsContent({ locale }: { locale: string }) {
       <main>
         <section className="bg-[#eaf7ff] py-20 lg:py-28">
           <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-            <h1 className="mb-6 md:mb-8 text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide text-[#2365c4]">
+            <h1 className="mb-6 md:mb-8 text-[3rem] font-bold tracking-wide text-[#2365c4]">
               {page.introTitle}
             </h1>
 
-            <div className="space-y-4 md:space-y-6 text-sm md:text-base leading-[1.8] text-[#1f3448] lg:max-w-[500px]">
+            <div className="space-y-4 md:space-y-6 text-[1.2rem] leading-[1.8] text-[#1f3448] lg:max-w-[500px]">
               {[page.introText1, page.introText2].map((intro, index) => (
                 <p key={index}>{intro}</p>
               ))}

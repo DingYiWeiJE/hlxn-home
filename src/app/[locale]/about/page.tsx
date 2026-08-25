@@ -9,6 +9,7 @@ import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
 import DevelopmentHistory from "@/components/about/DevelopmentHistory";
+import FadeAnimation from "@/components/FadeAnimation";
 
 type Props = {
   params: Promise<{
@@ -115,15 +116,39 @@ async function AboutContent({
   historyItems: Awaited<ReturnType<typeof getCompanyHistoryByLocale>>;
 }) {
   const t = await getTranslations({ locale });
+  const historyTranslations = {
+    title: t("aboutPage.history.title"),
+    previous: t("aboutPage.history.previous"),
+    next: t("aboutPage.history.next"),
+    emptyTitle: t("aboutPage.history.emptyTitle"),
+    emptyDescription: t("aboutPage.history.emptyDescription"),
+    timelineLabel: t("aboutPage.history.timelineLabel"),
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
       <HeaderSection locale={locale} />
       <main>
         <CompanyIntroSection locale={locale} />
-        <VisionMissionSection locale={locale} />
-        <DevelopmentHistory />
+        <FadeAnimation
+          animation="zoom-in"
+          duration={1200}
+        >
+          <VisionMissionSection locale={locale} />
+        </FadeAnimation>
+        
+        <FadeAnimation
+          animation="fade-right"
+          duration={2200}
+        >
+          <DevelopmentHistory locale={locale as "zh" | "en"} translations={historyTranslations} />
+        </FadeAnimation>
+        <FadeAnimation
+          animation="zoom-in"
+          duration={2200}
+        >
         <PatentSection locale={locale} />
+        </FadeAnimation>
         <StrategicLayoutMapSection locale={locale} />
         <MapSection locale={locale} />
       </main>
@@ -167,13 +192,13 @@ async function CompanyIntroSection({ locale }: { locale: string }) {
   return (
     <section className="bg-[#eaf7ff] py-20 lg:py-28">
       <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-        <h1 className="mb-6 md:mb-8 text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide text-[#2365c4]">
+        <h1 className="mb-6 md:mb-8 text-[3rem] font-bold tracking-wide text-[#2365c4]">
           {t("aboutPage.companyIntroTitle")}
         </h1>
 
-        <div className="space-y-4 md:space-y-6 text-sm md:text-base leading-[1.8] text-[#1f3448] lg:max-w-[500px]">
+        <div className="space-y-4 md:space-y-6 text-[1.2rem] leading-[1.8] text-[#1f3448] lg:max-w-[500px]">
           {intros.map((intro, index) => (
-            <p key={index}>{intro}</p>
+            <FadeAnimation ><p key={index} className="intro" >{intro}</p></FadeAnimation>
           ))}
         </div>
       </div>

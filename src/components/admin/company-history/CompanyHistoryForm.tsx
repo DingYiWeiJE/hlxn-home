@@ -2,12 +2,9 @@
 
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useState } from "react";
 
 import CompanyHistoryImagePicker from "./CompanyHistoryImagePicker";
-import CompanyHistoryParagraphsEditor, {
-  createInitialParagraphs,
-} from "./CompanyHistoryParagraphsEditor";
 
 type Locale = "zh" | "en";
 
@@ -25,14 +22,17 @@ type Props = {
   mode: "create" | "edit";
   initialData?: {
     id: string;
-    locale: Locale;
-    displayTime: string;
-    sortDate: string;
+    time: string;
+    content: string;
     sortOrder: number;
-    title: string | null;
-    detailParagraphs: string[];
     imageAssetId: string | null;
     imageAsset: ImageAsset | null;
+    historyYear: {
+      locale: Locale;
+      year: number;
+      sortDate: string;
+      sortOrder: number;
+    };
   };
 };
 
@@ -57,24 +57,17 @@ function getFirstError(errors: FieldErrors, key: string): string | undefined {
 
 export default function CompanyHistoryForm({ mode, initialData }: Props) {
   const router = useRouter();
-  const [locale, setLocale] = useState<Locale | "">(initialData?.locale ?? "");
-  const [displayTime, setDisplayTime] = useState(initialData?.displayTime ?? "");
-  const [sortDate, setSortDate] = useState(initialData?.sortDate ?? "");
+  const [locale, setLocale] = useState<Locale | "">(initialData?.historyYear.locale ?? "");
+  const [year, setYear] = useState(String(initialData?.historyYear.year ?? ""));
+  const [time, setTime] = useState(initialData?.time ?? "");
+  const [content, setContent] = useState(initialData?.content ?? "");
+  const [sortDate, setSortDate] = useState(initialData?.historyYear.sortDate ?? "");
   const [sortOrder, setSortOrder] = useState(String(initialData?.sortOrder ?? 0));
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [paragraphs, setParagraphs] = useState(() =>
-    createInitialParagraphs(initialData?.detailParagraphs),
-  );
   const [image, setImage] = useState<ImageAsset | null>(initialData?.imageAsset ?? null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [serverError, setServerError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const cleanedParagraphs = useMemo(
-    () => paragraphs.map((item) => item.value.trim()).filter(Boolean),
-    [paragraphs],
-  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -87,14 +80,17 @@ export default function CompanyHistoryForm({ mode, initialData }: Props) {
     if (!locale) {
       nextErrors.locale = ["请选择内容语言"];
     }
-    if (!displayTime.trim()) {
-      nextErrors.displayTime = ["请输入展示时间"];
+    if (!year.trim()) {
+      nextErrors.year = ["请输入年份"];
+    }
+    if (!time.trim()) {
+      nextErrors.time = ["请输入事件时间"];
+    }
+    if (!content.trim()) {
+      nextErrors.content = ["请输入事件内容"];
     }
     if (!sortDate) {
       nextErrors.sortDate = ["请选择排序时间"];
-    }
-    if (cleanedParagraphs.length === 0) {
-      nextErrors.detailParagraphs = ["事件详情至少需要一个非空自然段"];
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -120,11 +116,11 @@ export default function CompanyHistoryForm({ mode, initialData }: Props) {
           },
           body: JSON.stringify({
             locale,
-            displayTime: displayTime.trim(),
+            year: Number(year),
+            time: time.trim(),
+            content: content.trim(),
             sortDate,
             sortOrder: Number(sortOrder || 0),
-            title: title.trim() || null,
-            detailParagraphs: cleanedParagraphs,
             imageAssetId: image?.id ?? null,
           }),
         },
@@ -196,19 +192,40 @@ export default function CompanyHistoryForm({ mode, initialData }: Props) {
 
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-slate-700">
-                  展示时间 <span className="text-red-500">*</span>
+                  年份 <span className="text-red-500">*</span>
                 </span>
                 <input
-                  value={displayTime}
+                  type="number"
+                  value={year}
                   disabled={submitting}
-                  maxLength={100}
-                  onChange={(event) => setDisplayTime(event.target.value)}
-                  placeholder="例如：2024 年 6 月 / June 2024"
+                  onChange={(event) => setYear(event.target.value)}
+                  placeholder="例如：2024"
+                  min={1900}
+                  max={2100}
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
                 />
-                {getFirstError(errors, "displayTime") ? (
+                {getFirstError(errors, "year") ? (
                   <p className="mt-1 text-xs text-red-600">
-                    {getFirstError(errors, "displayTime")}
+                    {getFirstError(errors, "year")}
+                  </p>
+                ) : null}
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">
+                  事件时间 <span className="text-red-500">*</span>
+                </span>
+                <input
+                  value={time}
+                  disabled={submitting}
+                  maxLength={50}
+                  onChange={(event) => setTime(event.target.value)}
+                  placeholder="例如：6月 / June"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
+                />
+                {getFirstError(errors, "time") ? (
+                  <p className="mt-1 text-xs text-red-600">
+                    {getFirstError(errors, "time")}
                   </p>
                 ) : null}
               </label>
@@ -225,7 +242,7 @@ export default function CompanyHistoryForm({ mode, initialData }: Props) {
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
                 />
                 <p className="mt-1 text-xs text-slate-500">
-                  仅用于时间轴排序，官网不直接显示。
+                  用于时间轴排序，官网不直接显示。
                 </p>
                 {getFirstError(errors, "sortDate") ? (
                   <p className="mt-1 text-xs text-red-600">
@@ -259,31 +276,28 @@ export default function CompanyHistoryForm({ mode, initialData }: Props) {
 
               <label className="block md:col-span-2">
                 <span className="mb-2 block text-sm font-medium text-slate-700">
-                  事件标题
+                  事件内容 <span className="text-red-500">*</span>
                 </span>
-                <input
-                  value={title}
+                <textarea
+                  value={content}
                   disabled={submitting}
-                  maxLength={200}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="可选，留空时官网不显示标题"
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
+                  maxLength={1000}
+                  onChange={(event) => setContent(event.target.value)}
+                  placeholder="描述这个历史事件..."
+                  rows={4}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
                 />
-                {getFirstError(errors, "title") ? (
+                <p className="mt-1 text-xs text-slate-500">
+                  {content.length}/1000 字符
+                </p>
+                {getFirstError(errors, "content") ? (
                   <p className="mt-1 text-xs text-red-600">
-                    {getFirstError(errors, "title")}
+                    {getFirstError(errors, "content")}
                   </p>
                 ) : null}
               </label>
             </div>
           </section>
-
-          <CompanyHistoryParagraphsEditor
-            paragraphs={paragraphs}
-            onChange={setParagraphs}
-            disabled={submitting}
-            error={getFirstError(errors, "detailParagraphs")}
-          />
         </div>
 
         <div className="space-y-6">

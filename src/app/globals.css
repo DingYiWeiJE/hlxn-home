@@ -129,3 +129,59 @@ ol {
 .scrollbar-transparent::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 1);
 }
+
+.intro {
+  text-align: justify;
+  text-indent: 2em;
+  font-size: 1.2rem;
+  line-height: 2rem;
+}
+
+/* 动画样式 */
+.scroll-animation {
+  opacity: 0;
+
+  transition:
+    opacity var(--animation-duration) ease,
+    transform var(--animation-duration) ease;
+
+  transition-delay: var(--animation-delay);
+
+  will-change: opacity, transform;
+}
+
+/* 从下往上 */
+.scroll-animation-fade-up {
+  transform: translateY(var(--animation-distance));
+}
+
+/* 从上往下 */
+.scroll-animation-fade-down {
+  transform: translateY(calc(var(--animation-distance) * -1));
+}
+
+/* 从左往右 */
+.scroll-animation-fade-left {
+  transform: translateX(calc(var(--animation-distance) * -1));
+}
+
+/* 从右往左 */
+.scroll-animation-fade-right {
+  transform: translateX(var(--animation-distance));
+}
+
+/* 从小放大 */
+.scroll-animation-zoom-in {
+  transform: scale(0.85);
+}
+
+/* 从大缩小 */
+.scroll-animation-zoom-out {
+  transform: scale(1.15);
+}
+
+/* 进入可视区域后的最终状态 */
+.scroll-animation-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}

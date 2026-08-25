@@ -11,31 +11,18 @@ type Props = {
   }>;
 };
 
-function normalizeParagraphs(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((item) => (typeof item === "string" ? item.trim() : ""))
-    .filter(Boolean);
-}
-
 export default async function EditCompanyHistoryPage({ params }: Props) {
   await requireAdminActor();
 
   const { id } = await params;
 
-  const item = await prisma.companyHistoryItem.findUnique({
+  const event = await prisma.companyHistoryEvent.findUnique({
     where: { id },
     select: {
       id: true,
-      locale: true,
-      displayTime: true,
-      sortDate: true,
+      time: true,
+      content: true,
       sortOrder: true,
-      title: true,
-      detailParagraphs: true,
       imageAssetId: true,
       imageAsset: {
         select: {
@@ -46,10 +33,18 @@ export default async function EditCompanyHistoryPage({ params }: Props) {
           alt: true,
         },
       },
+      historyYear: {
+        select: {
+          locale: true,
+          year: true,
+          sortDate: true,
+          sortOrder: true,
+        },
+      },
     },
   });
 
-  if (!item) {
+  if (!event) {
     notFound();
   }
 
@@ -61,22 +56,25 @@ export default async function EditCompanyHistoryPage({ params }: Props) {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-950">编辑公司发展历程</h1>
         <p className="mt-1 text-sm text-slate-500">
-          可修改内容语言、排序时间、排序值、详情自然段和图片。
+          可修改年份、事件时间、内容、排序时间、排序值和图片。
         </p>
       </div>
 
       <CompanyHistoryForm
         mode="edit"
         initialData={{
-          id: item.id,
-          locale: item.locale,
-          displayTime: item.displayTime,
-          sortDate: formatDateInput(item.sortDate),
-          sortOrder: item.sortOrder,
-          title: item.title,
-          detailParagraphs: normalizeParagraphs(item.detailParagraphs),
-          imageAssetId: item.imageAssetId,
-          imageAsset: item.imageAsset,
+          id: event.id,
+          time: event.time,
+          content: event.content,
+          sortOrder: event.sortOrder,
+          imageAssetId: event.imageAssetId,
+          imageAsset: event.imageAsset,
+          historyYear: {
+            locale: event.historyYear.locale as "zh" | "en",
+            year: event.historyYear.year,
+            sortDate: formatDateInput(event.historyYear.sortDate),
+            sortOrder: event.historyYear.sortOrder,
+          },
         }}
       />
     </main>

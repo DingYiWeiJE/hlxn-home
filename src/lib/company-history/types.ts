@@ -8,10 +8,13 @@ export type CompanyHistoryImage = {
   alt: string | null;
 };
 
+export type CompanyHistoryEvent = {
+  time: string;
+  content: string;
+  image: string | null;
+};
+
 export type CompanyHistoryPublicItem = {
-  id: string;
-  displayTime: string;
-  title: string | null;
-  detailParagraphs: string[];
-  imageAsset: CompanyHistoryImage | null;
+  year: number;
+  events: CompanyHistoryEvent[];
 };

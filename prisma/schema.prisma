@@ -197,7 +197,7 @@ model MediaAsset {
   productCovers         Product[]            @relation("ProductCoverImage")
   newsCovers            News[]               @relation("NewsCoverImage")
   applicationCaseImages ApplicationCase[]    @relation("ApplicationCaseImage")
-  companyHistoryImages  CompanyHistoryItem[] @relation("CompanyHistoryImage")
+  companyHistoryEvents  CompanyHistoryEvent[] @relation("CompanyHistoryEventImage")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -219,29 +219,44 @@ enum CompanyHistoryLocale {
   en
 }
 
-model CompanyHistoryItem {
+model CompanyHistoryYear {
   id     String               @id @default(cuid())
   locale CompanyHistoryLocale
+  year   Int
 
-  displayTime String
-  sortDate    DateTime
-  sortOrder   Int      @default(0)
+  sortDate DateTime
+  sortOrder Int @default(0)
 
-  title            String?
-  detailParagraphs Json    @default("[]")
+  events CompanyHistoryEvent[]
 
-  imageAssetId String?
-  imageAsset   MediaAsset? @relation("CompanyHistoryImage", fields: [imageAssetId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  createdById String?
-  updatedById String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  @@unique([locale, year])
   @@index([locale, sortDate, sortOrder])
-  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model CompanyHistoryEvent {
+  id              String @id @default(cuid())
+  historyYearId   String
+  historyYear     CompanyHistoryYear @relation(fields: [historyYearId], references: [id], onDelete: Cascade)
+
+  time             String
+  content          String @db.Text
+  imageAssetId     String?
+  imageAsset       MediaAsset? @relation("CompanyHistoryEventImage", fields: [imageAssetId], references: [id], onDelete: SetNull)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([historyYearId, sortOrder])
   @@index([imageAssetId])
+  @@index([deletedAt])
 }
 
 // ============================================================

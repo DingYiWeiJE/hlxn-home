@@ -5,7 +5,7 @@ import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import {
-  updateCompanyHistorySchema,
+  updateCompanyHistoryEventSchema,
 } from "@/lib/company-history/schemas";
 import {
   assertCanDeleteCompanyHistory,
@@ -29,16 +29,22 @@ export async function GET(_request: Request, context: RouteContext) {
 
     const { id } = await context.params;
 
-    const item = await prisma.companyHistoryItem.findUnique({
+    const event = await prisma.companyHistoryEvent.findUnique({
       where: { id },
       select: {
         id: true,
-        locale: true,
-        displayTime: true,
-        sortDate: true,
+        time: true,
+        content: true,
         sortOrder: true,
-        title: true,
-        detailParagraphs: true,
+        historyYear: {
+          select: {
+            id: true,
+            locale: true,
+            year: true,
+            sortDate: true,
+            sortOrder: true,
+          },
+        },
         imageAssetId: true,
         imageAsset: {
           select: {
@@ -54,11 +60,11 @@ export async function GET(_request: Request, context: RouteContext) {
       },
     });
 
-    if (!item) {
-      throw new ApiError("NOT_FOUND", "公司发展历程不存在", 404);
+    if (!event) {
+      throw new ApiError("NOT_FOUND", "公司发展历程事件不存在", 404);
     }
 
-    return ok(item);
+    return ok(event);
   } catch (error) {
     return fail(error);
   }
@@ -71,50 +77,85 @@ export async function PATCH(request: Request, context: RouteContext) {
     assertSameOriginRequest(request);
 
     const { id } = await context.params;
-    const input = updateCompanyHistorySchema.parse(await request.json());
+    const input = updateCompanyHistoryEventSchema.parse(await request.json());
 
-    const existing = await prisma.companyHistoryItem.findUnique({
+    const existing = await prisma.companyHistoryEvent.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, historyYearId: true },
     });
 
     if (!existing) {
-      throw new ApiError("NOT_FOUND", "公司发展历程不存在", 404);
+      throw new ApiError("NOT_FOUND", "公司发展历程事件不存在", 404);
     }
 
-    await validateCompanyHistoryImage(input.imageAssetId);
+    if (input.imageAssetId !== undefined) {
+      await validateCompanyHistoryImage(input.imageAssetId);
+    }
 
-    const item = await prisma.$transaction((tx) =>
-      tx.companyHistoryItem.update({
+    const event = await prisma.$transaction(async (tx) => {
+      let historyYearId = existing.historyYearId;
+
+      if (input.year !== undefined && input.locale !== undefined) {
+        const locale = input.locale as CompanyHistoryLocale;
+        const year = input.year;
+
+        const historyYear = await tx.companyHistoryYear.findUnique({
+          where: {
+            locale_year: {
+              locale,
+              year,
+            },
+          },
+        });
+
+        if (!historyYear) {
+          const newYear = await tx.companyHistoryYear.create({
+            data: {
+              locale,
+              year,
+              sortDate: input.sortDate || new Date(),
+              sortOrder: input.sortOrder ?? 0,
+            },
+          });
+          historyYearId = newYear.id;
+        } else {
+          historyYearId = historyYear.id;
+        }
+      }
+
+      return tx.companyHistoryEvent.update({
         where: { id },
         data: {
-          locale: input.locale as CompanyHistoryLocale,
-          displayTime: input.displayTime,
-          sortDate: input.sortDate,
-          sortOrder: input.sortOrder,
-          title: input.title,
-          detailParagraphs: input.detailParagraphs,
-          imageAssetId: input.imageAssetId,
-          updatedById: actor.userId,
+          historyYearId,
+          ...(input.time !== undefined && { time: input.time }),
+          ...(input.content !== undefined && { content: input.content }),
+          ...(input.sortOrder !== undefined && { sortOrder: input.sortOrder }),
+          ...(input.imageAssetId !== undefined && { imageAssetId: input.imageAssetId }),
         },
         select: {
           id: true,
-          locale: true,
-          displayTime: true,
-          sortDate: true,
+          time: true,
+          content: true,
           sortOrder: true,
-          title: true,
-          detailParagraphs: true,
+          historyYear: {
+            select: {
+              id: true,
+              locale: true,
+              year: true,
+              sortDate: true,
+              sortOrder: true,
+            },
+          },
           imageAssetId: true,
           createdAt: true,
           updatedAt: true,
         },
-      }),
-    );
+      });
+    });
 
     clearCacheByNamespace("company-history");
 
-    return ok(item);
+    return ok(event);
   } catch (error) {
     return fail(error);
   }
@@ -128,20 +169,18 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     const { id } = await context.params;
 
-    const existing = await prisma.companyHistoryItem.findUnique({
+    const existing = await prisma.companyHistoryEvent.findUnique({
       where: { id },
       select: { id: true },
     });
 
     if (!existing) {
-      throw new ApiError("NOT_FOUND", "公司发展历程不存在", 404);
+      throw new ApiError("NOT_FOUND", "公司发展历程事件不存在", 404);
     }
 
-    await prisma.$transaction((tx) =>
-      tx.companyHistoryItem.delete({
-        where: { id },
-      }),
-    );
+    await prisma.companyHistoryEvent.delete({
+      where: { id },
+    });
 
     clearCacheByNamespace("company-history");
 

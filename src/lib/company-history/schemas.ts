@@ -5,46 +5,34 @@ export const companyHistoryLocaleSchema = z.enum(["zh", "en"], {
   message: "内容语言只能是中文或英文",
 });
 
-const titleSchema = z
+const yearSchema = z.coerce
+  .number()
+  .int("年份必须是整数")
+  .min(1900, "年份不能早于 1900 年")
+  .max(2100, "年份不能晚于 2100 年");
+
+const timeSchema = z
   .string()
   .trim()
-  .max(200, "事件标题不能超过 200 个字符")
-  .optional()
-  .nullable()
-  .transform((value) => {
-    const trimmed = value?.trim() ?? "";
-    return trimmed.length > 0 ? trimmed : null;
-  });
+  .min(1, "事件时间不能为空")
+  .max(50, "事件时间不能超过 50 个字符");
 
-const paragraphSchema = z
+const contentSchema = z
   .string()
   .trim()
-  .min(1, "自然段内容不能为空")
-  .max(3000, "单个自然段不能超过 3000 个字符");
-
-export const detailParagraphsSchema = z
-  .array(z.string())
-  .max(20, "事件详情最多支持 20 个自然段")
-  .transform((items) => items.map((item) => item.trim()).filter(Boolean))
-  .pipe(
-    z
-      .array(paragraphSchema)
-      .min(1, "事件详情至少需要一个非空自然段")
-      .max(20, "事件详情最多支持 20 个自然段"),
-  );
+  .min(1, "事件内容不能为空")
+  .max(1000, "事件内容不能超过 1000 个字符");
 
 const imageAssetIdSchema = z
   .union([z.string().trim().min(1), z.null()])
   .optional()
   .transform((value) => value ?? null);
 
-const companyHistoryFieldsSchema = z.object({
+const companyHistoryEventFieldsSchema = z.object({
   locale: companyHistoryLocaleSchema,
-  displayTime: z
-    .string()
-    .trim()
-    .min(1, "展示时间不能为空")
-    .max(100, "展示时间不能超过 100 个字符"),
+  year: yearSchema,
+  time: timeSchema,
+  content: contentSchema,
   sortDate: z
     .union([z.string(), z.date()])
     .transform((value) => parseDateInputToUtcNoon(value)),
@@ -54,13 +42,11 @@ const companyHistoryFieldsSchema = z.object({
     .min(-100000, "排序值过小")
     .max(100000, "排序值过大")
     .default(0),
-  title: titleSchema,
-  detailParagraphs: detailParagraphsSchema,
   imageAssetId: imageAssetIdSchema,
 });
 
-export const createCompanyHistorySchema = companyHistoryFieldsSchema.strict();
-export const updateCompanyHistorySchema = companyHistoryFieldsSchema.strict();
+export const createCompanyHistoryEventSchema = companyHistoryEventFieldsSchema.strict();
+export const updateCompanyHistoryEventSchema = companyHistoryEventFieldsSchema.partial().strict();
 
 export const adminCompanyHistoryListQuerySchema = z.object({
   keyword: z.string().trim().max(100).optional(),
@@ -70,15 +56,15 @@ export const adminCompanyHistoryListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   sort: z
-    .enum(["sortDate", "sortOrder", "createdAt", "updatedAt", "displayTime"])
+    .enum(["sortDate", "sortOrder", "createdAt", "year"])
     .default("sortDate"),
   order: z.enum(["asc", "desc"]).default("asc"),
 });
 
-export type CreateCompanyHistoryInput = z.infer<
-  typeof createCompanyHistorySchema
+export type CreateCompanyHistoryEventInput = z.infer<
+  typeof createCompanyHistoryEventSchema
 >;
 
-export type UpdateCompanyHistoryInput = z.infer<
-  typeof updateCompanyHistorySchema
+export type UpdateCompanyHistoryEventInput = z.infer<
+  typeof updateCompanyHistoryEventSchema
 >;

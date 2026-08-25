@@ -4,71 +4,66 @@ import { CompanyHistoryLocale as PrismaCompanyHistoryLocale } from "@prisma/clie
 import { prisma } from "@/lib/prisma";
 import type { CompanyHistoryLocale, CompanyHistoryPublicItem } from "./types";
 
-function normalizeParagraphs(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((item) => (typeof item === "string" ? item.trim() : ""))
-    .filter(Boolean);
-}
-
 export async function getCompanyHistoryByLocale(
   locale: CompanyHistoryLocale,
 ): Promise<CompanyHistoryPublicItem[]> {
-  const items = await prisma.companyHistoryItem.findMany({
+  const years = await prisma.companyHistoryYear.findMany({
     where: {
       locale: locale as PrismaCompanyHistoryLocale,
+      deletedAt: null,
     },
     orderBy: [
       { sortDate: "asc" },
       { sortOrder: "asc" },
-      { createdAt: "asc" },
     ],
     select: {
       id: true,
-      displayTime: true,
-      title: true,
-      detailParagraphs: true,
-      imageAsset: {
+      year: true,
+      events: {
+        where: {
+          deletedAt: null,
+        },
+        orderBy: [
+          { sortOrder: "asc" },
+          { createdAt: "asc" },
+        ],
         select: {
-          id: true,
-          type: true,
-          purpose: true,
-          enabled: true,
-          deletedAt: true,
-          url: true,
-          width: true,
-          height: true,
-          alt: true,
+          time: true,
+          content: true,
+          imageAsset: {
+            select: {
+              id: true,
+              type: true,
+              purpose: true,
+              enabled: true,
+              deletedAt: true,
+              url: true,
+            },
+          },
         },
       },
     },
   });
 
-  return items.map((item) => {
-    const imageAsset =
-      item.imageAsset &&
-      item.imageAsset.type === "IMAGE" &&
-      item.imageAsset.purpose === "COMPANY_HISTORY_IMAGE" &&
-      item.imageAsset.enabled &&
-      item.imageAsset.deletedAt === null
-        ? {
-            id: item.imageAsset.id,
-            url: item.imageAsset.url,
-            width: item.imageAsset.width,
-            height: item.imageAsset.height,
-            alt: item.imageAsset.alt,
-          }
-        : null;
+  return years.map((year) => ({
+    year: year.year,
+    events: year.events
+      .map((event) => {
+        const imageUrl =
+          event.imageAsset &&
+          event.imageAsset.type === "IMAGE" &&
+          event.imageAsset.purpose === "COMPANY_HISTORY_IMAGE" &&
+          event.imageAsset.enabled &&
+          event.imageAsset.deletedAt === null
+            ? event.imageAsset.url
+            : null;
 
-    return {
-      id: item.id,
-      displayTime: item.displayTime,
-      title: item.title,
-      detailParagraphs: normalizeParagraphs(item.detailParagraphs),
-      imageAsset,
-    };
-  });
+        return {
+          time: event.time,
+          content: event.content,
+          image: imageUrl,
+        };
+      })
+      .filter((event) => event.content.trim()), // Filter out empty events
+  }));
 }

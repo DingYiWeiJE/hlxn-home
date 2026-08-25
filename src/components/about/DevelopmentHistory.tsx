@@ -1,170 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type Locale = "zh" | "en";
 
 type HistoryEvent = {
   time: string;
   content: string;
-  highlight?: boolean;
+  image: string | null;
 };
 
 type HistoryItem = {
   year: number;
-  image: string;
   events: HistoryEvent[];
 };
 
-const historyData: HistoryItem[] = [
-  {
-    year: 2014,
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "02",
-        content: "杭州研发制造有限公司，在杭州市余杭区成立了",
-        highlight: true,
-      },
-      {
-        time: "06",
-        content: "企业完成了第一个产品重要交付",
-      },
-      {
-        time: "09",
-        content: "获得了首批客户的认可与支持",
-      },
-    ],
-  },
-  {
-    year: 2015,
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "03",
-        content: "公司研发团队规模持续扩大",
-        highlight: true,
-      },
-      {
-        time: "07",
-        content: "新一代核心产品正式进入研发阶段",
-      },
-      {
-        time: "11",
-        content: "完成年度重点项目交付",
-      },
-    ],
-  },
-  {
-    year: 2016,
-    image:
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "01",
-        content: "建立独立产品研发中心",
-        highlight: true,
-      },
-      {
-        time: "05",
-        content: "核心技术平台完成第一次升级",
-      },
-      {
-        time: "10",
-        content: "业务覆盖多个重点行业客户",
-      },
-    ],
-  },
-  {
-    year: 2017,
-    image:
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "04",
-        content: "公司总部办公区域完成升级",
-        highlight: true,
-      },
-      {
-        time: "08",
-        content: "推出多款创新产品及行业解决方案",
-      },
-      {
-        time: "12",
-        content: "年度销售额实现快速增长",
-      },
-    ],
-  },
-  {
-    year: 2018,
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "02",
-        content: "完成核心产品系列化布局",
-        highlight: true,
-      },
-      {
-        time: "06",
-        content: "建立全国市场服务体系",
-      },
-      {
-        time: "11",
-        content: "获得多项行业及技术荣誉",
-      },
-    ],
-  },
-  {
-    year: 2019,
-    image:
-      "https://images.unsplash.com/photo-1497366412874-3415097a27e7?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "03",
-        content: "智能制造基地正式投入运营",
-        highlight: true,
-      },
-      {
-        time: "07",
-        content: "产品覆盖更多行业应用场景",
-      },
-      {
-        time: "10",
-        content: "海外市场业务正式启动",
-      },
-    ],
-  },
-  {
-    year: 2020,
-    image:
-      "https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=1600&auto=format&fit=crop",
-    events: [
-      {
-        time: "01",
-        content: "公司进入新一轮高速发展阶段",
-        highlight: true,
-      },
-      {
-        time: "05",
-        content: "数字化研发与生产体系全面升级",
-      },
-      {
-        time: "12",
-        content: "年度业务规模再创新高",
-      },
-    ],
-  },
-];
+type Props = {
+  locale: Locale;
+  translations: {
+    title: string;
+    previous: string;
+    next: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    timelineLabel: string;
+  };
+};
 
 function ArrowLeftIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className="h-5 w-5"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
       <path
         d="M15 6l-6 6 6 6"
         stroke="currentColor"
@@ -184,12 +49,7 @@ function ArrowLeftIcon() {
 
 function ArrowRightIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className="h-5 w-5"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
       <path
         d="M9 6l6 6-6 6"
         stroke="currentColor"
@@ -207,21 +67,49 @@ function ArrowRightIcon() {
   );
 }
 
-export default function DevelopmentHistory() {
+export default function DevelopmentHistory({ locale, translations }: Props) {
+  const [historyData, setHistoryData] = useState<HistoryItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeEventIndex, setActiveEventIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const activeItem = historyData[activeIndex];
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const response = await fetch(`/api/public/company-history?locale=${locale}`, {
+          cache: "no-store",
+        });
+        const result = await response.json();
+        if (result.success) {
+          setHistoryData(result.data || []);
+        }
+      } catch (error) {
+        console.warn("Failed to load company history:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadHistory();
+  }, [locale]);
+
+  const hasHistory = historyData.length > 0;
+  const activeItem = hasHistory ? historyData[activeIndex] : null;
+  const hasEvents = activeItem && activeItem.events.length > 0;
+  const activeEvent = hasEvents ? activeItem.events[activeEventIndex] : null;
+
+  useEffect(() => {
+    setActiveEventIndex(0);
+  }, [activeIndex]);
 
   const handlePrev = () => {
-    setActiveIndex((prev) =>
-      prev === 0 ? historyData.length - 1 : prev - 1
-    );
+    if (!hasHistory) return;
+    setActiveIndex((prev) => (prev === 0 ? historyData.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) =>
-      prev === historyData.length - 1 ? 0 : prev + 1
-    );
+    if (!hasHistory) return;
+    setActiveIndex((prev) => (prev === historyData.length - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -234,134 +122,206 @@ export default function DevelopmentHistory() {
 
       <div className="relative mx-auto w-full max-w-[1200px] px-5 md:px-8">
         {/* title */}
-        <h2 className="text-center text-[26px] font-bold tracking-[0.04em] text-[#111827] md:text-[32px]">
-          发展历程
+        <h2 className="text-center text-[3rem] font-bold tracking-[0.04em] text-[#3060AC]">
+          {translations.title}
         </h2>
 
-        {/* content */}
-        <div className="mt-10 grid items-center gap-10 md:mt-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20">
-          {/* image */}
-          <div className="overflow-hidden rounded-[12px] bg-white shadow-sm">
-            <img
-              key={activeItem.year}
-              src={activeItem.image}
-              alt={`${activeItem.year} 年发展历程`}
-              className="aspect-[16/9] w-full object-cover transition-all duration-500"
-            />
+        {loading ? (
+          <div className="flex min-h-[360px] flex-col items-center justify-center py-16 text-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
           </div>
+        ) : !hasHistory ? (
+          <div className="flex min-h-[360px] flex-col items-center justify-center py-16 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#eef3f7] text-[#a4b1bb]">
+              <EmptyIcon />
+            </div>
 
-          {/* text */}
-          <div className="lg:pl-4">
-            <div
-              key={activeItem.year}
-              className="animate-[historyFade_.4s_ease-out]"
-            >
-              <div className="text-[42px] font-bold leading-none tracking-tight text-[#0759a6] md:text-[48px] lg:text-[50px]">
-                {activeItem.year}
-              </div>
+            <div className="mt-5 text-[1.2rem] font-medium text-[#4b5563]">
+              {translations.emptyTitle}
+            </div>
 
-              <div className="mt-7 space-y-5">
-                {activeItem.events.map((event, index) => (
-                  <div
-                    key={`${activeItem.year}-${event.time}-${index}`}
-                    className={[
-                      "flex items-start gap-3 text-sm leading-6 md:text-[15px]",
-                      event.highlight
-                        ? "font-semibold text-[#0759a6]"
-                        : "text-[#606b77]",
-                    ].join(" ")}
-                  >
-                    <span className="min-w-[30px] font-semibold">
-                      {event.time}:
-                    </span>
+            <p className="mt-2 text-[1.2rem] text-[#9ca3af]">
+              {translations.emptyDescription}
+            </p>
+          </div>
+        ) : (
+          activeItem &&
+          activeEvent && (
+            <>
+              {/* content */}
+              <div className="mt-10 grid items-center gap-10 md:mt-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20">
+                {/* image */}
+                <div className="overflow-hidden rounded-[12px] bg-white shadow-sm">
+                  {activeEvent.image ? (
+                    <img
+                      key={`${activeItem.year}-${activeEventIndex}`}
+                      src={activeEvent.image}
+                      alt={`${activeItem.year} 年 ${activeEvent.content}`}
+                      className="aspect-[16/9] w-full object-cover animate-[imageFade_.45s_ease-out]"
+                    />
+                  ) : (
+                    <img
+                      key={`${activeItem.year}-${activeEventIndex}`}
+                      src="/images/common/logo_2.png"
+                      alt={`${activeItem.year} 年 ${activeEvent.content}`}
+                      className="aspect-[16/9] w-full object-contain bg-slate-50 animate-[imageFade_.45s_ease-out] p-8"
+                    />
+                  )}
+                </div>
 
-                    <p>{event.content}</p>
+                {/* text */}
+                <div className="lg:pl-4">
+                  <div className="text-[42px] font-bold leading-none tracking-tight text-[#0759a6] md:text-[48px] lg:text-[50px]">
+                    {activeItem.year}
                   </div>
-                ))}
+
+                  <div className="mt-7 space-y-2">
+                    {activeItem.events.map((event, index) => {
+                      const isActive = index === activeEventIndex;
+
+                      return (
+                        <button
+                          key={`${activeItem.year}-${event.time}-${index}`}
+                          type="button"
+                          onClick={() => setActiveEventIndex(index)}
+                          className={[
+                            "group flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left text-sm leading-6 transition-all duration-300 md:text-[1.2rem]",
+                            isActive
+                              ? "font-semibold text-[#0759a6]"
+                              : "text-[#606b77] hover:text-[#0759a6]",
+                          ].join(" ")}
+                        >
+                          <span className="min-w-[30px] font-semibold">
+                            {event.time}:
+                          </span>
+
+                          <span>{event.content}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* timeline */}
-        <div className="mt-12 md:mt-16 lg:mt-14">
-          <div className="flex items-start gap-3 md:gap-6">
-            {/* left */}
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="上一年"
-              className="mt-[1px] flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0759a6] text-white shadow-sm transition duration-200 hover:scale-105 hover:bg-[#064d91] active:scale-95 md:h-12 md:w-12"
-            >
-              <ArrowLeftIcon />
-            </button>
+              {/* timeline */}
+              <div className="mt-12 md:mt-16 lg:mt-14">
+                <div className="flex items-start gap-3 md:gap-6">
+                  {/* left */}
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    aria-label={translations.previous}
+                    className="mt-[1px] flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0759a6] text-white shadow-sm transition duration-200 hover:scale-105 hover:bg-[#064d91] active:scale-95 md:h-12 md:w-12"
+                  >
+                    <ArrowLeftIcon />
+                  </button>
 
-            {/* year line */}
-            <div className="min-w-0 flex-1 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="relative flex min-w-[620px] items-start justify-between px-1">
-                {/* horizontal line */}
-                <div className="absolute left-0 right-0 top-[9px] h-px bg-[#dce4ea]" />
+                  {/* year line */}
+                  <div className="min-w-0 flex-1 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="relative flex min-w-[620px] items-start justify-between px-1">
+                      {/* horizontal line */}
+                      <div className="absolute left-0 right-0 top-[8.5px] h-px bg-[#dce4ea]" />
 
-                {historyData.map((item, index) => {
-                  const isActive = index === activeIndex;
+                      {historyData.map((item, index) => {
+                        const isActive = index === activeIndex;
 
-                  return (
-                    <button
-                      key={item.year}
-                      type="button"
-                      onClick={() => setActiveIndex(index)}
-                      className="group relative z-10 flex min-w-[60px] flex-col items-center"
-                    >
-                      <span
-                        className={[
-                          "block rounded-full ring-[5px] ring-[#f7f8fa] transition-all duration-300",
-                          isActive
-                            ? "h-[11px] w-[11px] bg-[#159bb7]"
-                            : "h-[7px] w-[7px] bg-[#cbd8df] group-hover:bg-[#8fa9b7]",
-                        ].join(" ")}
-                      />
+                        return (
+                          <button
+                            key={item.year}
+                            type="button"
+                            onClick={() => setActiveIndex(index)}
+                            className="group relative z-10 flex min-w-[60px] flex-col items-center"
+                          >
+                            {/* 固定圆点区域高度，确保所有圆点圆心水平一致 */}
+                            <span className="flex h-[18px] items-center justify-center">
+                              <span
+                                className={[
+                                  "block shrink-0 rounded-full ring-[5px] ring-[#f7f8fa] transition-all duration-300",
+                                  isActive
+                                    ? "h-[11px] w-[11px] bg-[#159bb7]"
+                                    : "h-[7px] w-[7px] bg-[#cbd8df] group-hover:bg-[#8fa9b7]",
+                                ].join(" ")}
+                              />
+                            </span>
 
-                      <span
-                        className={[
-                          "mt-4 text-[13px] transition-all duration-300",
-                          isActive
-                            ? "font-bold text-[#0759a6]"
-                            : "font-medium text-[#9caab5]",
-                        ].join(" ")}
-                      >
-                        {item.year}
-                      </span>
-                    </button>
-                  );
-                })}
+                            <span
+                              className={[
+                                "mt-3 text-[13px] transition-all duration-300",
+                                isActive
+                                  ? "font-bold text-[#0759a6]"
+                                  : "font-medium text-[#9caab5]",
+                              ].join(" ")}
+                            >
+                              {item.year}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* right */}
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    aria-label={translations.next}
+                    className="mt-[1px] flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0759a6] text-white shadow-sm transition duration-200 hover:scale-105 hover:bg-[#064d91] active:scale-95 md:h-12 md:w-12"
+                  >
+                    <ArrowRightIcon />
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* right */}
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="下一年"
-              className="mt-[1px] flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0759a6] text-white shadow-sm transition duration-200 hover:scale-105 hover:bg-[#064d91] active:scale-95 md:h-12 md:w-12"
-            >
-              <ArrowRightIcon />
-            </button>
-          </div>
-        </div>
+            </>
+          )
+        )}
       </div>
 
       <style jsx>{`
-        @keyframes historyFade {
+        @keyframes imageFade {
           from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: scale(1.015);
           }
+
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: scale(1);
           }
         }
       `}</style>
     </section>
+  );
+}
+
+function EmptyIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      className="h-12 w-12"
+      aria-hidden="true"
+    >
+      <rect
+        x="8"
+        y="10"
+        width="32"
+        height="28"
+        rx="4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M15 18h18M15 24h12"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M18 32h12"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
