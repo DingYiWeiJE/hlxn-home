@@ -212,7 +212,7 @@ async function VisionMissionSection({ locale }: { locale: string }) {
   return (
     <section className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
-        <h2 className="text-center text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide text-[#2365c4]">
+        <h2 className="text-center text-[3rem] font-bold tracking-wide text-[#2365c4]">
           {t("aboutPage.visionTitle")}
         </h2>
 
@@ -273,7 +273,7 @@ async function PatentSection({ locale }: { locale: string }) {
             <p className="text-base md:text-lg font-semibold text-[#2365c4]">
               {t("aboutPage.patentPeriod")}
             </p>
-            <h2 className="mt-4 text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide text-[#2365c4]">
+            <h2 className="mt-4 text-[3rem] font-bold tracking-wide text-[#2365c4]">
               {t("aboutPage.patentTitle")}
             </h2>
           </div>
@@ -322,7 +322,7 @@ async function MapSection({ locale }: { locale: string }) {
       <section className="bg-[#e7f6ff] py-16 lg:py-24">
         <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#2365c4] mb-6">
+            <h2 className="text-[3rem] font-bold text-[#2365c4] mb-6">
               {t("aboutPage.mapTitle")}
             </h2>
             <p className="text-base md:text-lg text-[#1f3448] max-w-2xl mx-auto">

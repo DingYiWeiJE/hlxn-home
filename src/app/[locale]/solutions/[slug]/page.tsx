@@ -30,7 +30,7 @@ const labels = {
     overview: "解决方案简介",
     workingPrinciple: "工作原理",
     systemComposition: "系统构成",
-    usageScenarios: "适用场景",
+    usageScenarios: "应用场景",
     customerValues: "客户价值",
     notFound: "解决方案不存在",
     brand: "汉理楚能",
@@ -168,9 +168,9 @@ export default async function SolutionDetailPage({ params }: PageProps) {
 
       <main className="flex-1">
         {/* 页面头图 */}
-        <section className="relative overflow-hidden bg-[#f4f9fc] pt-16">
+        <section className="relative overflow-hidden bg-[#F7FAFC] pt-16">
           <div className="mx-auto grid min-h-[560px] w-full max-w-[1440px] items-center gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1.05fr)] lg:px-12 lg:py-20">
-            <div>
+            <div style={{paddingLeft: "10%", paddingRight: "20%"}}>
               <Link
                 href={`/${locale}/solutions`}
                 className="inline-flex text-sm font-semibold text-[#2364c7] transition-colors hover:text-[#1d54a8]"
@@ -195,7 +195,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
                   {highlights.map((highlight, index) => (
                     <span
                       key={`${highlight}-${index}`}
-                      className="inline-flex min-h-10 items-center rounded-md bg-[#2364c7] px-4 py-2 text-sm font-semibold text-white shadow-sm"
+                      className="inline-flex min-h-10 items-center bg-[#2364c7] px-4 py-2 text-sm font-semibold text-white shadow-sm"
                     >
                       {highlight}
                     </span>
@@ -222,8 +222,6 @@ export default async function SolutionDetailPage({ params }: PageProps) {
         {/* 锚点导航 */}
         <nav className="sticky top-0 z-30 border-y border-slate-100 bg-white/95 shadow-sm backdrop-blur">
           <div className="mx-auto flex w-full max-w-[1100px] overflow-x-auto px-4 sm:justify-center sm:px-6">
-            <AnchorLink href="#overview" label={text.overview} />
-
             <AnchorLink
               href="#working-principle"
               label={text.workingPrinciple}
@@ -251,24 +249,6 @@ export default async function SolutionDetailPage({ params }: PageProps) {
             ) : null}
           </div>
         </nav>
-
-        {/* 解决方案简介 */}
-        <section
-          id="overview"
-          className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 lg:py-24"
-        >
-          <div className="mx-auto max-w-4xl">
-            <SectionTitle>{text.overview}</SectionTitle>
-
-            {summaryParagraphs.length > 0 ? (
-              <div className="mt-8 space-y-4 text-base leading-8 text-slate-600">
-                {summaryParagraphs.map((paragraph, index) => (
-                  <p key={`${paragraph}-${index}`}>{paragraph}</p>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
 
         {/* 工作原理 */}
         <section id="working-principle" className="scroll-mt-24">
@@ -317,7 +297,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
           </section>
         ) : null}
 
-        {/* 适用场景 */}
+        {/* 应用场景 */}
         {solution.usageScenarios.length > 0 ? (
           <section
             id="usage-scenarios"

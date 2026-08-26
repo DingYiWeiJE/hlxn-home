@@ -268,7 +268,7 @@ export default async function ProductDetailPage({
 
       <main className="flex-1">
         {/* 产品顶部主视觉 */}
-        <section className="overflow-hidden bg-[#f4f9fc]">
+        <section className="overflow-hidden bg-[#F7FAFC]">
           <div className="mx-auto grid min-h-[520px] w-full max-w-[1440px] items-center gap-10 px-5 py-14 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)] lg:px-12 lg:py-20">
             <div className="relative z-10">
 
@@ -307,7 +307,7 @@ export default async function ProductDetailPage({
                     ) => (
                       <span
                         key={`${highlight}-${index}`}
-                        className="inline-flex min-h-10 items-center rounded-md bg-[#2364c7] px-4 py-2 text-sm font-semibold text-white shadow-sm"
+                        className="inline-flex min-h-10 items-center bg-[#2364c7] px-4 py-2 text-sm font-semibold text-white shadow-sm"
                       >
                         {highlight}
                       </span>
