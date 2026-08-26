@@ -94,7 +94,7 @@ export default async function PrivacyPage({ params }: Props) {
           </div>
 
           <div className="relative z-10 text-center px-6 max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+            <h1 className="text-[3rem] font-bold text-white mb-4">
               {tPolicy.title}
             </h1>
             <p className="text-lg md:text-xl text-blue-100">
@@ -130,7 +130,7 @@ export default async function PrivacyPage({ params }: Props) {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                        <h2 className="text-[3rem] font-bold text-gray-900 mb-4">
                           {section.title}
                         </h2>
                         <div className="space-y-3">

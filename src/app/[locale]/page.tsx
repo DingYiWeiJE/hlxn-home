@@ -153,7 +153,7 @@ export default async function Home({ params }: Props) {
       ))}
 
       <div className="w-full bg-[#e7f6ff] py-12 text-center pb-0">
-        <h2 className="text-3xl font-bold text-[#3d71c2] ">{t("caseSection.title")}</h2>
+        <h2 className="text-[3rem] font-bold text-[#3d71c2] ">{t("caseSection.title")}</h2>
       </div>
 
       <ImageCarousel
@@ -181,7 +181,7 @@ export default async function Home({ params }: Props) {
 
         {/* 内容层 */}
         <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-          <h2 className="text-[2.25rem] font-bold text-white">{t("focusSection.title")}</h2>
+          <h2 className="text-[3rem] font-bold text-white">{t("focusSection.title")}</h2>
           <a
             href="#"
             className="

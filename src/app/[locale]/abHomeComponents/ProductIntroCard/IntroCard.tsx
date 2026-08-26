@@ -26,7 +26,7 @@ export default function IntroCard({
       ].join(" ")}
     >
       <div className="mx-auto lg:max-w-[430px] w-full">
-        <h2 className="whitespace-pre-line text-[30px] font-bold leading-[1.35] tracking-wide text-[#2864bd] sm:text-[34px] text-center lg:text-left">
+        <h2 className="whitespace-pre-line text-[3rem] font-bold leading-[1.35] tracking-wide text-[#2864bd] text-center lg:text-left">
           {title}
         </h2>
 

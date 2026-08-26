@@ -174,7 +174,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
                 {text.back}
               </Link>
 
-              <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-tight text-[#2364c7] sm:text-4xl lg:text-5xl">
+              <h1 className="mt-5 max-w-3xl text-[3rem] font-bold leading-tight text-[#2364c7]">
                 {solution.title}
               </h1>
 
@@ -378,8 +378,8 @@ function SectionTitle({
     <h2
       className={
         light
-          ? "text-center text-3xl font-bold leading-tight tracking-[0.02em] text-white sm:text-4xl"
-          : "text-center text-3xl font-bold leading-tight tracking-[0.02em] text-[#2a62bb] sm:text-4xl"
+          ? "text-center text-[3rem] font-bold leading-tight tracking-[0.02em] text-white"
+          : "text-center text-[3rem] font-bold leading-tight tracking-[0.02em] text-[#2a62bb]"
       }
     >
       {children}

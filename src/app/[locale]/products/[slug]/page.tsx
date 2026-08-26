@@ -278,7 +278,7 @@ export default async function ProductDetailPage({
                 </p>
               ) : null}
 
-              <h1 className="mt-2 max-w-2xl text-3xl font-bold leading-tight text-[#2364c7] sm:text-4xl lg:text-5xl">
+              <h1 className="mt-2 max-w-2xl text-[3rem] font-bold leading-tight text-[#2364c7]">
                 {product.name}
               </h1>
 
@@ -427,7 +427,7 @@ export default async function ProductDetailPage({
             <div className="absolute inset-0 bg-slate-950/45" />
 
             <div className="relative z-10 mx-auto w-full max-w-4xl text-center text-white">
-              <h2 className="text-3xl font-bold tracking-wide sm:text-4xl">
+              <h2 className="text-[3rem] font-bold tracking-wide">
                 {
                   text.productIntroduction
                 }
@@ -637,7 +637,7 @@ export default async function ProductDetailPage({
 
         {/* 内容层 */}
         <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-          <h2 className="text-[2.25rem] font-bold text-white">下载产品单页</h2>
+          <h2 className="text-[3rem] font-bold text-white">下载产品单页</h2>
           <a
             href={
                    product.detailPdf ? product.detailPdf
@@ -686,7 +686,7 @@ function SectionTitle({
   children: React.ReactNode;
 }) {
   return (
-    <h2 className="text-center text-3xl font-bold tracking-wide text-[#2364c7] sm:text-4xl">
+    <h2 className="text-center text-[3rem] font-bold tracking-wide text-[#2364c7]">
       {children}
     </h2>
   );

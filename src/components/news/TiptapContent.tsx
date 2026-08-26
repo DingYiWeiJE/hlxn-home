@@ -101,7 +101,7 @@ function renderNode(
         <h2
           key={key}
           style={alignmentStyle}
-          className="mb-4 mt-10 text-2xl font-bold leading-tight text-slate-950"
+          className="mb-4 mt-10 text-[3rem] font-bold leading-tight"
         >
           {children}
         </h2>

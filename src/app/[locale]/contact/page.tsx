@@ -45,7 +45,7 @@ export default async function ContactPage({ params }: Props) {
           <Navigation />
           <div className="flex-1 flex flex-col items-start justify-center">
             <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+              <h1 className="text-[3rem] font-bold text-white mb-4">
                 {locale === "zh" ? "联系我们" : "Contact Us"}
               </h1>
               <p className="text-lg md:text-xl text-white max-w-2xl">

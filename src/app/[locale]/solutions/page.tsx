@@ -51,7 +51,7 @@ export default async function SolutionsPage({ params }: Props) {
           <Navigation />
           <div className="flex flex-1 items-center">
             <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-              <h1 className="max-w-3xl text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+              <h1 className="max-w-3xl text-[3rem] font-bold text-white ">
                 {t("solutionsPageContent.heroTitle")}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-white md:text-xl">

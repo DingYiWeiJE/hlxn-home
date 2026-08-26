@@ -37,7 +37,7 @@ const SolutionsSection: React.FC<Props> = async ({ locale }) => {
         {/* 左侧方案列表 */}
         <div className="self-start">
           <header>
-            <h2 className="text-3xl font-bold tracking-wide text-white sm:text-4xl lg:text-[40px]">
+            <h2 className="text-[3rem] font-bold tracking-wide text-white">
               {t("solutionsSection.title")}
             </h2>
 
