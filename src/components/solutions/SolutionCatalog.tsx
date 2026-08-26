@@ -185,7 +185,7 @@ export default function SolutionCatalog({ locale }: { locale: string }) {
     >
       <div className="mx-auto w-full max-w-[1280px]">
         <header className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#2364c7] sm:text-4xl">
+          <h2 className="text-[3rem] font-bold tracking-tight text-[#2364c7]">
             {text.title}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">

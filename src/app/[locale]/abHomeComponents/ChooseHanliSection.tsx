@@ -51,7 +51,7 @@ const AdvantageCardItem: React.FC<AdvantageCard> = ({
         xl 下不再需要固定高度，由 subgrid 自动取三者最大高度
       */}
       <h2
-        className="mb-5 flex h-[2.5em] shrink-0 items-center justify-center text-center text-xl font-bold leading-tight text-slate-950 sm:mb-7 sm:text-2xl lg:text-[28px] xl:row-start-1 xl:h-auto xl:self-center"
+        className="mb-5 flex h-[2.5em] shrink-0 items-center justify-center text-center text-[3rem] font-bold leading-tight text-slate-950 sm:mb-7 xl:row-start-1 xl:h-auto xl:self-center"
       >
         <span>{heading}</span>
       </h2>
@@ -109,7 +109,7 @@ const ChooseHanliSection: React.FC<Props> = async ({ locale }) => {
   return (
     <section className="bg-sky-50 px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-12">
       <div className="mx-auto max-w-[1440px]">
-        <h1 className="mb-10 text-center text-3xl font-bold leading-tight tracking-wide text-blue-600 sm:mb-14 sm:text-4xl lg:mb-16 lg:text-[40px]">
+        <h1 className="mb-10 text-center font-bold leading-tight tracking-wide text-blue-600 sm:mb-14 lg:mb-16 text-[3rem]">
           {t("chooseHanli.title")}
         </h1>
 

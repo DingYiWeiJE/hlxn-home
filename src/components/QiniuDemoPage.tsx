@@ -32,11 +32,11 @@ export function QiniuDemoPage() {
 
   return (
     <div className="container mx-auto p-8 space-y-12">
-      <h1 className="text-3xl font-bold mb-8">七牛图床集成示例</h1>
+      <h1 className="text-[3rem] font-bold mb-8">七牛图床集成示例</h1>
 
       {/* 方式1: 使用完整组件 */}
       <section className="border rounded-lg p-6 bg-gray-50">
-        <h2 className="text-xl font-bold mb-4">方式1: 使用完整组件</h2>
+        <h2 className="text-[3rem] font-bold mb-4">方式1: 使用完整组件</h2>
         <p className="text-gray-600 mb-4">
           直接使用 QiniuUpload 组件，包含验证、预览、错误处理等完整功能
         </p>

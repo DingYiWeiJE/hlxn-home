@@ -47,7 +47,7 @@ async function ProductsContent({ locale }: { locale: string }) {
 
           <div className="flex flex-1 flex-col items-start justify-center">
             <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-              <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+              <h1 className="mb-4 text-[3rem] font-bold text-white">
                 {page.heroTitle}
               </h1>
 
@@ -75,7 +75,7 @@ async function ProductsContent({ locale }: { locale: string }) {
 
         <section className="w-full bg-white">
           <div className="mx-auto max-w-[1440px] px-5 py-16 md:px-8 lg:py-20">
-            <h2 className="text-center text-[32px] font-bold tracking-[2px] text-[#2463c5] md:text-[40px]">
+            <h2 className="text-center text-[3rem] font-bold tracking-[2px] text-[#2463c5]">
               {page.productsSeriesTitle}
             </h2>
 
@@ -117,7 +117,7 @@ async function ProductsContent({ locale }: { locale: string }) {
 
           {/* 内容层 */}
           <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-            <h2 className="text-[2.25rem] font-bold text-white">{page.downloadBrochureTitle}</h2>
+            <h2 className="text-[3rem] font-bold text-white">{page.downloadBrochureTitle}</h2>
             <a
               href="#"
               className="

@@ -48,11 +48,10 @@ export default async function SolutionSection({ locale }: Props) {
         >
           <h2
             className="
-              text-3xl
+              text-[3rem]
               font-bold
               tracking-wide
               text-[#2463c5]
-              md:text-4xl
             "
           >
             {sectionTitle}

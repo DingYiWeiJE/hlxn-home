@@ -79,7 +79,7 @@ export default async function NewsCenter({
     >
       <div className="mx-auto max-w-[1440px]">
         <div className="flex items-center justify-between gap-6">
-          <h2 className="text-3xl font-bold tracking-wide text-[#2f67bd] sm:text-4xl">
+          <h2 className="text-[3rem] font-bold tracking-wide text-[#2f67bd]">
             {t("newsCenter.title")}
           </h2>
 

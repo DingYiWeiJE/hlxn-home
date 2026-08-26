@@ -48,7 +48,7 @@ export default function ContactInfo() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+      <h2 className="text-[3rem] font-bold text-gray-900 mb-6">
         {t("contactInfo.title")}
       </h2>
 

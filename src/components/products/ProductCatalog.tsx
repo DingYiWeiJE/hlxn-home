@@ -736,7 +736,7 @@ export default function ProductCatalog() {
     >
       <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <header className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#2364c7] sm:text-4xl lg:text-5xl">
+          <h1 className="text-[3rem] font-bold tracking-tight text-[#2364c7]">
             {text.title}
           </h1>
 
@@ -882,7 +882,7 @@ export default function ProductCatalog() {
           {/* 桌面端二级分类 */}
           <aside className="hidden overflow-hidden rounded-2xl border border-white/80 bg-white shadow-sm lg:block">
             <div className="border-b border-slate-100 px-5 py-4">
-              <h2 className="text-base font-bold text-slate-900">
+              <h2 className="text-[3rem] font-bold ">
                 {text.productType}
               </h2>
             </div>
@@ -1207,7 +1207,7 @@ function EmptyState({
         <PackageSearch className="h-8 w-8" />
       </span>
 
-      <h2 className="mt-5 text-lg font-bold text-slate-800">
+      <h2 className="mt-5 text-[3rem] font-bold ">
         {title}
       </h2>
 

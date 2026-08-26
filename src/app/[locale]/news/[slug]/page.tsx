@@ -105,7 +105,7 @@ export default async function NewsDetail({ params }: Props) {
       </div>
       <header className="border-b border-slate-200 bg-[#3060AC] p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-[1200px]">
-          <h1 className="mb-4 text-4xl font-bold text-white">{news.title}</h1>
+          <h1 className="mb-4 text-[3rem] font-bold text-white">{news.title}</h1>
           <div className="flex items-center gap-4 text-sm text-slate-200">
             {news.publishedAt && (
               <time dateTime={news.publishedAt.toISOString()}>

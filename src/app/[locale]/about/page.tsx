@@ -294,7 +294,7 @@ async function PatentSection({ locale }: { locale: string }) {
         </div>
       </div>
       <div className="mx-auto max-w-[1440px] px-4 lg:px-8 mt-12">
-        <h2 className="text-center text-[#2A62BB] text-xl md:text-2xl lg:text-2.3rem mt-12 md:mt-5rem font-bold">
+        <h2 className="text-center text-[#2A62BB] text-[3rem] mt-12 md:mt-5rem font-bold">
           {t("aboutPage.honorTitle")}
         </h2>
         <ImageCarousel

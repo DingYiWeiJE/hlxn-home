@@ -528,13 +528,11 @@ export default function NewsList() {
                     <h2
                       className="
                         line-clamp-2
-                        text-[17px]
+                        text-[3rem]
                         font-bold
                         leading-[1.65]
-                        text-slate-900
                         transition-colors
                         group-hover:text-[#2463c5]
-                        sm:text-lg
                       "
                     >
                       <Link

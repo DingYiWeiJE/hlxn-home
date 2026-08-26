@@ -118,7 +118,7 @@ export default async function ApplicationCaseDetail({
             )}
 
             <header className="mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-[#102a43] mb-4">
+              <h1 className="text-[3rem] font-bold text-[#102a43] mb-4">
                 {caseData.title}
               </h1>
 
