@@ -490,7 +490,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
     <section className="bg-[#f8fcff] py-16 lg:py-24">
       <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
         <div className="max-w-3xl">
-          <h2 className="mt-3 text-2xl font-bold tracking-wide text-[#2365c4] md:text-3xl lg:text-4xl">
+          <h2 className="mt-3  font-bold tracking-wide text-[#2365c4] text-[3rem]">
             {currentUi.worldTitle}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[#52677f] md:text-base">

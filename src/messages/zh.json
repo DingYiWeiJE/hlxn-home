@@ -284,13 +284,13 @@
     "mapTitle": "控制器生产车间",
     "mapDescription": "覆盖SMT贴片、DIP插装、程序烧录、老化测试、功能验证等全工序，实现从PCB到成品的一站式生产。",
     "history": {
-      "title": "公司发展历程",
+      "title": "发展历程",
       "previous": "上一项发展历程",
       "next": "下一项发展历程",
       "scrollHint": "可横向拖动时间轴，聚焦后也可使用键盘方向键。",
       "emptyTitle": "我们的发展故事仍在持续书写",
       "emptyDescription": "更多重要里程碑即将呈现，敬请期待。",
-      "timelineLabel": "公司发展历程时间轴",
+      "timelineLabel": "发展历程时间轴",
       "itemLabel": "发展历程"
     }
   },

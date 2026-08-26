@@ -66,7 +66,7 @@ function ContactItem({
  */
 function ContactButton({ type }: { type: "phone" | "wechat" }) {
   const isPhone = type === "phone";
-  const bgColor = isPhone ? "bg-[#00658c]" : "bg-[#00c768]";
+  const bgColor = isPhone ? "bg-[#3060AC]" : "bg-[#68BB63]";
 
   return (
     <div
