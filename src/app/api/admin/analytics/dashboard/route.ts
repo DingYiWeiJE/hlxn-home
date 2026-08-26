@@ -572,7 +572,7 @@ async function getTopSolutions(
 
   const solutions = await prisma.solution.findMany({
     where: { id: { in: solutionIds } },
-    select: { id: true, name: true, slug: true },
+    select: { id: true, title: true, slug: true },
   });
 
   const solutionMap = new Map(solutions.map((s) => [s.id, s]));
@@ -582,7 +582,7 @@ async function getTopSolutions(
       const solution = solutionMap.get(r.resourceId);
       return {
         id: r.resourceId,
-        name: solution?.name || "已删除的解决方案",
+        name: solution?.title || "已删除的解决方案",
         slug: solution?.slug || "",
         views: Number(r.views),
       };

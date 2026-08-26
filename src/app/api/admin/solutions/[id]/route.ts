@@ -20,7 +20,8 @@ type RouteContext = {
 const solutionDetailSelect = {
   id: true,
   locale: true,
-  name: true,
+  title: true,
+  subtitle: true,
   slug: true,
   status: true,
   sortOrder: true,
@@ -127,7 +128,8 @@ function formatSolutionDetail(solution: SolutionDetailPayload) {
   return {
     id: solution.id,
     locale: solution.locale,
-    name: solution.name,
+    title: solution.title,
+    subtitle: solution.subtitle,
     slug: solution.slug,
     status: solution.status,
     sortOrder: solution.sortOrder,
@@ -311,7 +313,8 @@ export async function PATCH(request: Request, context: RouteContext) {
         },
         data: {
           ...(body.locale !== undefined ? { locale: nextLocale } : {}),
-          ...(body.name !== undefined ? { name: body.name } : {}),
+          ...(body.title !== undefined ? { title: body.title } : {}),
+          ...(body.subtitle !== undefined ? { subtitle: body.subtitle } : {}),
           ...(body.status !== undefined ? { status: body.status } : {}),
           ...(body.sortOrder !== undefined
             ? { sortOrder: body.sortOrder }

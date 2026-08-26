@@ -441,7 +441,8 @@ model ProductApplication {
 model Solution {
   id     String         @id @default(cuid())
   locale SolutionLocale @default(zh)
-  name   String
+  title  String
+  subtitle String?
   slug   String
 
   status    SolutionStatus @default(DRAFT)

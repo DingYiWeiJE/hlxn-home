@@ -55,7 +55,8 @@ export async function POST(request: Request, context: RouteContext) {
         id: true,
         locale: true,
         slug: true,
-        name: true,
+        title: true,
+        subtitle: true,
         deletedAt: true,
       },
     });
