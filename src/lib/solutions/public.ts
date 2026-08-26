@@ -22,7 +22,8 @@ export type SolutionImage = {
 export type PublicSolutionListItem = {
   id: string;
   locale: SolutionLocale;
-  name: string;
+  title: string;
+  subtitle: string | null;
   slug: string;
   summaryParagraphs: unknown;
   highlights: unknown;
@@ -110,7 +111,13 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
       ? {
           OR: [
             {
-              name: {
+              title: {
+                contains: query.keyword,
+                mode: "insensitive",
+              },
+            },
+            {
+              subtitle: {
                 contains: query.keyword,
                 mode: "insensitive",
               },
@@ -145,7 +152,8 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
       select: {
         id: true,
         locale: true,
-        name: true,
+        title: true,
+        subtitle: true,
         slug: true,
         summaryParagraphs: true,
         highlights: true,
@@ -168,7 +176,8 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
       (item): PublicSolutionListItem => ({
         id: item.id,
         locale: item.locale,
-        name: item.name,
+        title: item.title,
+        subtitle: item.subtitle,
         slug: item.slug,
         summaryParagraphs: item.summaryParagraphs,
         highlights: item.highlights,
@@ -193,7 +202,8 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
 const detailSelect = {
   id: true,
   locale: true,
-  name: true,
+  title: true,
+  subtitle: true,
   slug: true,
   translationKey: true,
   summaryParagraphs: true,
@@ -279,14 +289,11 @@ function formatSolutionDetail(
   );
   const coverImage = formatImage(solution.coverImageAsset);
 
-  if (!workingPrincipleBackgroundImage) {
-    return null;
-  }
-
   return {
     id: solution.id,
     locale: solution.locale,
-    name: solution.name,
+    title: solution.title,
+    subtitle: solution.subtitle,
     slug: solution.slug,
     translationKey: solution.translationKey,
     summaryParagraphs: solution.summaryParagraphs,

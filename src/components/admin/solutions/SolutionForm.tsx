@@ -62,7 +62,8 @@ type CustomerValueItem = {
 export type SolutionFormInitialData = {
   id: string;
   locale: SolutionLocale;
-  name: string;
+  title: string;
+  subtitle: string | null;
   slug: string;
   status: SolutionStatus;
   sortOrder: number;
@@ -110,7 +111,8 @@ type SaveResponse =
       data: {
         id: string;
         locale: SolutionLocale;
-        name: string;
+        title: string;
+        subtitle: string | null;
         slug: string;
       };
     }
@@ -200,7 +202,8 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
   const [locale, setLocale] = useState<SolutionLocale>(
     initialData?.locale ?? "zh",
   );
-  const [name, setName] = useState(initialData?.name ?? "");
+  const [title, setTitle] = useState(initialData?.title ?? "");
+  const [subtitle, setSubtitle] = useState(initialData?.subtitle ?? "");
   const [status, setStatus] = useState<SolutionStatus>(
     initialData?.status ?? "DRAFT",
   );
@@ -388,7 +391,8 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
 
     const payload = {
       locale,
-      name,
+      title,
+      subtitle: subtitle || null,
       status,
       sortOrder,
       publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
@@ -535,11 +539,20 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
             </select>
           </InputBlock>
 
-          <InputBlock label="名称" required>
+          <InputBlock label="主标题" required>
             <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
               required
+              maxLength={200}
+              className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </InputBlock>
+
+          <InputBlock label="副标题">
+            <input
+              value={subtitle}
+              onChange={(event) => setSubtitle(event.target.value)}
               maxLength={200}
               className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
@@ -622,7 +635,6 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
 
             <ImagePickerBox
               label="工作原理背景图"
-              required
               asset={workingPrincipleBackgroundAsset}
               onPick={() => setPicker({ target: "working" })}
               onClear={() => {
@@ -663,7 +675,7 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
         }
         purpose={pickerPurpose}
         selectedAssetId={selectedPickerAssetId}
-        uploadAlt={name || "solution image"}
+        uploadAlt={title || "solution image"}
         onSelect={selectAsset}
         onClose={() => setPicker(null)}
       />

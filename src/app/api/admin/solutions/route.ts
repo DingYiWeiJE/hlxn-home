@@ -32,7 +32,13 @@ export async function GET(request: NextRequest) {
         ? {
             OR: [
               {
-                name: {
+                title: {
+                  contains: query.keyword,
+                  mode: "insensitive",
+                },
+              },
+              {
+                subtitle: {
                   contains: query.keyword,
                   mode: "insensitive",
                 },
@@ -70,7 +76,8 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           locale: true,
-          name: true,
+          title: true,
+          subtitle: true,
           slug: true,
           status: true,
           sortOrder: true,
@@ -118,7 +125,8 @@ export async function GET(request: NextRequest) {
       items: items.map((item) => ({
         id: item.id,
         locale: item.locale,
-        name: item.name,
+        title: item.title,
+        subtitle: item.subtitle,
         slug: item.slug,
         status: item.status,
         sortOrder: item.sortOrder,
@@ -163,7 +171,7 @@ export async function POST(request: Request) {
         body.workingPrincipleBackgroundAssetId,
       usageScenarios: body.usageScenarios,
       customerValues: body.customerValues,
-      requireWorkingPrincipleBackground: true,
+      requireWorkingPrincipleBackground: false,
     });
 
     await ensureTranslationKeyAvailable({
@@ -174,7 +182,7 @@ export async function POST(request: Request) {
     const solution = await prisma.$transaction(async (transaction) => {
       const locale = body.locale as SolutionLocale;
       const slug = await generateUniqueSlug({
-        source: body.name,
+        source: body.title,
         maxLength: 150,
         exists: async (candidate) => {
           const existing = await transaction.solution.findFirst({
@@ -194,7 +202,8 @@ export async function POST(request: Request) {
       return transaction.solution.create({
         data: {
           locale,
-          name: body.name,
+          title: body.title,
+          subtitle: body.subtitle,
           slug,
           status: body.status,
           sortOrder: body.sortOrder,
@@ -232,7 +241,8 @@ export async function POST(request: Request) {
         select: {
           id: true,
           locale: true,
-          name: true,
+          title: true,
+          subtitle: true,
           slug: true,
         },
       });

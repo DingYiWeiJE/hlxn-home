@@ -25,7 +25,8 @@ export default async function EditSolutionPage({ params }: PageProps) {
     select: {
       id: true,
       locale: true,
-      name: true,
+      title: true,
+      subtitle: true,
       slug: true,
       status: true,
       sortOrder: true,

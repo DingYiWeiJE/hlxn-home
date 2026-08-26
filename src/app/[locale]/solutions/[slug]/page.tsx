@@ -94,26 +94,26 @@ export async function generateMetadata({
   const description =
     toStringArray(solution.summaryParagraphs)[0] ??
     (locale === "zh"
-      ? `${solution.name}解决方案`
-      : `${solution.name} solution`);
+      ? `${solution.title}解决方案`
+      : `${solution.title} solution`);
 
   const coverImage = solution.coverImage;
 
   return {
-    title: `${solution.name} | ${text.brand}`,
+    title: `${solution.title} | ${text.brand}`,
     description,
     alternates: {
       canonical: `/${locale}/solutions/${solution.slug}`,
     },
     openGraph: {
-      title: solution.name,
+      title: solution.title,
       description,
       type: "website",
       images: coverImage
         ? [
             {
               url: coverImage.url,
-              alt: coverImage.alt ?? solution.name,
+              alt: coverImage.alt ?? solution.title,
             },
           ]
         : undefined,
@@ -136,10 +136,6 @@ export default async function SolutionDetailPage({ params }: PageProps) {
   const coverImage = solution.coverImage;
   const workingPrincipleBackgroundImage =
     solution.workingPrincipleBackgroundImage;
-
-  if (!workingPrincipleBackgroundImage) {
-    notFound();
-  }
 
   const switchUrls = await resolveSolutionLocaleSwitchUrls({
     locale,
@@ -179,7 +175,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
               </Link>
 
               <h1 className="mt-5 max-w-3xl text-3xl font-bold leading-tight text-[#2364c7] sm:text-4xl lg:text-5xl">
-                {solution.name}
+                {solution.title}
               </h1>
 
               {summaryParagraphs.length > 0 ? (
@@ -208,7 +204,7 @@ export default async function SolutionDetailPage({ params }: PageProps) {
               {coverImage ? (
                 <Image
                   src={coverImage.url}
-                  alt={coverImage.alt || solution.name}
+                  alt={coverImage.alt || solution.title}
                   fill
                   priority
                   sizes="(max-width: 1023px) 100vw, 50vw"
@@ -253,15 +249,17 @@ export default async function SolutionDetailPage({ params }: PageProps) {
         {/* 工作原理 */}
         <section id="working-principle" className="scroll-mt-24">
           <div className="relative flex min-h-[500px] items-center overflow-hidden bg-slate-900 px-5 py-16 sm:px-8 lg:min-h-[620px] lg:py-24">
-            <Image
-              src={workingPrincipleBackgroundImage.url}
-              alt={
-                workingPrincipleBackgroundImage.alt || text.workingPrinciple
-              }
-              fill
-              sizes="100vw"
-              className="object-cover"
-            />
+            {workingPrincipleBackgroundImage ? (
+              <Image
+                src={workingPrincipleBackgroundImage.url}
+                alt={
+                  workingPrincipleBackgroundImage.alt || text.workingPrinciple
+                }
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+            ) : null}
 
             <div className="absolute inset-0 bg-slate-950/60" />
 

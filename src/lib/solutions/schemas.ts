@@ -91,11 +91,17 @@ export const solutionCustomerValueSchema = z.object({
 
 const solutionFieldsSchema = z.object({
   locale: solutionLocaleSchema,
-  name: z
+  title: z
     .string()
     .trim()
-    .min(1, "Name is required")
-    .max(200, "Name cannot exceed 200 characters"),
+    .min(1, "Title is required")
+    .max(200, "Title cannot exceed 200 characters"),
+  subtitle: z
+    .string()
+    .trim()
+    .max(200, "Subtitle cannot exceed 200 characters")
+    .optional()
+    .nullable(),
   status: solutionStatusSchema.default("DRAFT"),
   sortOrder: z.number().int().min(0).default(0),
   publishedAt: z.coerce.date().optional().nullable(),
@@ -104,7 +110,7 @@ const solutionFieldsSchema = z.object({
   summaryParagraphs: requiredParagraphsSchema,
   highlights: highlightsSchema,
   workingPrincipleParagraphs: requiredParagraphsSchema,
-  workingPrincipleBackgroundAssetId: imageIdSchema,
+  workingPrincipleBackgroundAssetId: imageIdSchema.optional(),
   systemCompositionParagraphs: optionalParagraphsSchema,
   usageScenarios: z
     .array(solutionUsageScenarioSchema)
@@ -136,7 +142,7 @@ export const adminSolutionListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   sort: z
-    .enum(["createdAt", "updatedAt", "publishedAt", "sortOrder", "name"])
+    .enum(["createdAt", "updatedAt", "publishedAt", "sortOrder", "title"])
     .default("createdAt"),
   order: z.enum(["asc", "desc"]).default("desc"),
 });
