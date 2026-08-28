@@ -65,7 +65,13 @@ const translationKeySchema = z
 const imageIdSchema = z
   .string()
   .trim()
-  .min(1, "Image is required");
+  .pipe(
+    z.union([
+      z.string().min(1, "Image is required"),
+      z.literal("").transform(() => null),
+    ]),
+  )
+  .nullable();
 
 export const solutionUsageScenarioSchema = z.object({
   title: z
@@ -74,7 +80,7 @@ export const solutionUsageScenarioSchema = z.object({
     .min(1, "Title is required")
     .max(200, "Title cannot exceed 200 characters"),
   detailParagraphs: optionalParagraphsSchema,
-  imageAssetId: imageIdSchema,
+  imageAssetId: imageIdSchema.optional(),
   sortOrder: z.number().int().min(0).optional(),
 });
 
@@ -85,7 +91,7 @@ export const solutionCustomerValueSchema = z.object({
     .min(1, "Title is required")
     .max(200, "Title cannot exceed 200 characters"),
   detailParagraphs: requiredParagraphsSchema,
-  imageAssetId: imageIdSchema,
+  imageAssetId: imageIdSchema.optional(),
   sortOrder: z.number().int().min(0).optional(),
 });
 
