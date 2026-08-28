@@ -171,11 +171,14 @@ export default async function SolutionDetailPage({ params }: PageProps) {
                 href={`/${locale}/solutions`}
                 className="inline-flex text-sm font-semibold text-[#2364c7] transition-colors hover:text-[#1d54a8]"
               >
-                {text.back}
+                <svg t="1787925125089" className="icon" viewBox="0 0 1103 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M11.652047 412.151798a41.805655 41.805655 0 0 0 0 57.945315l415.69465 407.034345c15.9822 15.746009 41.097085 2.834282 41.097085-21.178382V596.85249s605.591525-222.176194 552.527473 409.711166c-1.417141 17.871721 19.839972 23.697744 25.429805 7.085705 79.832268-242.488546 189.188304-815.643291-586.460123-764.941141l6.534594-219.656832c0.7873-24.406315-24.721235-38.184073-41.097085-22.123144L11.652047 412.151798z" fill="currentColor"></path></svg>
               </Link>
 
               <h1 className="mt-5 max-w-3xl text-[3rem] font-bold leading-tight text-[#2364c7]">
                 {solution.title}
+              </h1>
+              <h1 className="mt-5 max-w-3xl text-[3rem] font-bold leading-tight text-[#2364c7]">
+                {solution.subtitle}
               </h1>
 
               {summaryParagraphs.length > 0 ? (
@@ -248,7 +251,9 @@ export default async function SolutionDetailPage({ params }: PageProps) {
 
         {/* 工作原理 */}
         <section id="working-principle" className="scroll-mt-24">
-          <div className="relative flex min-h-[500px] items-center overflow-hidden bg-slate-900 px-5 py-16 sm:px-8 lg:min-h-[620px] lg:py-24">
+          <div className={`relative flex min-h-[500px] items-center overflow-hidden px-5 py-16 sm:px-8 lg:min-h-[620px] lg:py-24 ${
+            workingPrincipleBackgroundImage ? 'bg-slate-900' : 'bg-slate-100'
+          }`}>
             {workingPrincipleBackgroundImage ? (
               <Image
                 src={workingPrincipleBackgroundImage.url}
@@ -261,13 +266,21 @@ export default async function SolutionDetailPage({ params }: PageProps) {
               />
             ) : null}
 
-            <div className="absolute inset-0 bg-slate-950/60" />
+            {workingPrincipleBackgroundImage ? (
+              <div className="absolute inset-0 bg-slate-950/60" />
+            ) : null}
 
-            <div className="relative z-10 mx-auto w-full max-w-4xl text-white">
-              <SectionTitle light>{text.workingPrinciple}</SectionTitle>
+            <div className={`relative z-10 mx-auto w-full max-w-4xl ${
+              workingPrincipleBackgroundImage ? 'text-white' : 'text-slate-900'
+            }`}>
+              <SectionTitle light={!!workingPrincipleBackgroundImage}>{text.workingPrinciple}</SectionTitle>
 
               {workingPrincipleParagraphs.length > 0 ? (
-                <div className="mx-auto mt-8 max-w-3xl space-y-4 text-center text-sm leading-8 text-white/95 sm:text-base">
+                <div className={`mx-auto mt-8 max-w-3xl space-y-4 text-center text-sm leading-8 sm:text-base ${
+                  workingPrincipleBackgroundImage
+                    ? 'text-white/95'
+                    : 'text-slate-600'
+                }`}>
                   {workingPrincipleParagraphs.map((paragraph, index) => (
                     <p key={`${paragraph}-${index}`}>{paragraph}</p>
                   ))}
