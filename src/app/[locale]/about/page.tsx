@@ -198,7 +198,7 @@ async function CompanyIntroSection({ locale }: { locale: string }) {
 
         <div className="space-y-4 md:space-y-6 text-[1.2rem] leading-[1.8] text-[#1f3448] lg:max-w-[500px]">
           {intros.map((intro, index) => (
-            <FadeAnimation ><p key={index} className="intro" >{intro}</p></FadeAnimation>
+            <FadeAnimation key={index}><p  className="intro" >{intro}</p></FadeAnimation>
           ))}
         </div>
       </div>

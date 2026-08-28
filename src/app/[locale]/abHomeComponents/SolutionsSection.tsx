@@ -56,7 +56,7 @@ const SolutionsSection: React.FC<Props> = async ({ locale }) => {
                   {item.title}
                 </h3>
 
-                <p className="mt-4 text-sm leading-7 text-white/70 sm:text-base sm:leading-8 lg:text-[16px]">
+                <p className="mt-4 intro text-sm leading-7 text-white/70 sm:text-base sm:leading-8 lg:text-[16px]">
                   {item.description}
                 </p>
               </article>
@@ -67,7 +67,9 @@ const SolutionsSection: React.FC<Props> = async ({ locale }) => {
         {/* 右侧宣传语 */}
         <div className="flex items-center justify-center lg:justify-end">
           <div className="w-full text-center lg:max-w-[650px] lg:text-left">
-            <p className="text-3xl font-bold leading-tight text-white drop-shadow-sm sm:text-4xl lg:text-[40px] xl:text-[43px]">
+            <p className="text-3xl font-bold text-white  drop-shadow-sm sm:text-4xl lg:text-[40px] xl:text-[43px]"
+              style={{lineHeight: '3.5rem'}}
+            >
               {t("solutionsSection.tagline")}
             </p>
 
