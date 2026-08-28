@@ -29,7 +29,7 @@ const FeatureBlock: React.FC<FeatureItem> = ({ title, description }) => {
           {title}
         </h3>
 
-        <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8 lg:text-[17px]">
+        <p className="mt-4  text-sm leading-7 text-slate-600 sm:text-base sm:leading-8 lg:text-[17px]">
           {description}
         </p>
       </div>
@@ -51,7 +51,7 @@ const AdvantageCardItem: React.FC<AdvantageCard> = ({
         xl 下不再需要固定高度，由 subgrid 自动取三者最大高度
       */}
       <h2
-        className="mb-5 flex h-[2.5em] shrink-0 items-center justify-center text-center text-[3rem] font-bold leading-tight text-slate-950 sm:mb-7 xl:row-start-1 xl:h-auto xl:self-center"
+        className="mb-5 flex h-[2.5em] shrink-0 items-center justify-center text-center text-[2rem] font-bold leading-tight text-slate-950 sm:mb-7 xl:row-start-1 xl:h-auto xl:self-center"
       >
         <span>{heading}</span>
       </h2>

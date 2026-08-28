@@ -43,7 +43,7 @@ export default function Navigation({
           backgroundColor: hasbg ? "white" : scrolledPast ? "white" : "transparent",
         }}
       >
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-4 py-3 sm:p-6 sm:py-5 lg:p-8 lg:py-6">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href={`/${locale}`} className="flex-shrink-0">

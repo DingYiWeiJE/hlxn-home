@@ -493,7 +493,7 @@ export default function StrategicLayoutMap({ locale = "zh" }: { locale?: string 
           <h2 className="mt-3  font-bold tracking-wide text-[#2365c4] text-[3rem]">
             {currentUi.worldTitle}
           </h2>
-          <p className="mt-4 text-sm leading-7 text-[#52677f] md:text-base">
+          <p className="intro mt-4 text-sm leading-7 text-[#52677f] md:text-base">
             {normalizedLocale === "zh" ? <>
             </> : currentUi.intro}
           </p>

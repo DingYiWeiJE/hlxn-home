@@ -36,7 +36,7 @@ function FooterNav({
 }) {
   return (
     <nav aria-label={ariaLabel}>
-      <h2 className="text-[3rem] font-semibold tracking-wide text-white">
+      <h2 className="text-xl font-semibold tracking-wide text-white md:text-2xl">
         {title}
       </h2>
 
@@ -97,7 +97,7 @@ export default async function SiteFooter({ locale }: Props) {
           <section aria-labelledby="footer-contact-title">
             <h2
               id="footer-contact-title"
-              className="text-[3rem] font-semibold tracking-wide text-white"
+              className="text-xl font-semibold tracking-wide text-white md:text-2xl"
             >
               {t("siteFooter.contact")}
             </h2>
