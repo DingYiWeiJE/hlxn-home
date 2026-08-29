@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
-import SolutionCatalog from "@/components/solutions/SolutionCatalog";
+import SolutionCatalogNew from "@/components/solutions/SolutionCatalogNew";
 
 type Props = {
   params: Promise<{
@@ -63,7 +63,7 @@ export default async function SolutionsPage({ params }: Props) {
       </section>
 
       <main className="flex-1">
-        <SolutionCatalog locale={normalizedLocale} />
+        <SolutionCatalogNew locale={normalizedLocale} />
       </main>
 
       <Footer locale={normalizedLocale} />

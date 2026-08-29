@@ -10,6 +10,9 @@
       "updates": "News & Updates",
       "exhibitions": "Exhibitions & Events"
     },
+    "solutionsSubmenu": {
+      "allCategories": "All Categories"
+    },
     "contact": "Contact Us",
     "language": "Language"
   },
