@@ -307,17 +307,7 @@ export default function WebNavigation({
       >
         {t("nav.about")}
       </Link>
-      <Link
-        href={`/${locale}/products`}
-        className={`transition ${
-          isActive(`/${locale}/products`)
-            ? `${activeTextColor} text-lg font-bold`
-            : `${textColor} ${hoverTextColor}`
-        }`}
-      >
-        {t("nav.products")}
-      </Link>
-
+      
       {/* Solutions with Dropdown */}
       <Dropdown
         trigger={
@@ -333,6 +323,17 @@ export default function WebNavigation({
         }
         items={solutionDropdownItems}
       />
+      <Link
+        href={`/${locale}/products`}
+        className={`transition ${
+          isActive(`/${locale}/products`)
+            ? `${activeTextColor} text-lg font-bold`
+            : `${textColor} ${hoverTextColor}`
+        }`}
+      >
+        {t("nav.products")}
+      </Link>
+
 
       <Link
         href={`/${locale}/cases`}
