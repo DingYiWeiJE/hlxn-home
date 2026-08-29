@@ -31,6 +31,7 @@ export default async function EditSolutionPage({ params }: PageProps) {
       status: true,
       sortOrder: true,
       translationKey: true,
+      categoryId: true,
       summaryParagraphs: true,
       highlights: true,
       workingPrincipleParagraphs: true,

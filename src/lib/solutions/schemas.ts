@@ -112,6 +112,12 @@ const solutionFieldsSchema = z.object({
   sortOrder: z.number().int().min(0).default(0),
   publishedAt: z.coerce.date().optional().nullable(),
   translationKey: translationKeySchema,
+  categoryId: z
+    .string()
+    .trim()
+    .min(1, "Category ID is required")
+    .optional()
+    .nullable(),
   coverImageAssetId: imageIdSchema.optional(),
   summaryParagraphs: requiredParagraphsSchema,
   highlights: highlightsSchema,
@@ -144,6 +150,7 @@ export const adminSolutionListQuerySchema = z.object({
   locale: solutionLocaleSchema.optional(),
   keyword: z.string().trim().max(100).optional(),
   status: solutionStatusSchema.optional(),
+  type: z.string().trim().optional(),
   deleted: booleanQuerySchema.optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
