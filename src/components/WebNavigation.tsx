@@ -3,7 +3,9 @@
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { newsEmitter } from "@/lib/events";
+import { solutionEmitter } from "@/lib/solutions-events";
 import Dropdown from "./Dropdown";
 
 type Props = {
@@ -11,6 +13,12 @@ type Props = {
   scrolledPast: boolean;
   isWhiteBg: boolean;
   localeSwitchUrls?: Partial<Record<"zh" | "en", string>>;
+};
+
+type SolutionCategory = {
+  id: string;
+  chName: string;
+  enName: string;
 };
 
 export default function WebNavigation({
@@ -23,6 +31,7 @@ export default function WebNavigation({
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const [categories, setCategories] = useState<SolutionCategory[]>([]);
 
   const textColor = isWhiteBg ? "text-black" : "text-white";
   const hoverTextColor = isWhiteBg ? "hover:text-gray-700" : "hover:text-gray-300";
@@ -58,6 +67,25 @@ export default function WebNavigation({
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     router.push(`/${lang}${pathWithoutLocale}${hash}`);
   };
+
+  // 加载解决方案分类
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/admin/solution-categories", {
+          credentials: "include",
+        });
+        const result = await response.json();
+        if (result.success && result.data?.categories) {
+          setCategories(result.data.categories);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    }
+
+    fetchCategories();
+  }, []);
 
   const newsDropdownItems = [
     {
@@ -128,6 +156,78 @@ export default function WebNavigation({
         </button>
       ),
     },
+  ];
+
+  const solutionDropdownItems = [
+    {
+      label: "all",
+      element: (
+        <button
+          onClick={(e) => {
+            const isSolutionsPage =
+              pathname ===
+              `/${locale}/solutions`;
+
+            if (isSolutionsPage) {
+              e.preventDefault();
+              solutionEmitter.emit(
+                "changeSolutionCategory",
+                null,
+              );
+            } else {
+              window.location.href =
+                `/${locale}/solutions`;
+            }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
+          }}
+        >
+          {t("nav.solutionsSubmenu.allCategories")}
+        </button>
+      ),
+    },
+    ...categories.map((category) => ({
+      label: category.id,
+      element: (
+        <button
+          key={category.id}
+          onClick={(e) => {
+            const isSolutionsPage =
+              pathname ===
+              `/${locale}/solutions`;
+
+            if (isSolutionsPage) {
+              e.preventDefault();
+              solutionEmitter.emit(
+                "changeSolutionCategory",
+                category.id,
+              );
+            } else {
+              window.location.href =
+                `/${locale}/solutions?category=${category.id}`;
+            }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
+          }}
+        >
+          {locale === "zh" ? category.chName : category.enName}
+        </button>
+      ),
+    })),
   ];
 
   const languageDropdownItems = [
@@ -217,16 +317,23 @@ export default function WebNavigation({
       >
         {t("nav.products")}
       </Link>
-      <Link
-        href={`/${locale}/solutions`}
-        className={`transition ${
-          isActive(`/${locale}/solutions`)
-            ? `${activeTextColor} text-lg font-bold`
-            : `${textColor} ${hoverTextColor}`
-        }`}
-      >
-        {t("nav.solutions")}
-      </Link>
+
+      {/* Solutions with Dropdown */}
+      <Dropdown
+        trigger={
+          <button
+            className={`transition ${
+              isActive(`/${locale}/solutions`)
+                ? `${activeTextColor} text-lg font-bold`
+                : `${textColor} ${hoverTextColor}`
+            }`}
+          >
+            {t("nav.solutions")}
+          </button>
+        }
+        items={solutionDropdownItems}
+      />
+
       <Link
         href={`/${locale}/cases`}
         className={`transition ${
