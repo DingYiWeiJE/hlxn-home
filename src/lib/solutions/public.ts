@@ -107,6 +107,7 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
     locale,
     status: SolutionStatus.PUBLISHED,
     deletedAt: null,
+    ...(query.type ? { categoryId: query.type } : {}),
     ...(query.keyword
       ? {
           OR: [
