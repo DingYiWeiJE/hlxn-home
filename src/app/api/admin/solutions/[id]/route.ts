@@ -280,7 +280,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               solutionId: id,
               title: item.title,
               detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId,
+              imageAssetId: item.imageAssetId ?? null,
               sortOrder: item.sortOrder ?? index,
             })),
           });
@@ -300,7 +300,7 @@ export async function PATCH(request: Request, context: RouteContext) {
               solutionId: id,
               title: item.title,
               detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId,
+              imageAssetId: item.imageAssetId ?? null,
               sortOrder: item.sortOrder ?? index,
             })),
           });

@@ -4,7 +4,7 @@ import { ApiError } from "@/lib/api/errors";
 import { prisma } from "@/lib/prisma";
 
 type ImageReference = {
-  imageAssetId: string;
+  imageAssetId?: string | null;
 };
 
 export type SolutionReferenceInput = {
@@ -116,8 +116,8 @@ async function validateImageAssetList({
   const assetIds = [
     ...new Set(
       (items ?? [])
-        .map((item) => item.imageAssetId.trim())
-        .filter(Boolean),
+        .map((item) => item.imageAssetId?.trim())
+        .filter((id): id is string => Boolean(id)),
     ),
   ];
 
