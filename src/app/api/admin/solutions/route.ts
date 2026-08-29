@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       deletedAt: query.deleted === true ? { not: null } : null,
       ...(query.locale ? { locale: query.locale as SolutionLocale } : {}),
       ...(query.status ? { status: query.status } : {}),
+      ...(query.type ? { categoryId: query.type } : {}),
       ...(query.keyword
         ? {
             OR: [
@@ -208,6 +209,7 @@ export async function POST(request: Request) {
           status: body.status,
           sortOrder: body.sortOrder,
           translationKey: body.translationKey,
+          categoryId: body.categoryId,
           coverImageAssetId: body.coverImageAssetId,
           summaryParagraphs: body.summaryParagraphs,
           highlights: body.highlights,
@@ -222,20 +224,24 @@ export async function POST(request: Request) {
               ? body.publishedAt ?? new Date()
               : null,
           usageScenarios: {
-            create: body.usageScenarios.map((item, index) => ({
-              title: item.title,
-              detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId,
-              sortOrder: item.sortOrder ?? index,
-            })),
+            create: body.usageScenarios
+              .filter((item) => item.imageAssetId)
+              .map((item, index) => ({
+                title: item.title,
+                detailParagraphs: item.detailParagraphs,
+                imageAssetId: item.imageAssetId as string,
+                sortOrder: item.sortOrder ?? index,
+              })),
           },
           customerValues: {
-            create: body.customerValues.map((item, index) => ({
-              title: item.title,
-              detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId,
-              sortOrder: item.sortOrder ?? index,
-            })),
+            create: body.customerValues
+              .filter((item) => item.imageAssetId)
+              .map((item, index) => ({
+                title: item.title,
+                detailParagraphs: item.detailParagraphs,
+                imageAssetId: item.imageAssetId as string,
+                sortOrder: item.sortOrder ?? index,
+              })),
           },
         },
         select: {

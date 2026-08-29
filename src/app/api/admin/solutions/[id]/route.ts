@@ -26,6 +26,7 @@ const solutionDetailSelect = {
   status: true,
   sortOrder: true,
   translationKey: true,
+  categoryId: true,
   summaryParagraphs: true,
   highlights: true,
   workingPrincipleParagraphs: true,
@@ -134,6 +135,7 @@ function formatSolutionDetail(solution: SolutionDetailPayload) {
     status: solution.status,
     sortOrder: solution.sortOrder,
     translationKey: solution.translationKey,
+    categoryId: solution.categoryId,
     summaryParagraphs: solution.summaryParagraphs,
     highlights: solution.highlights,
     workingPrincipleParagraphs: solution.workingPrincipleParagraphs,
@@ -276,13 +278,15 @@ export async function PATCH(request: Request, context: RouteContext) {
 
         if (body.usageScenarios.length > 0) {
           await transaction.solutionUsageScenario.createMany({
-            data: body.usageScenarios.map((item, index) => ({
-              solutionId: id,
-              title: item.title,
-              detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId ?? null,
-              sortOrder: item.sortOrder ?? index,
-            })),
+            data: body.usageScenarios
+              .filter((item) => item.imageAssetId)
+              .map((item, index) => ({
+                solutionId: id,
+                title: item.title,
+                detailParagraphs: item.detailParagraphs,
+                imageAssetId: item.imageAssetId as string,
+                sortOrder: item.sortOrder ?? index,
+              })),
           });
         }
       }
@@ -296,13 +300,15 @@ export async function PATCH(request: Request, context: RouteContext) {
 
         if (body.customerValues.length > 0) {
           await transaction.solutionCustomerValue.createMany({
-            data: body.customerValues.map((item, index) => ({
-              solutionId: id,
-              title: item.title,
-              detailParagraphs: item.detailParagraphs,
-              imageAssetId: item.imageAssetId ?? null,
-              sortOrder: item.sortOrder ?? index,
-            })),
+            data: body.customerValues
+              .filter((item) => item.imageAssetId)
+              .map((item, index) => ({
+                solutionId: id,
+                title: item.title,
+                detailParagraphs: item.detailParagraphs,
+                imageAssetId: item.imageAssetId as string,
+                sortOrder: item.sortOrder ?? index,
+              })),
           });
         }
       }
@@ -321,6 +327,9 @@ export async function PATCH(request: Request, context: RouteContext) {
             : {}),
           ...(body.translationKey !== undefined
             ? { translationKey: body.translationKey }
+            : {}),
+          ...(body.categoryId !== undefined
+            ? { categoryId: body.categoryId }
             : {}),
           ...(body.coverImageAssetId !== undefined
             ? { coverImageAssetId: body.coverImageAssetId }

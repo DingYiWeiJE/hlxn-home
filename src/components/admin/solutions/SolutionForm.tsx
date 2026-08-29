@@ -14,15 +14,24 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, type ReactNode, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, useMemo, useState, useEffect } from "react";
 
 import MediaAssetPicker, {
   type ProductMediaAsset,
   type ProductMediaPurpose,
 } from "@/components/admin/products/MediaAssetPicker";
+import SolutionCategoryManager from "./SolutionCategoryManager";
 
 type SolutionLocale = "zh" | "en";
 type SolutionStatus = "DRAFT" | "PUBLISHED";
+
+type Category = {
+  id: string;
+  chName: string;
+  enName: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 type ImageAsset = {
   id: string;
@@ -68,6 +77,7 @@ export type SolutionFormInitialData = {
   status: SolutionStatus;
   sortOrder: number;
   translationKey: string | null;
+  categoryId: string | null;
   summaryParagraphs: unknown;
   highlights: unknown;
   workingPrincipleParagraphs: unknown;
@@ -214,6 +224,10 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
   const [translationKey, setTranslationKey] = useState(
     initialData?.translationKey ?? "",
   );
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
 
   const [summaryParagraphs, setSummaryParagraphs] = useState<TextItem[]>(
     toStringArray(initialData?.summaryParagraphs),
@@ -282,6 +296,27 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  async function fetchCategories() {
+    setCategoriesLoading(true);
+    try {
+      const response = await fetch("/api/admin/solution-categories", {
+        credentials: "include",
+      });
+      const result = await response.json();
+      if (result.success) {
+        setCategories(result.data.categories);
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }
 
   const pickerPurpose = useMemo<ProductMediaPurpose>(() => {
     if (!picker) {
@@ -397,6 +432,7 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
       sortOrder,
       publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
       translationKey: translationKey.trim() || null,
+      categoryId: categoryId || null,
       coverImageAssetId,
       summaryParagraphs: normalizeTextItems(summaryParagraphs),
       highlights: normalizeTextItems(highlights),
@@ -558,6 +594,31 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
             />
           </InputBlock>
 
+          <InputBlock label="解决方案类型">
+            <div className="flex gap-2">
+              <select
+                value={categoryId}
+                onChange={(event) => setCategoryId(event.target.value)}
+                className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              >
+                <option value="">未选择</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.chName}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowCategoryManager(true)}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+              >
+                <Plus className="h-4 w-4" />
+                管理类型
+              </button>
+            </div>
+          </InputBlock>
+
           <InputBlock label="排序值">
             <input
               type="number"
@@ -678,6 +739,14 @@ export default function SolutionForm({ mode, initialData }: SolutionFormProps) {
         uploadAlt={title || "solution image"}
         onSelect={selectAsset}
         onClose={() => setPicker(null)}
+      />
+
+      <SolutionCategoryManager
+        open={showCategoryManager}
+        onClose={() => setShowCategoryManager(false)}
+        onCategoryAdded={(newCategory) => {
+          setCategories([newCategory, ...categories]);
+        }}
       />
     </>
   );

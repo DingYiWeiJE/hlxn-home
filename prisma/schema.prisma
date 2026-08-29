@@ -435,6 +435,24 @@ model ProductApplication {
 }
 
 // ============================================================
+// 解决方案分类相关
+// ============================================================
+
+model SolutionCategory {
+  id     String @id @default(cuid())
+  chName String
+  enName String
+
+  solutions Solution[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
+// ============================================================
 // 瑙ｅ喅鏂规鐩稿叧
 // ============================================================
 
@@ -456,6 +474,7 @@ model Solution {
   systemCompositionParagraphs       Json    @default("[]")
 
   translationKey String?
+  categoryId     String?
 
   createdBy String?
   updatedBy String?
@@ -467,6 +486,7 @@ model Solution {
 
   coverImageAsset                     MediaAsset? @relation("SolutionCoverImage", fields: [coverImageAssetId], references: [id], onDelete: SetNull)
   workingPrincipleBackgroundAsset     MediaAsset? @relation("SolutionWorkingPrincipleBackgroundImage", fields: [workingPrincipleBackgroundAssetId], references: [id], onDelete: SetNull)
+  category                            SolutionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   usageScenarios SolutionUsageScenario[]
   customerValues SolutionCustomerValue[]
@@ -474,6 +494,7 @@ model Solution {
   @@unique([locale, slug])
   @@unique([translationKey, locale])
   @@index([translationKey])
+  @@index([categoryId])
   @@index([locale, status, sortOrder])
   @@index([status, sortOrder])
   @@index([coverImageAssetId])
