@@ -442,6 +442,7 @@ export default async function ProductDetailPage({
                       index,
                     ) => (
                       <p
+                        className="intro"
                         key={index}
                       >
                         {
@@ -457,6 +458,7 @@ export default async function ProductDetailPage({
                       index,
                     ) => (
                       <p
+                        className="intro"
                         key={index}
                       >
                         {

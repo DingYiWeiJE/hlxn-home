@@ -98,7 +98,7 @@ async function ProductsContent({ locale }: { locale: string }) {
           </div>
         </section>
 
-        <ProductCatalog />
+        <ProductCatalog locale={locale} />
         {/* <DownloadBanner
           image="/images/products/dy.jpg"
           title={page.downloadProductTitle}
