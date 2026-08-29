@@ -6,6 +6,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import ProductCatalog from "../../../components/products/ProductCatalog";
 
+export const dynamic = 'force-dynamic';
+
 type Props = {
   params: Promise<{
     locale: string;

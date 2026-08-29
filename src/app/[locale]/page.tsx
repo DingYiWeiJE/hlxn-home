@@ -11,6 +11,8 @@ import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
 import NewsCenter from "./abHomeComponents/NewsCenter";
 import SiteFooter from "@/components/SiteFooter";
 
+export const dynamic = 'force-dynamic';
+
 type Props = {
   params: Promise<{
     locale: string;
