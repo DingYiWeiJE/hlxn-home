@@ -505,13 +505,13 @@ model Solution {
 model SolutionUsageScenario {
   id               String @id @default(cuid())
   solutionId       String
-  imageAssetId     String
+  imageAssetId     String?
   title            String
   detailParagraphs Json   @default("[]")
   sortOrder        Int    @default(0)
 
   solution   Solution   @relation(fields: [solutionId], references: [id], onDelete: Cascade)
-  imageAsset MediaAsset @relation(fields: [imageAssetId], references: [id], onDelete: Restrict)
+  imageAsset MediaAsset? @relation(fields: [imageAssetId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -523,13 +523,13 @@ model SolutionUsageScenario {
 model SolutionCustomerValue {
   id               String @id @default(cuid())
   solutionId       String
-  imageAssetId     String
+  imageAssetId     String?
   title            String
   detailParagraphs Json   @default("[]")
   sortOrder        Int    @default(0)
 
   solution   Solution   @relation(fields: [solutionId], references: [id], onDelete: Cascade)
-  imageAsset MediaAsset @relation(fields: [imageAssetId], references: [id], onDelete: Restrict)
+  imageAsset MediaAsset? @relation(fields: [imageAssetId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import Navigation from "@/components/Navigation";
@@ -63,7 +64,9 @@ export default async function SolutionsPage({ params }: Props) {
       </section>
 
       <main className="flex-1">
-        <SolutionCatalogNew locale={normalizedLocale} />
+        <Suspense fallback={<div className="min-h-96" />}>
+          <SolutionCatalogNew locale={normalizedLocale} />
+        </Suspense>
       </main>
 
       <Footer locale={normalizedLocale} />

@@ -54,7 +54,7 @@ type UsageScenarioItem = {
   clientId: string;
   title: string;
   detailParagraphs: TextItem[];
-  imageAssetId: string;
+  imageAssetId: string | null;
   sortOrder: number;
   imageAsset: ImageAsset | null;
 };
@@ -63,7 +63,7 @@ type CustomerValueItem = {
   clientId: string;
   title: string;
   detailParagraphs: TextItem[];
-  imageAssetId: string;
+  imageAssetId: string | null;
   sortOrder: number;
   imageAsset: ImageAsset | null;
 };
@@ -91,7 +91,7 @@ export type SolutionFormInitialData = {
     title: string;
     detailParagraphs: unknown;
     sortOrder: number;
-    imageAssetId: string;
+    imageAssetId: string | null;
     imageAsset: ImageAsset | null;
   }>;
   customerValues: Array<{
@@ -99,7 +99,7 @@ export type SolutionFormInitialData = {
     title: string;
     detailParagraphs: unknown;
     sortOrder: number;
-    imageAssetId: string;
+    imageAssetId: string | null;
     imageAsset: ImageAsset | null;
   }>;
   publishedAt: string | null;
