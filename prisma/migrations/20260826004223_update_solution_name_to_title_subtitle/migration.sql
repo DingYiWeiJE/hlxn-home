@@ -8,4 +8,13 @@
 -- AlterTable
 ALTER TABLE "Solution" DROP COLUMN "name",
 ADD COLUMN     "subtitle" TEXT,
-ADD COLUMN     "title" TEXT NOT NULL;
+ADD COLUMN     "title" TEXT DEFAULT 'Untitled';
+
+-- Update existing NULL values
+UPDATE "Solution" SET "title" = 'Untitled' WHERE "title" IS NULL;
+
+-- Now make title NOT NULL
+ALTER TABLE "Solution" ALTER COLUMN "title" SET NOT NULL;
+
+-- Remove the default
+ALTER TABLE "Solution" ALTER COLUMN "title" DROP DEFAULT;
