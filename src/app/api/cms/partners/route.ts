@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+const cdnDomain = process.env.QINIU_DOMAIN!;
+
 export async function GET() {
   try {
     const partners = await prisma.cmsPartner.findMany({
@@ -18,7 +20,7 @@ export async function GET() {
 
     const result = partners.map((partner) => ({
       id: partner.id,
-      image: partner.imageRelativePath,
+      image: `${cdnDomain}/${partner.imageRelativePath}`,
       websiteUrl: partner.websiteUrl,
     }));
 
