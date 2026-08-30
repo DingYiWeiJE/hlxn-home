@@ -12,6 +12,7 @@ import {
   Newspaper,
   Package,
   Puzzle,
+  Settings,
   Users,
   X,
   type LucideIcon,
@@ -93,6 +94,12 @@ const navigationItems: NavigationItem[] = [
     label: "新闻管理",
     description: "管理新闻内容",
     icon: Newspaper,
+  },
+  {
+    href: "/admin/cms",
+    label: "CMS 内容管理",
+    description: "管理背景图、合作伙伴、联系方式等",
+    icon: Settings,
   },
   {
     href: "/admin/users",

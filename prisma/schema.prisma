@@ -857,3 +857,137 @@ model AnalyticsPageView {
   @@index([resourceType, resourceId, createdAt])
   @@index([createdAt])
 }
+
+// ============================================================
+// CMS 内容管理系统相关
+// ============================================================
+
+enum CmsBackgroundLocation {
+  HOMEPAGE
+  ABOUT_US
+  SOLUTIONS
+  PRODUCTS
+  APPLICATION_CASES
+  NEWS
+  CONTACT_US
+}
+
+enum CmsBrochureLanguage {
+  zh
+  en
+}
+
+model CmsBackgroundImage {
+  id String @id @default(cuid())
+
+  location CmsBackgroundLocation @unique
+  type String // "image" 或 "video"
+
+  relativePath String @unique // 存储七牛云相对路径，如 cms/backgrounds/image/homepage
+  filename String
+  mimeType String
+  size Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([location])
+  @@index([deletedAt])
+}
+
+model CmsBrochure {
+  id String @id @default(cuid())
+
+  language CmsBrochureLanguage
+
+  relativePath String @unique // 存储七牛云相对路径，如 cms/brochures/zh
+  filename String
+  mimeType String
+  size Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([language])
+  @@index([deletedAt])
+}
+
+model CmsPartner {
+  id String @id @default(cuid())
+
+  imageRelativePath String // 图片相对路径，必传
+  imageFilename String
+  imageMimeType String
+  imageSize Int
+
+  websiteUrl String? // 官网地址，可选
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
+model CmsContactMethod {
+  id String @id @default(cuid())
+
+  language String // "zh" 或 "en"
+  title String // 如 "电话"、"邮箱"、"微信"
+  value String // 联系方式的实际值
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([language])
+  @@index([deletedAt])
+}
+
+model CmsCompanyAddress {
+  id String @id @default(cuid())
+
+  language String // "zh" 或 "en"
+  address String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@unique([language])
+  @@index([deletedAt])
+}
+
+model CmsCompanyHonor {
+  id String @id @default(cuid())
+
+  imageRelativePath String // 图片相对路径
+  imageFilename String
+  imageMimeType String
+  imageSize Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
+
+model CmsWorkshopImage {
+  id String @id @default(cuid())
+
+  imageRelativePath String // 图片相对路径
+  imageFilename String
+  imageMimeType String
+  imageSize Int
+
+  title String? // 可选标题
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
