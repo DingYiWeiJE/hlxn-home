@@ -8,6 +8,7 @@ import CmsContactMethodManager from "@/components/admin/cms/CmsContactMethodMana
 import CmsCompanyAddressManager from "@/components/admin/cms/CmsCompanyAddressManager";
 import CmsCompanyHonorManager from "@/components/admin/cms/CmsCompanyHonorManager";
 import CmsWorkshopImageManager from "@/components/admin/cms/CmsWorkshopImageManager";
+import CmsBranchImageManager from "@/components/admin/cms/CmsBranchImageManager";
 
 export default function CmsPage() {
   const [activeTab, setActiveTab] = useState("backgrounds");
@@ -20,6 +21,7 @@ export default function CmsPage() {
     { id: "address", label: "公司地址", component: CmsCompanyAddressManager },
     { id: "honors", label: "公司荣誉", component: CmsCompanyHonorManager },
     { id: "workshop", label: "生产车间", component: CmsWorkshopImageManager },
+    { id: "branch", label: "分支机构", component: CmsBranchImageManager },
   ];
 
   const activeComponent = tabs.find((tab) => tab.id === activeTab)?.component;

@@ -991,3 +991,18 @@ model CmsWorkshopImage {
 
   @@index([deletedAt])
 }
+
+model CmsBranchImage {
+  id String @id @default(cuid())
+
+  imageRelativePath String // 图片相对路径
+  imageFilename String
+  imageMimeType String
+  imageSize Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+}
