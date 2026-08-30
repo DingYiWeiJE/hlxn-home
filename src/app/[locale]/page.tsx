@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:
       locale === "zh"
-        ? "汉理楚能 | 智能能源管理解决方案"
+        ? "汉理楚能 | 专注新能源动力系统解决方案"
         : "Hanli Chuneng | Intelligent Energy Management Solutions",
     description:
       locale === "zh"
@@ -95,7 +95,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title:
         locale === "zh"
-          ? "汉理楚能 | 智能能源管理解决方案"
+          ? "汉理楚能 | 专注新能源动力系统解决方案"
           : "Hanli Chuneng | Intelligent Energy Management Solutions",
       description:
         locale === "zh"
