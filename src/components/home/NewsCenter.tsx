@@ -19,9 +19,9 @@ type NewsCenterProps = {
   className?: string;
 };
 
-async function fetchNews(locale: Locale, maxItems = 3): Promise<NewsItem[]> {
+async function fetchNews(locale: Locale, maxItems = 4): Promise<NewsItem[]> {
   try {
-    const pageSize = Math.min(Math.max(Math.trunc(maxItems), 1), 12);
+    const pageSize = 4  
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const apiUrl = `${baseUrl}/api/news?locale=${locale}&page=1&pageSize=${pageSize}`;
@@ -98,7 +98,7 @@ export default async function NewsCenter({
               {noNewsText}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
               {newsList.map((item) => (
                 <NewsCard key={item.id} item={item} locale={locale} />
               ))}

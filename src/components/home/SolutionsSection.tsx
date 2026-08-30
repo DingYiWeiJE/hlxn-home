@@ -74,7 +74,7 @@ const SolutionsSection: React.FC<Props> = async ({ locale }) => {
             </p>
 
             <Link
-              href="/about"
+              href={`/${locale}/solutions`}
               className="group mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#2f67bd] px-8 text-base font-medium text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#2459a8] hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300/50 sm:min-h-14 sm:px-9 sm:text-lg"
             >
               <span>{t("solutionsSection.learnMore")}</span>

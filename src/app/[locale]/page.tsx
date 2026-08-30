@@ -1,14 +1,14 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
+import HeroContent from "@/components/home/HeroContent";
 import type { Metadata } from "next";
-import ChooseHanliSection from "./abHomeComponents/ChooseHanliSection";
-import AboutHanli from "./abHomeComponents/AboutHanli";
-import SolutionsSection from "./abHomeComponents/SolutionsSection";
-import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCard";
-import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
-import NewsCenter from "./abHomeComponents/NewsCenter";
+import ChooseHanliSection from "@/components/home/ChooseHanliSection";
+import AboutHanli from "@/components/home/AboutHanli";
+import SolutionsSection from "@/components/home/SolutionsSection";
+import ProductIntroCard from "@/components/home/ProductIntroCard/ProductIntroCard";
+import ImageCarousel from "@/components/home/carousel/ImageCarousel";
+import NewsCenter from "@/components/home/NewsCenter";
 import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = 'force-dynamic';
@@ -130,7 +130,7 @@ export default async function Home({ params }: Props) {
         {/* 内容层 */}
         <div className="relative flex flex-col h-full">
           <Navigation />
-          <HeroContent />
+          <HeroContent  locale={locale} />
         </div>
       </div>
       <ChooseHanliSection locale={locale} />
@@ -185,7 +185,7 @@ export default async function Home({ params }: Props) {
         <div className="relative flex flex-col items-center justify-center gap-4 text-center">
           <h2 className="text-[3rem] font-bold text-white">{t("focusSection.title")}</h2>
           <a
-            href="#"
+            href={`/${locale}/solutions`}
             className="
               inline-flex items-center gap-3
               rounded-full bg-white
