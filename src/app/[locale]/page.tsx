@@ -9,6 +9,7 @@ import SolutionsSection from "@/components/home/SolutionsSection";
 import ProductIntroCard from "@/components/home/ProductIntroCard/ProductIntroCard";
 import ImageCarousel from "@/components/home/carousel/ImageCarousel";
 import NewsCenter from "@/components/home/NewsCenter";
+import { PartnerSection } from "@/components/home/PartnerSection";
 import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = 'force-dynamic';
@@ -171,6 +172,8 @@ export default async function Home({ params }: Props) {
       />
       
       <NewsCenter locale={locale} maxItems={3} />
+
+      <PartnerSection locale={locale} />
 
       <div
         className="h-[300px] relative bg-cover bg-center flex flex-col items-center justify-center"
