@@ -168,7 +168,7 @@ export async function PartnerSection({ locale }: Props) {
       aria-labelledby="partners-title"
       className="bg-white py-14 sm:py-18 lg:py-24"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-10">
           <p
