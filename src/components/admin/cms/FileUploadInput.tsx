@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, DragEvent, ReactNode } from "react";
+import { useState, ChangeEvent, ReactNode } from "react";
 import { Upload } from "lucide-react";
 
 interface FileUploadInputProps {
@@ -22,7 +22,7 @@ export default function FileUploadInput({
 }: FileUploadInputProps) {
   const [isDragActive, setIsDragActive] = useState(false);
 
-  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
+  const handleDrag = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -32,7 +32,7 @@ export default function FileUploadInput({
     }
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
