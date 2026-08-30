@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Trash2 } from "lucide-react";
+import FileUploadInput from "./FileUploadInput";
+import MediaPreview from "./MediaPreview";
 
 interface CompanyHonor {
   id: string;
   imageFilename: string;
+  url?: string;
 }
 
 export default function CmsCompanyHonorManager() {
@@ -86,52 +90,53 @@ export default function CmsCompanyHonorManager() {
   return (
     <div className="space-y-8">
       {/* 上传表单 */}
-      <div className="rounded-lg border border-gray-200 p-6">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">上传公司荣誉图片</h3>
         <form onSubmit={handleUpload} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              选择图片（最大 3MB）
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept="image/*"
-              className="mt-1 block w-full"
-            />
-            {file && (
-              <p className="mt-2 text-sm text-gray-500">
-                选择文件: {file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
-              </p>
-            )}
-          </div>
+          <FileUploadInput
+            file={file}
+            onChange={setFile}
+            accept="image/*"
+            label="荣誉证书/奖项图片"
+            description="支持 JPG, PNG, WebP 等格式，最大 3MB"
+          />
 
           <button
             type="submit"
             disabled={!file || uploading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {uploading ? "上传中..." : "上传"}
+            {uploading ? "上传中..." : "上传图片"}
           </button>
         </form>
       </div>
 
       {/* 荣誉图片列表 */}
       <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">荣誉图片列表</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">荣誉图片列表</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {honors.length === 0 ? (
-            <p className="col-span-full text-gray-500">暂无荣誉图片</p>
+            <p className="col-span-full py-8 text-center text-gray-500">暂无荣誉图片</p>
           ) : (
             honors.map((honor) => (
-              <div key={honor.id} className="rounded-lg border border-gray-200 p-4">
-                <p className="mb-3 truncate text-sm font-medium text-gray-900">
-                  {honor.imageFilename}
-                </p>
+              <div
+                key={honor.id}
+                className="group rounded-lg border border-gray-200 bg-white p-3 hover:shadow-md transition-shadow"
+              >
+                <div className="relative mb-3 overflow-hidden rounded-lg">
+                  <MediaPreview
+                    filename={honor.imageFilename}
+                    type="image"
+                    url={honor.url}
+                    size="lg"
+                  />
+                </div>
+                <p className="mb-3 truncate text-xs text-gray-500">{honor.imageFilename}</p>
                 <button
                   onClick={() => handleDelete(honor.id)}
-                  className="w-full rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
                 >
+                  <Trash2 className="h-4 w-4" />
                   删除
                 </button>
               </div>

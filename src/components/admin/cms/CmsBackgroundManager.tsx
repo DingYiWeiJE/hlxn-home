@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import FileUploadInput from "./FileUploadInput";
+import MediaPreview from "./MediaPreview";
 
 const LOCATIONS = [
   { value: "HOMEPAGE", label: "首页背景" },
@@ -18,6 +21,7 @@ interface Background {
   location: string;
   type: string;
   filename: string;
+  url?: string;
 }
 
 export default function CmsBackgroundManager() {
@@ -104,87 +108,89 @@ export default function CmsBackgroundManager() {
   return (
     <div className="space-y-8">
       {/* 上传表单 */}
-      <div className="rounded-lg border border-gray-200 p-6">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">上传背景图/视频</h3>
         <form onSubmit={handleUpload} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">位置</label>
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 border"
-            >
-              {LOCATIONS.map((loc) => (
-                <option key={loc.value} value={loc.value}>
-                  {loc.label}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">位置</label>
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                {LOCATIONS.map((loc) => (
+                  <option key={loc.value} value={loc.value}>
+                    {loc.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">类型</label>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="image">图片</option>
+                <option value="video">视频</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">类型</label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 border"
-            >
-              <option value="image">图片</option>
-              <option value="video">视频</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              选择文件（最大 3MB）
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept={selectedType === "image" ? "image/*" : "video/*"}
-              className="mt-1 block w-full"
-            />
-            {file && (
-              <p className="mt-2 text-sm text-gray-500">
-                选择文件: {file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
-              </p>
-            )}
-          </div>
+          <FileUploadInput
+            file={file}
+            onChange={setFile}
+            accept={selectedType === "image" ? "image/*" : "video/*"}
+            label={selectedType === "image" ? "背景图片" : "背景视频"}
+            description={`${selectedType === "image" ? "支持 JPG, PNG, WebP 等格式" : "支持 MP4, WebM 等格式"}，最大 3MB`}
+          />
 
           <button
             type="submit"
             disabled={!file || uploading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {uploading ? "上传中..." : "上传"}
+            {uploading ? "上传中..." : "上传背景"}
           </button>
         </form>
       </div>
 
       {/* 当前背景列表 */}
       <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">当前背景</h3>
-        <div className="space-y-2">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">当前背景</h3>
+        <div className="space-y-3">
           {backgrounds.length === 0 ? (
-            <p className="text-gray-500">暂无背景</p>
+            <p className="text-center py-8 text-gray-500">暂无背景</p>
           ) : (
             backgrounds.map((bg) => (
               <div
                 key={bg.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 hover:shadow-sm transition-shadow"
               >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {LOCATIONS.find((l) => l.value === bg.location)?.label}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {bg.type === "image" ? "图片" : "视频"} • {bg.filename}
-                  </p>
+                <div className="flex items-center gap-4">
+                  <MediaPreview
+                    filename={bg.filename}
+                    type={bg.type === "image" ? "image" : "video"}
+                    url={bg.url}
+                    size="md"
+                  />
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {LOCATIONS.find((l) => l.value === bg.location)?.label}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {bg.type === "image" ? "📷 图片" : "🎬 视频"} • {bg.filename}
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => handleDelete(bg.location)}
-                  className="text-sm text-red-600 hover:text-red-700"
+                  className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
                 >
+                  <Trash2 className="h-4 w-4" />
                   删除
                 </button>
               </div>

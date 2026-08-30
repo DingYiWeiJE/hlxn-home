@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Trash2, Edit2, Check, X } from "lucide-react";
+import FileUploadInput from "./FileUploadInput";
+import MediaPreview from "./MediaPreview";
 
 interface Partner {
   id: string;
   imageFilename: string;
   websiteUrl: string | null;
+  url?: string;
 }
 
 export default function CmsPartnerManager() {
@@ -114,26 +118,16 @@ export default function CmsPartnerManager() {
   return (
     <div className="space-y-8">
       {/* 添加表单 */}
-      <div className="rounded-lg border border-gray-200 p-6">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">添加合作伙伴</h3>
         <form onSubmit={handleUpload} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              合作伙伴标志（必传，最大 3MB）
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept="image/*"
-              className="mt-1 block w-full"
-              required
-            />
-            {file && (
-              <p className="mt-2 text-sm text-gray-500">
-                选择文件: {file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
-              </p>
-            )}
-          </div>
+          <FileUploadInput
+            file={file}
+            onChange={setFile}
+            accept="image/*"
+            label="合作伙伴标志"
+            description="支持 JPG, PNG, WebP 等格式，最大 3MB，建议宽度至少 200px"
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700">官网地址（可选）</label>
@@ -142,59 +136,86 @@ export default function CmsPartnerManager() {
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
               placeholder="https://example.com"
-              className="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 border"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={!file || uploading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {uploading ? "添加中..." : "添加"}
+            {uploading ? "添加中..." : "添加合作伙伴"}
           </button>
         </form>
       </div>
 
       {/* 合作伙伴列表 */}
       <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">合作伙伴列表</h3>
-        <div className="space-y-2">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">合作伙伴列表</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {partners.length === 0 ? (
-            <p className="text-gray-500">暂无合作伙伴</p>
+            <p className="col-span-full py-8 text-center text-gray-500">暂无合作伙伴</p>
           ) : (
             partners.map((partner) => (
-              <div key={partner.id} className="rounded-lg bg-gray-50 p-4">
+              <div
+                key={partner.id}
+                className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow"
+              >
                 {editingId === partner.id ? (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    <MediaPreview
+                      filename={partner.imageFilename}
+                      type="image"
+                      url={partner.url}
+                      size="lg"
+                    />
                     <input
                       type="url"
                       value={editingUrl}
                       onChange={(e) => setEditingUrl(e.target.value)}
                       placeholder="https://example.com"
-                      className="block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 border"
+                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleUpdate(partner.id)}
-                        className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
                       >
+                        <Check className="h-4 w-4" />
                         保存
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="text-sm bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 transition-colors"
                       >
+                        <X className="h-4 w-4" />
                         取消
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{partner.imageFilename}</p>
-                      <p className="text-sm text-gray-500">
-                        {partner.websiteUrl || "无官网地址"}
+                  <div className="space-y-3">
+                    <MediaPreview
+                      filename={partner.imageFilename}
+                      type="image"
+                      url={partner.url}
+                      size="lg"
+                    />
+                    <div className="min-h-12">
+                      <p className="text-xs text-gray-600 break-all">
+                        {partner.websiteUrl ? (
+                          <a
+                            href={partner.websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            {partner.websiteUrl}
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">无官网地址</span>
+                        )}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -203,14 +224,16 @@ export default function CmsPartnerManager() {
                           setEditingId(partner.id);
                           setEditingUrl(partner.websiteUrl || "");
                         }}
-                        className="text-sm text-blue-600 hover:text-blue-700"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-100 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-200 transition-colors"
                       >
+                        <Edit2 className="h-4 w-4" />
                         编辑
                       </button>
                       <button
                         onClick={() => handleDelete(partner.id)}
-                        className="text-sm text-red-600 hover:text-red-700"
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
                       >
+                        <Trash2 className="h-4 w-4" />
                         删除
                       </button>
                     </div>

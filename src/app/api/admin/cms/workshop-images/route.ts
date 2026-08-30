@@ -120,7 +120,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return ok(images);
+    // 添加CDN URL到每条记录
+    const imagesWithUrls = images.map((img) => ({
+      ...img,
+      url: img.imageRelativePath ? `${cdnDomain}/${img.imageRelativePath}` : null,
+    }));
+
+    return ok(imagesWithUrls);
   } catch (error) {
     return fail(error);
   }

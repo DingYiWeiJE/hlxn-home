@@ -110,7 +110,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return ok(honors);
+    // 添加CDN URL到每条记录
+    const honorsWithUrls = honors.map((honor) => ({
+      ...honor,
+      url: honor.imageRelativePath ? `${cdnDomain}/${honor.imageRelativePath}` : null,
+    }));
+
+    return ok(honorsWithUrls);
   } catch (error) {
     return fail(error);
   }

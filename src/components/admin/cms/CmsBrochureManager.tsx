@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Trash2, FileText } from "lucide-react";
+import FileUploadInput from "./FileUploadInput";
 
 interface Brochure {
   id: string;
@@ -89,70 +91,70 @@ export default function CmsBrochureManager() {
   return (
     <div className="space-y-8">
       {/* 上传表单 */}
-      <div className="rounded-lg border border-gray-200 p-6">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-900">上传企业画册</h3>
         <form onSubmit={handleUpload} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">语言</label>
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 border"
-            >
-              <option value="zh">中文</option>
-              <option value="en">英文</option>
-            </select>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">语言</label>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="zh">中文</option>
+                <option value="en">英文</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              选择 PDF 文件（最大 3MB）
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept="application/pdf"
-              className="mt-1 block w-full"
-            />
-            {file && (
-              <p className="mt-2 text-sm text-gray-500">
-                选择文件: {file.name} ({(file.size / 1024 / 1024).toFixed(2)}MB)
-              </p>
-            )}
-          </div>
+          <FileUploadInput
+            file={file}
+            onChange={setFile}
+            accept="application/pdf"
+            label="企业画册 PDF 文件"
+            description="支持 PDF 格式，最大 3MB"
+          />
 
           <button
             type="submit"
             disabled={!file || uploading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {uploading ? "上传中..." : "上传"}
+            {uploading ? "上传中..." : "上传画册"}
           </button>
         </form>
       </div>
 
       {/* 当前画册列表 */}
       <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">当前画册</h3>
-        <div className="space-y-2">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">当前画册</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
           {brochures.length === 0 ? (
-            <p className="text-gray-500">暂无画册</p>
+            <p className="col-span-full py-8 text-center text-gray-500">暂无画册</p>
           ) : (
             brochures.map((brochure) => (
               <div
                 key={brochure.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 p-4"
+                className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow"
               >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {brochure.language === "zh" ? "中文" : "英文"}企业画册
-                  </p>
-                  <p className="text-sm text-gray-500">{brochure.filename}</p>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gradient-to-br from-red-100 to-orange-100">
+                    <FileText className="h-10 w-10 text-red-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900">
+                      {brochure.language === "zh" ? "🇨🇳 中文" : "🇬🇧 英文"}企业画册
+                    </p>
+                    <p className="mt-1 truncate text-sm text-gray-500">{brochure.filename}</p>
+                    <p className="mt-2 text-xs text-gray-400">PDF 文档</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => handleDelete(brochure.language)}
-                  className="text-sm text-red-600 hover:text-red-700"
+                  className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
                 >
+                  <Trash2 className="h-4 w-4" />
                   删除
                 </button>
               </div>

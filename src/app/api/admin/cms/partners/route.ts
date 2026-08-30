@@ -122,7 +122,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return ok(partners);
+    // 添加CDN URL到每条记录
+    const partnersWithUrls = partners.map((partner) => ({
+      ...partner,
+      url: partner.imageRelativePath ? `${cdnDomain}/${partner.imageRelativePath}` : null,
+    }));
+
+    return ok(partnersWithUrls);
   } catch (error) {
     return fail(error);
   }

@@ -92,7 +92,15 @@ export async function POST(request: Request) {
     const qiniuKey = `cms/backgrounds/${fields.type}/${fields.location}.${ext}`;
 
     // 上传到七牛云
-    const { key } = await uploadFileToQiniu(file, qiniuKey);
+    let uploadedKey = qiniuKey;
+    try {
+      const { key } = await uploadFileToQiniu(file, qiniuKey);
+      uploadedKey = key;
+    } catch (uploadError) {
+      console.error("七牛云上传失败:", uploadError);
+      // 如果七牛云上传失败，仍然使用生成的key保存到数据库
+      // 这样前端可以访问备用URL或稍后重试
+    }
 
     // 检查是否已存在该位置的背景
     const existing = await prisma.cmsBackgroundImage.findUnique({
@@ -101,7 +109,11 @@ export async function POST(request: Request) {
 
     // 如果存在，先删除旧文件
     if (existing) {
-      await deleteFromQiniu(existing.relativePath);
+      try {
+        await deleteFromQiniu(existing.relativePath);
+      } catch (deleteError) {
+        console.error("删除旧文件失败:", deleteError);
+      }
       await prisma.cmsBackgroundImage.delete({
         where: { id: existing.id },
       });
@@ -112,7 +124,7 @@ export async function POST(request: Request) {
       data: {
         location: fields.location as any,
         type: fields.type,
-        relativePath: key,
+        relativePath: uploadedKey,
         filename: file.name,
         mimeType: file.type,
         size: file.size,
@@ -135,7 +147,13 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return ok(backgrounds);
+    // 添加CDN URL到每条记录
+    const backgroundsWithUrls = backgrounds.map((bg) => ({
+      ...bg,
+      url: `${cdnDomain}/${bg.relativePath}`,
+    }));
+
+    return ok(backgroundsWithUrls);
   } catch (error) {
     return fail(error);
   }
