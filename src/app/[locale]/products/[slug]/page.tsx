@@ -157,7 +157,7 @@ export async function generateMetadata({
     return {
       title:
         locale === "zh"
-          ? "产品不存在 | 汉理楚能"
+          ? "产品不存在 | 汉理新能"
           : "Product Not Found | Hanli Chuneng",
     };
   }
@@ -173,7 +173,7 @@ export async function generateMetadata({
   return {
     title: `${product.name} | ${
       locale === "zh"
-        ? "汉理楚能"
+        ? "汉理新能"
         : "Hanli Chuneng"
     }`,
 

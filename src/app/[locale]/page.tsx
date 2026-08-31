@@ -87,20 +87,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:
       locale === "zh"
-        ? "汉理楚能 | 专注新能源动力系统解决方案"
+        ? "汉理新能 | 专注新能源动力系统解决方案"
         : "Hanli Chuneng | Intelligent Energy Management Solutions",
     description:
       locale === "zh"
-        ? "汉理楚能致力于为全球企业提供先进的能源管理技术与服务"
+        ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
         : "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide",
     openGraph: {
       title:
         locale === "zh"
-          ? "汉理楚能 | 专注新能源动力系统解决方案"
+          ? "汉理新能 | 专注新能源动力系统解决方案"
           : "Hanli Chuneng | Intelligent Energy Management Solutions",
       description:
         locale === "zh"
-          ? "汉理楚能致力于为全球企业提供先进的能源管理技术与服务"
+          ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
           : "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide",
       type: "website",
       locale: locale === "zh" ? "zh_CN" : "en_US",
