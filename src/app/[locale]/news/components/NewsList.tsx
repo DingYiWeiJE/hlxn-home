@@ -11,7 +11,26 @@ import {
 import { newsEmitter } from "@/lib/events";
 
 type Locale = "zh" | "en";
-type NewsType = "DYNAMIC" | "EVENT";
+
+interface NewsTypeItem {
+  id: string;
+  chName: string;
+  enName: string;
+}
+
+const LEGACY_NEWS_TYPE_MAP: Record<string, string> = {
+  DYNAMIC: "news_type_dynamic",
+  EVENT: "news_type_event",
+};
+
+function resolveTypeParam(
+  raw: string | null | undefined,
+): string | null {
+  if (!raw) {
+    return null;
+  }
+  return LEGACY_NEWS_TYPE_MAP[raw] ?? raw;
+}
 
 interface NewsItem {
   id: string;
@@ -96,8 +115,6 @@ const text = {
     jump: "跳转",
     paginationLabel: "新闻列表分页",
     goToPage: "前往第",
-    categoryDynamic: "新闻动态",
-    categoryEvent: "展会活动",
   },
 
   en: {
@@ -114,8 +131,6 @@ const text = {
     jump: "Go",
     paginationLabel: "News pagination",
     goToPage: "Go to page",
-    categoryDynamic: "News & Updates",
-    categoryEvent: "Exhibitions & Events",
   },
 } satisfies Record<Locale, Record<string, string>>;
 
@@ -132,27 +147,15 @@ export default function NewsList() {
 
   const labels = text[locale];
 
-  const tabs: Array<{
-    type: NewsType;
-    label: string;
-  }> = [
-    {
-      type: "DYNAMIC",
-      label: labels.categoryDynamic,
-    },
-    {
-      type: "EVENT",
-      label: labels.categoryEvent,
-    },
-  ];
-
-  const initialNewsType: NewsType =
-    (searchParams.get(
-      "type",
-    ) as NewsType) ?? "DYNAMIC";
+  const initialTypeId = resolveTypeParam(
+    searchParams.get("type"),
+  );
 
   const sectionRef =
     useRef<HTMLElement>(null);
+
+  const [newsTypes, setNewsTypes] =
+    useState<NewsTypeItem[]>([]);
 
   const [newsList, setNewsList] =
     useState<NewsItem[]>([]);
@@ -172,10 +175,78 @@ export default function NewsList() {
   const [error, setError] =
     useState("");
 
-  const [newsType, setNewsType] =
-    useState<NewsType>(
-      initialNewsType,
-    );
+  const [
+    newsTypeId,
+    setNewsTypeId,
+  ] = useState<string | null>(
+    initialTypeId,
+  );
+
+  /*
+   * 加载新闻类型列表。若当前没有选中或选中不存在，
+   * 自动落到第一条类型。
+   */
+  useEffect(() => {
+    const controller =
+      new AbortController();
+
+    async function fetchNewsTypes() {
+      try {
+        const response = await fetch(
+          "/api/news-types",
+          {
+            method: "GET",
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
+        const result =
+          (await response.json()) as {
+            success?: boolean;
+            data?: {
+              types?: NewsTypeItem[];
+            };
+          };
+        if (!response.ok || result.success === false) {
+          return;
+        }
+        const types =
+          result.data?.types ?? [];
+        setNewsTypes(types);
+        setNewsTypeId((current) => {
+          if (
+            current &&
+            types.some(
+              (type) =>
+                type.id === current,
+            )
+          ) {
+            return current;
+          }
+          return (
+            types[0]?.id ?? null
+          );
+        });
+      } catch (fetchError) {
+        if (
+          fetchError instanceof Error &&
+          fetchError.name === "AbortError"
+        ) {
+          return;
+        }
+        console.error(
+          "获取新闻类型列表失败：",
+          fetchError,
+        );
+      }
+    }
+
+    void fetchNewsTypes();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   /*
    * 在 /zh/news 和 /en/news 之间切换时，
@@ -192,16 +263,18 @@ export default function NewsList() {
   useEffect(() => {
     setCurrentPage(1);
     setJumpPage("1");
-  }, [newsType]);
+  }, [newsTypeId]);
 
   /*
    * 监听导航菜单的事件，切换 tab。
    */
   useEffect(() => {
     const handleChangeNewsType = (
-      type: NewsType,
+      typeId: string,
     ) => {
-      setNewsType(type);
+      const resolved =
+        resolveTypeParam(typeId);
+      setNewsTypeId(resolved);
       setCurrentPage(1);
       setJumpPage("1");
 
@@ -234,6 +307,13 @@ export default function NewsList() {
    * 根据当前路由语言、分类及页码请求真实新闻。
    */
   useEffect(() => {
+    if (!newsTypeId) {
+      setIsLoading(false);
+      setNewsList([]);
+      setTotalPages(1);
+      return;
+    }
+
     const controller =
       new AbortController();
 
@@ -245,7 +325,7 @@ export default function NewsList() {
         const query =
           new URLSearchParams({
             locale,
-            newsType,
+            newsTypeId: newsTypeId!,
             page: String(
               currentPage,
             ),
@@ -357,7 +437,7 @@ export default function NewsList() {
     };
   }, [
     locale,
-    newsType,
+    newsTypeId,
     currentPage,
     labels.fetchError,
   ]);
@@ -414,38 +494,46 @@ export default function NewsList() {
     >
       <div className="mx-auto w-full max-w-[1360px] px-5 sm:px-6 lg:px-8">
         <div className="mb-8 flex border-b border-slate-200">
-          {tabs.map((tab) => (
-            <button
-              key={tab.type}
-              type="button"
-              onClick={() => {
-                setNewsType(tab.type);
-                window.requestAnimationFrame(
-                  () => {
-                    sectionRef.current?.scrollIntoView(
-                      {
-                        behavior: "smooth",
-                        block: "start",
-                      },
-                    );
-                  },
-                );
-              }}
-              className={[
-                "px-6 py-3 font-medium text-base transition-colors border-b-2 -mb-px",
-                newsType === tab.type
-                  ? "text-[#2463c5] border-[#2463c5]"
-                  : "text-slate-600 border-transparent hover:text-slate-900",
-              ].join(" ")}
-              aria-current={
-                newsType === tab.type
-                  ? "page"
-                  : undefined
-              }
-            >
-              {tab.label}
-            </button>
-          ))}
+          {newsTypes.map((tab) => {
+            const label =
+              locale === "zh"
+                ? tab.chName
+                : tab.enName;
+            const isActive =
+              newsTypeId === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setNewsTypeId(tab.id);
+                  window.requestAnimationFrame(
+                    () => {
+                      sectionRef.current?.scrollIntoView(
+                        {
+                          behavior: "smooth",
+                          block: "start",
+                        },
+                      );
+                    },
+                  );
+                }}
+                className={[
+                  "px-6 py-3 font-medium text-base transition-colors border-b-2 -mb-px",
+                  isActive
+                    ? "text-[#2463c5] border-[#2463c5]"
+                    : "text-slate-600 border-transparent hover:text-slate-900",
+                ].join(" ")}
+                aria-current={
+                  isActive
+                    ? "page"
+                    : undefined
+                }
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {isLoading ? (

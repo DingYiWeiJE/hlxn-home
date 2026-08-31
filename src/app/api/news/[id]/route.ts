@@ -399,12 +399,21 @@ export async function PATCH(
           }
         : {}),
 
-      ...(input.newsType !==
+      ...(input.newsTypeId !==
       undefined
-        ? {
-            newsType:
-              input.newsType,
-          }
+        ? input.newsTypeId
+          ? {
+              newsType: {
+                connect: {
+                  id: input.newsTypeId,
+                },
+              },
+            }
+          : {
+              newsType: {
+                disconnect: true,
+              },
+            }
         : {}),
 
       ...(input.publishedAt !==

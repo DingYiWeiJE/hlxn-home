@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import NewsEditor from "./NewsEditor";
+import NewsTypeManager, { type NewsTypeItem } from "./NewsTypeManager";
 import type { TiptapNode } from "@/lib/news/tiptap";
 
 export type NewsMediaAsset = {
@@ -27,7 +28,6 @@ export type NewsMediaAsset = {
 type NewsLocale = "zh" | "en";
 type NewsStatus = "DRAFT" | "PUBLISHED";
 type NewsSourceType = "MANUAL" | "WECHAT";
-type NewsType = "DYNAMIC" | "EVENT";
 
 type NewsFormState = {
   title: string;
@@ -40,7 +40,7 @@ type NewsFormState = {
   authorName: string;
   status: NewsStatus;
   isFeatured: boolean;
-  newsType: NewsType;
+  newsTypeId: string | null;
   publishedAt: string;
 
   content: TiptapNode;
@@ -212,8 +212,8 @@ function createInitialForm(
     isFeatured:
       value?.isFeatured ?? false,
 
-    newsType:
-      value?.newsType ?? "DYNAMIC",
+    newsTypeId:
+      value?.newsTypeId ?? null,
 
     publishedAt:
       toDateTimeLocal(
@@ -373,6 +373,26 @@ export default function NewsForm({
     setImageLoading,
   ] = useState(false);
 
+  const [
+    newsTypes,
+    setNewsTypes,
+  ] = useState<NewsTypeItem[]>([]);
+
+  const [
+    typesLoading,
+    setTypesLoading,
+  ] = useState(false);
+
+  const [
+    typesError,
+    setTypesError,
+  ] = useState("");
+
+  const [
+    typeManagerOpen,
+    setTypeManagerOpen,
+  ] = useState(false);
+
   const dirty = useMemo(
     () =>
       JSON.stringify(form) !==
@@ -410,6 +430,50 @@ export default function NewsForm({
     dirty,
     allowNavigation,
   ]);
+
+  async function loadNewsTypes() {
+    setTypesLoading(true);
+    setTypesError("");
+    try {
+      const response = await fetch(
+        "/api/admin/news-types",
+        { credentials: "include" },
+      );
+      const result = (await response.json()) as {
+        success: boolean;
+        data?: { types: NewsTypeItem[] };
+        error?: { message?: string };
+      };
+      if (result.success && result.data) {
+        const list = result.data.types;
+        setNewsTypes(list);
+        setForm((current) => {
+          if (current.newsTypeId) {
+            const stillExists = list.some(
+              (t) => t.id === current.newsTypeId,
+            );
+            if (stillExists) return current;
+          }
+          const fallback = list[0]?.id ?? null;
+          if (fallback === current.newsTypeId) return current;
+          return { ...current, newsTypeId: fallback };
+        });
+      } else {
+        setTypesError(
+          result.error?.message || "加载新闻类型失败",
+        );
+      }
+    } catch {
+      setTypesError("加载新闻类型失败");
+    } finally {
+      setTypesLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadNewsTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function updateForm<
     K extends keyof NewsFormState,
@@ -452,6 +516,12 @@ export default function NewsForm({
     if (!form.title.trim()) {
       errors.title = [
         "请输入新闻标题",
+      ];
+    }
+
+    if (!form.newsTypeId) {
+      errors.newsTypeId = [
+        "请选择新闻类型",
       ];
     }
 
@@ -554,8 +624,8 @@ export default function NewsForm({
       isFeatured:
         form.isFeatured,
 
-      newsType:
-        form.newsType,
+      newsTypeId:
+        form.newsTypeId,
 
       publishedAt:
         form.publishedAt
@@ -1166,37 +1236,74 @@ export default function NewsForm({
               required
               error={
                 fieldErrors
-                  .newsType?.[0]
+                  .newsTypeId?.[0] ??
+                typesError ??
+                undefined
               }
             >
-              <select
-                value={
-                  form.newsType
-                }
-                onChange={(
-                  event,
-                ) =>
-                  updateForm(
-                    "newsType",
-                    event.target
-                      .value as NewsType,
-                  )
-                }
-                className={inputClass(
-                  Boolean(
-                    fieldErrors
-                      .newsType,
-                  ),
-                )}
-              >
-                <option value="DYNAMIC">
-                  动态
-                </option>
-
-                <option value="EVENT">
-                  活动
-                </option>
-              </select>
+              <div className="flex gap-2">
+                <select
+                  value={
+                    form.newsTypeId ?? ""
+                  }
+                  disabled={
+                    typesLoading ||
+                    newsTypes.length === 0
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    updateForm(
+                      "newsTypeId",
+                      event.target
+                        .value || null,
+                    )
+                  }
+                  className={inputClass(
+                    Boolean(
+                      fieldErrors
+                        .newsTypeId,
+                    ),
+                  )}
+                >
+                  {newsTypes.length === 0 ? (
+                    <option value="">
+                      {typesLoading
+                        ? "加载中..."
+                        : "暂无类型，请先添加"}
+                    </option>
+                  ) : (
+                    <>
+                      {!form.newsTypeId && (
+                        <option value="">
+                          请选择新闻类型
+                        </option>
+                      )}
+                      {newsTypes.map(
+                        (type) => (
+                          <option
+                            key={type.id}
+                            value={type.id}
+                          >
+                            {type.chName}
+                          </option>
+                        ),
+                      )}
+                    </>
+                  )}
+                </select>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setTypeManagerOpen(
+                      true,
+                    )
+                  }
+                  className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 transition hover:bg-slate-50"
+                >
+                  管理
+                </button>
+              </div>
             </Field>
 
             <Field
@@ -1709,6 +1816,33 @@ export default function NewsForm({
       </div>
 
       {/* NewsCoverPicker removed - now using direct file upload */}
+
+      <NewsTypeManager
+        open={typeManagerOpen}
+        onClose={() =>
+          setTypeManagerOpen(false)
+        }
+        onTypesChanged={(next) => {
+          setNewsTypes(next);
+          setForm((current) => {
+            if (
+              current.newsTypeId &&
+              next.some(
+                (type) =>
+                  type.id ===
+                  current.newsTypeId,
+              )
+            ) {
+              return current;
+            }
+            return {
+              ...current,
+              newsTypeId:
+                next[0]?.id ?? null,
+            };
+          });
+        }}
+      />
     </>
   );
 }

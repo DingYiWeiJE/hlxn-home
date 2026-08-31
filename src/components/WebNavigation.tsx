@@ -21,6 +21,12 @@ type SolutionCategory = {
   enName: string;
 };
 
+type NewsType = {
+  id: string;
+  chName: string;
+  enName: string;
+};
+
 export default function WebNavigation({
   hasbg,
   scrolledPast,
@@ -32,6 +38,7 @@ export default function WebNavigation({
   const pathname = usePathname();
   const router = useRouter();
   const [categories, setCategories] = useState<SolutionCategory[]>([]);
+  const [newsTypes, setNewsTypes] = useState<NewsType[]>([]);
 
   const textColor = isWhiteBg ? "text-black" : "text-white";
   const hoverTextColor = isWhiteBg ? "hover:text-gray-700" : "hover:text-gray-300";
@@ -87,76 +94,60 @@ export default function WebNavigation({
     fetchCategories();
   }, []);
 
-  const newsDropdownItems = [
-    {
-      label: "updates",
-      element: (
-        <button
-          onClick={(e) => {
-            const isNewsPage =
-              pathname ===
-              `/${locale}/news`;
+  // 加载新闻类型
+  useEffect(() => {
+    async function fetchNewsTypes() {
+      try {
+        const response = await fetch("/api/news-types", {
+          cache: "no-store",
+        });
+        const result = await response.json();
+        if (result.success && result.data?.types) {
+          setNewsTypes(result.data.types);
+        }
+      } catch (err) {
+        console.error("Failed to load news types:", err);
+      }
+    }
 
-            if (isNewsPage) {
-              e.preventDefault();
-              newsEmitter.emit(
-                "changeNewsType",
-                "DYNAMIC",
-              );
-            } else {
-              window.location.href =
-                `/${locale}/news`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.newsSubmenu.updates")}
-        </button>
-      ),
-    },
-    {
-      label: "exhibitions",
-      element: (
-        <button
-          onClick={(e) => {
-            const isNewsPage =
-              pathname ===
-              `/${locale}/news`;
+    fetchNewsTypes();
+  }, []);
 
-            if (isNewsPage) {
-              e.preventDefault();
-              newsEmitter.emit(
-                "changeNewsType",
-                "EVENT",
-              );
-            } else {
-              window.location.href =
-                `/${locale}/news?type=EVENT`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.newsSubmenu.exhibitions")}
-        </button>
-      ),
-    },
-  ];
+  const newsDropdownItems = newsTypes.map((type) => ({
+    label: type.id,
+    element: (
+      <button
+        key={type.id}
+        onClick={(e) => {
+          const isNewsPage =
+            pathname ===
+            `/${locale}/news`;
+
+          if (isNewsPage) {
+            e.preventDefault();
+            newsEmitter.emit(
+              "changeNewsType",
+              type.id,
+            );
+          } else {
+            window.location.href =
+              `/${locale}/news?type=${type.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh" ? type.chName : type.enName}
+      </button>
+    ),
+  }));
 
   const solutionDropdownItems = [
     {

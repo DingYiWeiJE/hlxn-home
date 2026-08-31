@@ -131,10 +131,10 @@ export async function GET(
                   query.featured,
               }),
 
-          ...(query.newsType
+          ...(query.newsTypeId
             ? {
-                newsType:
-                  query.newsType,
+                newsTypeId:
+                  query.newsTypeId,
               }
             : {}),
 
@@ -396,8 +396,15 @@ export async function POST(
                 isFeatured:
                   input.isFeatured,
 
-                newsType:
-                  input.newsType,
+                ...(input.newsTypeId
+                  ? {
+                      newsType: {
+                        connect: {
+                          id: input.newsTypeId,
+                        },
+                      },
+                    }
+                  : {}),
 
                 publishedAt,
 

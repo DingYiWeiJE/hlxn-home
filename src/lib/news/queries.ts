@@ -34,6 +34,15 @@ export const newsListSelect = {
   status: true,
   isFeatured: true,
 
+  newsTypeId: true,
+  newsType: {
+    select: {
+      id: true,
+      chName: true,
+      enName: true,
+    },
+  },
+
   sourceType: true,
   sourceAccountName: true,
   sourcePublishedAt: true,

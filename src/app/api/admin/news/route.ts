@@ -52,10 +52,10 @@ export async function GET(
           }
         : {}),
 
-      ...(query.newsType
+      ...(query.newsTypeId
         ? {
-            newsType:
-              query.newsType,
+            newsTypeId:
+              query.newsTypeId,
           }
         : {}),
 
