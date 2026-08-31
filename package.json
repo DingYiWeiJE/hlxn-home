@@ -28,6 +28,7 @@
     "@tiptap/starter-kit": "^3.28.0",
     "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
+    "domhandler": "5.0.3",
     "dotenv": "^17.4.2",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
