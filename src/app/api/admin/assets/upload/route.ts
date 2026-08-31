@@ -1,9 +1,8 @@
 import {
   MediaAssetPurpose,
+  MediaAssetType,
 } from "@prisma/client";
 import { z } from "zod";
-import qiniu from "qiniu";
-import sharp from "sharp";
 
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
@@ -12,55 +11,17 @@ import {
   fail,
   ok,
 } from "@/lib/api/response";
-import {
-  uploadPdf,
-} from "@/lib/media/upload";
 import { prisma } from "@/lib/prisma";
+import { uploadFileToQiniu } from "@/lib/qiniu/direct-upload";
 
 export const runtime = "nodejs";
 
-const accessKey = process.env.QINIU_ACCESS_KEY!;
-const secretKey = process.env.QINIU_SECRET_KEY!;
-const bucket = process.env.QINIU_BUCKET!;
-const cdnDomain = process.env.QINIU_DOMAIN!;
-
-function getUploadToken() {
-  const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
-  const options = { scope: bucket };
-  const putPolicy = new qiniu.rs.PutPolicy(options);
-  return putPolicy.uploadToken(mac);
-}
-
-async function uploadImageToQiniu(
-  file: File,
-): Promise<{ key: string; url: string }> {
-  const token = getUploadToken();
-
-  // 生成唯一的文件名 (时间戳 + 随机数)
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 8);
-  const ext = file.name.split(".").pop() || "jpg";
-  const fileName = `${timestamp}-${random}.${ext}`;
-
-  // 读取文件二进制数据
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  // 配置七牛上传
-  const config = new qiniu.conf.Config();
-  const formUploader = new qiniu.form_up.FormUploader(config);
-  const putExtra = new qiniu.form_up.PutExtra();
-
-  // 上传到七牛
-  const uploadRes = await new Promise<any>((resolve, reject) => {
-    formUploader.put(token, fileName, buffer, putExtra, (err, body) => {
-      if (err) reject(err);
-      resolve(body);
-    });
-  });
-
-  const url = `${cdnDomain}/${uploadRes.key}`;
-  return { key: uploadRes.key, url };
-}
+const MAX_IMAGE_BYTES = Number(
+  process.env.MAX_IMAGE_UPLOAD_BYTES ?? 10 * 1024 * 1024,
+);
+const MAX_PDF_BYTES = Number(
+  process.env.MAX_PDF_UPLOAD_BYTES ?? 50 * 1024 * 1024,
+);
 
 const imagePurposeValues = [
   "GENERAL",
@@ -101,6 +62,13 @@ const formSchema = z.object({
     .optional()
     .nullable(),
 });
+
+function formatMegabytes(bytes: number): string {
+  const megabytes = bytes / 1024 / 1024;
+  return Number.isInteger(megabytes)
+    ? String(megabytes)
+    : megabytes.toFixed(1);
+}
 
 export async function POST(
   request: Request,
@@ -148,41 +116,59 @@ export async function POST(
           formData.get("alt"),
       });
 
-    if (
-      fields.type === "IMAGE"
-    ) {
-      // 上传到七牛
-      const { key, url } = await uploadImageToQiniu(file);
-
-      // 获取图片宽高信息
-      let width: number | null = null;
-      let height: number | null = null;
-      try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const metadata = await sharp(buffer).metadata();
-        width = metadata.width || null;
-        height = metadata.height || null;
-      } catch (err) {
-        console.error("Failed to get image metadata:", err);
+    if (fields.type === "IMAGE") {
+      if (file.size <= 0) {
+        throw new ApiError(
+          "VALIDATION_ERROR",
+          "请选择有效的图片文件",
+          400,
+          {
+            file: ["请选择有效的图片文件"],
+          },
+        );
       }
 
-      // 保存到数据库记录
-      const image =
-        await prisma.mediaAsset.create({
-          data: {
-            filename: file.name,
-            originalName: file.name,
-            mimeType: file.type,
-            size: file.size,
-            url: url,
-            relativePath: `qiniu/${key}`,
-            width: width,
-            height: height,
-            alt: fields.alt,
-            purpose: fields.purpose as MediaAssetPurpose,
-            createdById: actor.userId,
+      if (file.size > MAX_IMAGE_BYTES) {
+        const sizeLimit = formatMegabytes(MAX_IMAGE_BYTES);
+        throw new ApiError(
+          "FILE_TOO_LARGE",
+          `图片不能超过 ${sizeLimit} MB`,
+          413,
+          {
+            file: [`图片不能超过 ${sizeLimit} MB`],
           },
-        });
+        );
+      }
+
+      if (!file.type.startsWith("image/")) {
+        throw new ApiError(
+          "UNSUPPORTED_FILE_TYPE",
+          "仅支持图片文件",
+          400,
+          {
+            file: ["仅支持图片文件"],
+          },
+        );
+      }
+
+      const { key, url } = await uploadFileToQiniu(file, "");
+
+      const image = await prisma.mediaAsset.create({
+        data: {
+          type: MediaAssetType.IMAGE,
+          filename: file.name,
+          originalName: file.name,
+          mimeType: file.type,
+          size: file.size,
+          url,
+          relativePath: `qiniu/${key}`,
+          width: null,
+          height: null,
+          alt: fields.alt,
+          purpose: fields.purpose as MediaAssetPurpose,
+          createdById: actor.userId,
+        },
+      });
 
       return ok(image, {
         status: 201,
@@ -209,12 +195,58 @@ export async function POST(
       );
     }
 
-    const pdf =
-      await uploadPdf(file, {
-        scope: "products",
-        createdById:
-          actor.userId,
-      });
+    if (file.size <= 0) {
+      throw new ApiError(
+        "VALIDATION_ERROR",
+        "请选择有效的 PDF 文件",
+        400,
+        {
+          file: ["请选择有效的 PDF 文件"],
+        },
+      );
+    }
+
+    if (file.size > MAX_PDF_BYTES) {
+      const sizeLimit = formatMegabytes(MAX_PDF_BYTES);
+      throw new ApiError(
+        "FILE_TOO_LARGE",
+        `PDF 文件不能超过 ${sizeLimit} MB`,
+        413,
+        {
+          file: [`PDF 文件不能超过 ${sizeLimit} MB`],
+        },
+      );
+    }
+
+    if (file.type && file.type !== "application/pdf") {
+      throw new ApiError(
+        "UNSUPPORTED_FILE_TYPE",
+        "仅支持 PDF 文件",
+        400,
+        {
+          file: ["仅支持 PDF 文件"],
+        },
+      );
+    }
+
+    const { key, url } = await uploadFileToQiniu(file, "");
+
+    const pdf = await prisma.mediaAsset.create({
+      data: {
+        type: MediaAssetType.PDF,
+        filename: file.name,
+        originalName: file.name,
+        mimeType: file.type || "application/pdf",
+        size: file.size,
+        url,
+        relativePath: `qiniu/${key}`,
+        width: null,
+        height: null,
+        alt: null,
+        purpose: MediaAssetPurpose.GENERAL,
+        createdById: actor.userId,
+      },
+    });
 
     return ok(pdf, {
       status: 201,
