@@ -12,7 +12,7 @@ import {
 import Image from "next/image";
 import {
   type ChangeEvent,
-  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useState,
@@ -375,14 +375,19 @@ export default function MediaAssetPicker({
     open,
   ]);
 
-  function handleSearch(
-    event: FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
-
+  function runSearch() {
     setKeyword(
       keywordInput.trim(),
     );
+  }
+
+  function handleKeywordKeyDown(
+    event: ReactKeyboardEvent<HTMLInputElement>,
+  ) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runSearch();
+    }
   }
 
   function handleSelect(
@@ -576,8 +581,7 @@ export default function MediaAssetPicker({
               </label>
             ) : null}
 
-            <form
-              onSubmit={handleSearch}
+            <div
               className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row"
             >
               <label className="relative block min-w-0 flex-1">
@@ -593,6 +597,9 @@ export default function MediaAssetPicker({
                         .value,
                     )
                   }
+                  onKeyDown={
+                    handleKeywordKeyDown
+                  }
                   placeholder={
                     type ===
                     "IMAGE"
@@ -604,7 +611,8 @@ export default function MediaAssetPicker({
               </label>
 
               <button
-                type="submit"
+                type="button"
+                onClick={runSearch}
                 disabled={
                   isUploading
                 }
@@ -630,7 +638,7 @@ export default function MediaAssetPicker({
                   清除
                 </button>
               ) : null}
-            </form>
+            </div>
           </div>
         </div>
 

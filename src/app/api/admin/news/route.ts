@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import {
   newsListSelect,
 } from "@/lib/news/queries";
@@ -139,7 +140,11 @@ export async function GET(
           // 兼容当前旧新闻列表页面
           coverImage:
             item.coverImageAsset
-              ?.url ?? null,
+              ? buildMediaUrl(
+                  item.coverImageAsset
+                    .relativePath,
+                )
+              : null,
         })),
 
       pagination: {

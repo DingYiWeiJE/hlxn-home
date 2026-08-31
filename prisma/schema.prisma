@@ -164,7 +164,6 @@ model MediaAsset {
 
   type MediaAssetType @default(IMAGE)
 
-  url          String  @unique
   relativePath String  @unique
   filename     String
   originalName String?

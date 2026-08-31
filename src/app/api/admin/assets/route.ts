@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -148,7 +149,6 @@ export async function GET(
             id: true,
             type: true,
             purpose: true,
-            url: true,
             relativePath: true,
             filename: true,
             originalName: true,
@@ -216,7 +216,7 @@ export async function GET(
             id: item.id,
             type: item.type,
             purpose: item.purpose,
-            url: item.url,
+            url: buildMediaUrl(item.relativePath),
             relativePath:
               item.relativePath,
             filename:

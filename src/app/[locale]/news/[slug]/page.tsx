@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import TiptapContent from "@/components/news/TiptapContent";
 import type { TiptapNode } from "@/lib/news/tiptap";
 import Footer from "@/components/SiteFooter";
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       coverImageAsset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
         },
       },
     },
@@ -44,15 +45,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const coverUrl = news.coverImageAsset
+    ? buildMediaUrl(news.coverImageAsset.relativePath)
+    : null;
+
   return {
     title: news.title,
     description: news.summary || "新闻详情",
     openGraph: {
       title: news.title,
       description: news.summary || "新闻详情",
-      images: news.coverImageAsset?.url
-        ? [{ url: news.coverImageAsset.url }]
-        : [],
+      images: coverUrl ? [{ url: coverUrl }] : [],
     },
   };
 }
@@ -78,7 +81,7 @@ export default async function NewsDetail({ params }: Props) {
       coverImageAsset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
         },
       },
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { CompanyHistoryLocale as PrismaCompanyHistoryLocale } from "@prisma/client";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import type { CompanyHistoryLocale, CompanyHistoryPublicItem } from "./types";
 
@@ -37,7 +38,7 @@ export async function getCompanyHistoryByLocale(
               purpose: true,
               enabled: true,
               deletedAt: true,
-              url: true,
+              relativePath: true,
             },
           },
         },
@@ -55,7 +56,7 @@ export async function getCompanyHistoryByLocale(
           event.imageAsset.purpose === "COMPANY_HISTORY_IMAGE" &&
           event.imageAsset.enabled &&
           event.imageAsset.deletedAt === null
-            ? event.imageAsset.url
+            ? buildMediaUrl(event.imageAsset.relativePath)
             : null;
 
         return {

@@ -8,6 +8,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { revalidateNewsCache } from "@/lib/news/cache";
 import {
   newsDetailSelect,
@@ -43,8 +44,11 @@ function formatNewsDetail(
     // 暂时保留这个兼容字段，
     // 旧页面重构完成后可以删除。
     coverImage:
-      news.coverImageAsset?.url ??
-      null,
+      news.coverImageAsset
+        ? buildMediaUrl(
+            news.coverImageAsset.relativePath,
+          )
+        : null,
   };
 }
 

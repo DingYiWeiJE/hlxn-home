@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import CompanyHistoryForm from "@/components/admin/company-history/CompanyHistoryForm";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { formatDateInput } from "@/lib/company-history/date";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 type Props = {
@@ -27,7 +28,7 @@ export default async function EditCompanyHistoryPage({ params }: Props) {
       imageAsset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           width: true,
           height: true,
           alt: true,
@@ -68,7 +69,7 @@ export default async function EditCompanyHistoryPage({ params }: Props) {
           content: event.content,
           sortOrder: event.sortOrder,
           imageAssetId: event.imageAssetId,
-          imageAsset: event.imageAsset,
+          imageAsset: withMediaUrl(event.imageAsset),
           historyYear: {
             locale: event.historyYear.locale as "zh" | "en",
             year: event.historyYear.year,

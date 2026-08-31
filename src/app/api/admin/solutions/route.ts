@@ -5,6 +5,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { generateUniqueSlug } from "@/lib/slug/generate-slug";
 import {
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
           coverImageAsset: {
             select: {
               id: true,
-              url: true,
+              relativePath: true,
               originalName: true,
               width: true,
               height: true,
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
           workingPrincipleBackgroundAsset: {
             select: {
               id: true,
-              url: true,
+              relativePath: true,
               originalName: true,
               width: true,
               height: true,
@@ -136,9 +137,9 @@ export async function GET(request: NextRequest) {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         deletedAt: item.deletedAt,
-        coverImage: item.coverImageAsset,
+        coverImage: withMediaUrl(item.coverImageAsset),
         workingPrincipleBackgroundImage:
-          item.workingPrincipleBackgroundAsset,
+          withMediaUrl(item.workingPrincipleBackgroundAsset),
         counts: {
           usageScenarios: item._count.usageScenarios,
           customerValues: item._count.customerValues,

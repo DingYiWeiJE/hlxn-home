@@ -160,8 +160,7 @@ export async function POST(
           originalName: file.name,
           mimeType: file.type,
           size: file.size,
-          url,
-          relativePath: `qiniu/${key}`,
+          relativePath: key,
           width: null,
           height: null,
           alt: fields.alt,
@@ -170,7 +169,7 @@ export async function POST(
         },
       });
 
-      return ok(image, {
+      return ok({ ...image, url }, {
         status: 201,
       });
     }
@@ -238,8 +237,7 @@ export async function POST(
         originalName: file.name,
         mimeType: file.type || "application/pdf",
         size: file.size,
-        url,
-        relativePath: `qiniu/${key}`,
+        relativePath: key,
         width: null,
         height: null,
         alt: null,
@@ -248,7 +246,7 @@ export async function POST(
       },
     });
 
-    return ok(pdf, {
+    return ok({ ...pdf, url }, {
       status: 201,
     });
   } catch (error) {

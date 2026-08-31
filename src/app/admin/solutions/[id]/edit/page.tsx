@@ -4,6 +4,7 @@ import SolutionForm, {
   type SolutionFormInitialData,
 } from "@/components/admin/solutions/SolutionForm";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -42,7 +43,7 @@ export default async function EditSolutionPage({ params }: PageProps) {
       coverImageAsset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           filename: true,
           originalName: true,
           mimeType: true,
@@ -55,7 +56,7 @@ export default async function EditSolutionPage({ params }: PageProps) {
       workingPrincipleBackgroundAsset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           filename: true,
           originalName: true,
           mimeType: true,
@@ -78,7 +79,7 @@ export default async function EditSolutionPage({ params }: PageProps) {
           imageAsset: {
             select: {
               id: true,
-              url: true,
+              relativePath: true,
               filename: true,
               originalName: true,
               mimeType: true,
@@ -103,7 +104,7 @@ export default async function EditSolutionPage({ params }: PageProps) {
           imageAsset: {
             select: {
               id: true,
-              url: true,
+              relativePath: true,
               filename: true,
               originalName: true,
               mimeType: true,
@@ -124,6 +125,18 @@ export default async function EditSolutionPage({ params }: PageProps) {
 
   const initialData: SolutionFormInitialData = {
     ...solution,
+    coverImageAsset: withMediaUrl(solution.coverImageAsset),
+    workingPrincipleBackgroundAsset: withMediaUrl(
+      solution.workingPrincipleBackgroundAsset,
+    ),
+    usageScenarios: solution.usageScenarios.map((item) => ({
+      ...item,
+      imageAsset: withMediaUrl(item.imageAsset),
+    })),
+    customerValues: solution.customerValues.map((item) => ({
+      ...item,
+      imageAsset: withMediaUrl(item.imageAsset),
+    })),
     publishedAt: solution.publishedAt?.toISOString() ?? null,
     detailUrl: `/${solution.locale}/solutions/${solution.slug}`,
   };

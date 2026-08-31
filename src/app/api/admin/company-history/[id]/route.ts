@@ -12,6 +12,7 @@ import {
   assertCanWriteCompanyHistory,
 } from "@/lib/company-history/permissions";
 import { validateCompanyHistoryImage } from "@/lib/company-history/validation";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { clearCacheByNamespace } from "@/lib/cache";
 
@@ -49,7 +50,7 @@ export async function GET(_request: Request, context: RouteContext) {
         imageAsset: {
           select: {
             id: true,
-            url: true,
+            relativePath: true,
             width: true,
             height: true,
             alt: true,
@@ -64,7 +65,10 @@ export async function GET(_request: Request, context: RouteContext) {
       throw new ApiError("NOT_FOUND", "公司发展历程事件不存在", 404);
     }
 
-    return ok(event);
+    return ok({
+      ...event,
+      imageAsset: withMediaUrl(event.imageAsset),
+    });
   } catch (error) {
     return fail(error);
   }

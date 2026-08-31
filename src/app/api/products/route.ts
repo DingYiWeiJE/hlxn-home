@@ -7,6 +7,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { withCache } from "@/lib/cache";
 
@@ -169,7 +170,7 @@ export async function GET(
                 coverImageAsset: {
                   select: {
                     id: true,
-                    url: true,
+                    relativePath: true,
                     width: true,
                     height: true,
                     alt: true,
@@ -222,7 +223,14 @@ export async function GET(
               item.highlights,
 
             coverImage:
-              item.coverImageAsset,
+              item.coverImageAsset
+                ? {
+                    ...item.coverImageAsset,
+                    url: buildMediaUrl(
+                      item.coverImageAsset.relativePath,
+                    ),
+                  }
+                : null,
 
             category: {
               primary: {

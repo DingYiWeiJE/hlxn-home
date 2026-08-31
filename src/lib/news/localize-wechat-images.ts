@@ -6,6 +6,7 @@ import path from "node:path";
 import { MediaAssetType } from "@prisma/client";
 
 import { getUploadConfig } from "@/lib/media/config";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import type { TiptapNode } from "@/lib/news/tiptap";
 import type { WechatRemoteImage } from "@/lib/news/wechat-import";
@@ -35,7 +36,6 @@ const MAX_TOTAL_IMAGE_BYTES = 50 * 1024 * 1024;
 const mediaAssetSelect = {
   id: true,
   type: true,
-  url: true,
   relativePath: true,
   filename: true,
   originalName: true,
@@ -172,11 +172,10 @@ export async function localizeWechatImages(
         .update(downloaded.buffer)
         .digest("hex");
 
-      const asset = await prisma.mediaAsset.create({
+      const created = await prisma.mediaAsset.create({
         data: {
           type: MediaAssetType.IMAGE,
-          url,
-          relativePath: `qiniu/${key}`,
+          relativePath: key,
           filename,
           originalName,
           mimeType: contentType,
@@ -190,6 +189,8 @@ export async function localizeWechatImages(
         },
         select: mediaAssetSelect,
       });
+
+      const asset: UploadedMediaAsset = { ...created, url };
 
       console.log(
         "✅ Image uploaded successfully:",
@@ -310,7 +311,7 @@ async function findExistingWechatAsset(
     .digest("hex")
     .slice(0, 32);
 
-  return prisma.mediaAsset.findFirst({
+  const found = await prisma.mediaAsset.findFirst({
     where: {
       type: MediaAssetType.IMAGE,
 
@@ -327,6 +328,9 @@ async function findExistingWechatAsset(
     },
     select: mediaAssetSelect,
   });
+
+  if (!found) return null;
+  return { ...found, url: buildMediaUrl(found.relativePath) };
 }
 
 async function downloadWechatImage(

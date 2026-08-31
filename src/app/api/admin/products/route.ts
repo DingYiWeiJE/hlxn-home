@@ -7,6 +7,7 @@ import { NextRequest } from "next/server";
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { generateUniqueSlug } from "@/lib/slug/generate-slug";
 import { prisma } from "@/lib/prisma";
 import {
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
             coverImageAsset: {
               select: {
                 id: true,
-                url: true,
+                relativePath: true,
                 originalName: true,
                 width: true,
                 height: true,
@@ -229,7 +230,7 @@ export async function GET(request: NextRequest) {
         },
 
         coverImage:
-          item.coverImageAsset,
+          withMediaUrl(item.coverImageAsset),
 
         detailPdf: item.detailPdfAsset
           ? {
@@ -491,7 +492,7 @@ export async function POST(request: Request) {
               coverImageAsset: {
                 select: {
                   id: true,
-                  url: true,
+                  relativePath: true,
                   originalName: true,
                   width: true,
                   height: true,
@@ -503,7 +504,7 @@ export async function POST(request: Request) {
                 select: {
                   id: true,
                   type: true,
-                  url: true,
+                  relativePath: true,
                   filename: true,
                   originalName: true,
                   mimeType: true,
@@ -527,7 +528,7 @@ export async function POST(request: Request) {
                   asset: {
                     select: {
                       id: true,
-                      url: true,
+                      relativePath: true,
                       originalName: true,
                       width: true,
                       height: true,
@@ -550,7 +551,7 @@ export async function POST(request: Request) {
                   asset: {
                     select: {
                       id: true,
-                      url: true,
+                      relativePath: true,
                       originalName: true,
                       width: true,
                       height: true,
@@ -578,6 +579,26 @@ export async function POST(request: Request) {
     return ok(
       {
         ...product,
+
+        coverImageAsset:
+          withMediaUrl(product.coverImageAsset),
+
+        introBackgroundImageAsset:
+          withMediaUrl(product.introBackgroundImageAsset),
+
+        advantages: product.advantages.map(
+          (item) => ({
+            ...item,
+            asset: withMediaUrl(item.asset),
+          }),
+        ),
+
+        applications: product.applications.map(
+          (item) => ({
+            ...item,
+            asset: withMediaUrl(item.asset),
+          }),
+        ),
 
         detailPdf:
           product.detailPdfAsset

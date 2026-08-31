@@ -5,6 +5,7 @@ import {
 
 import { ApiError } from "@/lib/api/errors";
 import { fail } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -70,7 +71,7 @@ async function getDownloadAsset(assetId: string) {
       id: true,
       originalName: true,
       filename: true,
-      url: true,
+      relativePath: true,
       size: true,
     },
   });
@@ -153,7 +154,7 @@ export async function GET(
       status: 307,
       headers: {
         ...headers,
-        Location: asset.url,
+        Location: buildMediaUrl(asset.relativePath),
       },
     });
   } catch (error) {

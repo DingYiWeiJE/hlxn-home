@@ -76,8 +76,7 @@ export async function POST(request: Request) {
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
-        url,
-        relativePath: `qiniu/${key}`,
+        relativePath: key,
         width: null,
         height: null,
         alt: fields.alt?.trim() || null,
@@ -85,7 +84,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return ok(image, { status: 201 });
+    return ok({ ...image, url }, { status: 201 });
   } catch (error) {
     return fail(error);
   }

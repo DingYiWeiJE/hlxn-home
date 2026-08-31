@@ -2,6 +2,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -45,7 +46,6 @@ export async function GET(_request: Request, context: RouteContext) {
         id: true,
         type: true,
         purpose: true,
-        url: true,
         relativePath: true,
         filename: true,
         originalName: true,
@@ -79,7 +79,7 @@ export async function GET(_request: Request, context: RouteContext) {
       id: asset.id,
       type: asset.type,
       purpose: asset.purpose,
-      url: asset.url,
+      url: buildMediaUrl(asset.relativePath),
       relativePath: asset.relativePath,
       filename: asset.filename,
       originalName: asset.originalName,

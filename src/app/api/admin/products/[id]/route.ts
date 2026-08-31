@@ -7,6 +7,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { updateProductSchema } from "@/lib/products/schemas";
 import { validateProductReferences } from "@/lib/products/validation";
@@ -68,7 +69,7 @@ const productDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       originalName: true,
       mimeType: true,
       size: true,
@@ -82,7 +83,7 @@ const productDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       filename: true,
       originalName: true,
       mimeType: true,
@@ -108,7 +109,7 @@ const productDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           originalName: true,
           mimeType: true,
           size: true,
@@ -135,7 +136,7 @@ const productDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           originalName: true,
           mimeType: true,
           size: true,
@@ -207,19 +208,25 @@ function formatProductDetail(
       product.coverImageAssetId,
 
     coverImage:
-      product.coverImageAsset,
+      withMediaUrl(product.coverImageAsset),
 
     introBackgroundImageAssetId:
       product.introBackgroundImageAssetId,
 
     introBackgroundImageAsset:
-      product.introBackgroundImageAsset,
+      withMediaUrl(product.introBackgroundImageAsset),
 
     advantages:
-      product.advantages,
+      product.advantages.map((item) => ({
+        ...item,
+        asset: withMediaUrl(item.asset),
+      })),
 
     applications:
-      product.applications,
+      product.applications.map((item) => ({
+        ...item,
+        asset: withMediaUrl(item.asset),
+      })),
 
     specification: hasSpecification
       ? {

@@ -7,6 +7,7 @@ import {
   SolutionStatus,
 } from "@prisma/client";
 
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import type { publicSolutionListQuerySchema } from "@/lib/solutions/schemas";
 import type { z } from "zod";
@@ -62,7 +63,7 @@ export type PublicSolutionListQuery = z.infer<
 const imageSelect = {
   id: true,
   type: true,
-  url: true,
+  relativePath: true,
   width: true,
   height: true,
   alt: true,
@@ -74,7 +75,7 @@ function formatImage(
   image: {
     id: string;
     type: MediaAssetType;
-    url: string;
+    relativePath: string;
     width: number | null;
     height: number | null;
     alt: string | null;
@@ -93,7 +94,7 @@ function formatImage(
 
   return {
     id: image.id,
-    url: image.url,
+    url: buildMediaUrl(image.relativePath),
     width: image.width,
     height: image.height,
     alt: image.alt,

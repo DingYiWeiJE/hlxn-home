@@ -4,6 +4,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { updateSolutionSchema } from "@/lib/solutions/schemas";
 import { validateSolutionReferences } from "@/lib/solutions/validation";
@@ -43,7 +44,7 @@ const solutionDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       filename: true,
       originalName: true,
       mimeType: true,
@@ -57,7 +58,7 @@ const solutionDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       filename: true,
       originalName: true,
       mimeType: true,
@@ -81,7 +82,7 @@ const solutionDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           filename: true,
           originalName: true,
           mimeType: true,
@@ -107,7 +108,7 @@ const solutionDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           filename: true,
           originalName: true,
           mimeType: true,
@@ -142,12 +143,18 @@ function formatSolutionDetail(solution: SolutionDetailPayload) {
     workingPrincipleBackgroundAssetId:
       solution.workingPrincipleBackgroundAssetId,
     coverImageAssetId: solution.coverImageAssetId,
-    coverImageAsset: solution.coverImageAsset,
+    coverImageAsset: withMediaUrl(solution.coverImageAsset),
     workingPrincipleBackgroundAsset:
-      solution.workingPrincipleBackgroundAsset,
+      withMediaUrl(solution.workingPrincipleBackgroundAsset),
     systemCompositionParagraphs: solution.systemCompositionParagraphs,
-    usageScenarios: solution.usageScenarios,
-    customerValues: solution.customerValues,
+    usageScenarios: solution.usageScenarios.map((item) => ({
+      ...item,
+      imageAsset: withMediaUrl(item.imageAsset),
+    })),
+    customerValues: solution.customerValues.map((item) => ({
+      ...item,
+      imageAsset: withMediaUrl(item.imageAsset),
+    })),
     createdBy: solution.createdBy,
     updatedBy: solution.updatedBy,
     publishedAt: solution.publishedAt,
