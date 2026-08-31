@@ -158,75 +158,41 @@ export default function WebNavigation({
     };
   }, [locale]);
 
-  const productDropdownItems = [
-    {
-      label: "all",
-      element: (
-        <button
-          onClick={(e) => {
-            const isProductsPage =
-              pathname === `/${locale}/products`;
+  const productDropdownItems = productCategories.map((category) => ({
+    label: category.id,
+    element: (
+      <button
+        key={category.id}
+        onClick={(e) => {
+          const isProductsPage =
+            pathname === `/${locale}/products`;
 
-            if (isProductsPage) {
-              e.preventDefault();
-              productEmitter.emit(
-                "changeProductCategory",
-                null,
-              );
-            } else {
-              window.location.href = `/${locale}/products`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {locale === "zh" ? "全部产品" : "All Products"}
-        </button>
-      ),
-    },
-    ...productCategories.map((category) => ({
-      label: category.id,
-      element: (
-        <button
-          key={category.id}
-          onClick={(e) => {
-            const isProductsPage =
-              pathname === `/${locale}/products`;
-
-            if (isProductsPage) {
-              e.preventDefault();
-              productEmitter.emit(
-                "changeProductCategory",
-                category.id,
-              );
-            } else {
-              window.location.href = `/${locale}/products?primaryCategory=${category.id}`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {locale === "zh"
-            ? category.nameZh || category.name
-            : category.nameEn || category.name}
-        </button>
-      ),
-    })),
-  ];
+          if (isProductsPage) {
+            e.preventDefault();
+            productEmitter.emit(
+              "changeProductCategory",
+              category.id,
+            );
+          } else {
+            window.location.href = `/${locale}/products?primaryCategory=${category.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh"
+          ? category.nameZh || category.name
+          : category.nameEn || category.name}
+      </button>
+    ),
+  }));
 
   const newsDropdownItems = newsTypes.map((type) => ({
     label: type.id,
@@ -264,77 +230,41 @@ export default function WebNavigation({
     ),
   }));
 
-  const solutionDropdownItems = [
-    {
-      label: "all",
-      element: (
-        <button
-          onClick={(e) => {
-            const isSolutionsPage =
-              pathname ===
-              `/${locale}/solutions`;
+  const solutionDropdownItems = categories.map((category) => ({
+    label: category.id,
+    element: (
+      <button
+        key={category.id}
+        onClick={(e) => {
+          const isSolutionsPage =
+            pathname ===
+            `/${locale}/solutions`;
 
-            if (isSolutionsPage) {
-              e.preventDefault();
-              solutionEmitter.emit(
-                "changeSolutionCategory",
-                null,
-              );
-            } else {
-              window.location.href =
-                `/${locale}/solutions`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.solutionsSubmenu.allCategories")}
-        </button>
-      ),
-    },
-    ...categories.map((category) => ({
-      label: category.id,
-      element: (
-        <button
-          key={category.id}
-          onClick={(e) => {
-            const isSolutionsPage =
-              pathname ===
-              `/${locale}/solutions`;
-
-            if (isSolutionsPage) {
-              e.preventDefault();
-              solutionEmitter.emit(
-                "changeSolutionCategory",
-                category.id,
-              );
-            } else {
-              window.location.href =
-                `/${locale}/solutions?category=${category.id}`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {locale === "zh" ? category.chName : category.enName}
-        </button>
-      ),
-    })),
-  ];
+          if (isSolutionsPage) {
+            e.preventDefault();
+            solutionEmitter.emit(
+              "changeSolutionCategory",
+              category.id,
+            );
+          } else {
+            window.location.href =
+              `/${locale}/solutions?category=${category.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh" ? category.chName : category.enName}
+      </button>
+    ),
+  }));
 
   const languageDropdownItems = [
     {
@@ -417,7 +347,8 @@ export default function WebNavigation({
       {/* Solutions with Dropdown */}
       <Dropdown
         trigger={
-          <button
+          <Link
+            href={`/${locale}/solutions`}
             className={`transition ${
               isActive(`/${locale}/solutions`)
                 ? `${activeTextColor} text-lg font-bold`
@@ -425,14 +356,15 @@ export default function WebNavigation({
             }`}
           >
             {t("nav.solutions")}
-          </button>
+          </Link>
         }
         items={solutionDropdownItems}
       />
       {/* Products with Dropdown */}
       <Dropdown
         trigger={
-          <button
+          <Link
+            href={`/${locale}/products`}
             className={`transition ${
               isActive(`/${locale}/products`)
                 ? `${activeTextColor} text-lg font-bold`
@@ -440,7 +372,7 @@ export default function WebNavigation({
             }`}
           >
             {t("nav.products")}
-          </button>
+          </Link>
         }
         items={productDropdownItems}
       />
@@ -460,7 +392,8 @@ export default function WebNavigation({
       {/* News with Dropdown */}
       <Dropdown
         trigger={
-          <button
+          <Link
+            href={`/${locale}/news`}
             className={`transition ${
               isActive(`/${locale}/news`)
                 ? `${activeTextColor} text-lg font-bold`
@@ -468,7 +401,7 @@ export default function WebNavigation({
             }`}
           >
             {t("nav.news")}
-          </button>
+          </Link>
         }
         items={newsDropdownItems}
       />
