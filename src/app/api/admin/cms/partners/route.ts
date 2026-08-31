@@ -6,6 +6,7 @@ import { ok, fail } from "@/lib/api/response";
 import { ApiError } from "@/lib/api/errors";
 import { deleteFromQiniu } from "@/lib/cms/qiniu";
 import { revalidatePath } from "next/cache";
+import { clearCacheByNamespace } from "@/lib/cache";
 import * as qiniu from "qiniu";
 
 export const runtime = "nodejs";
@@ -108,6 +109,7 @@ export async function POST(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/partners");
+    clearCacheByNamespace("cms-partners");
 
     return ok(partner, { status: 201 });
   } catch (error) {
@@ -224,6 +226,7 @@ export async function PUT(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/partners");
+    clearCacheByNamespace("cms-partners");
 
     return ok(updated);
   } catch (error) {
@@ -269,6 +272,7 @@ export async function DELETE(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/partners");
+    clearCacheByNamespace("cms-partners");
 
     return ok({ success: true });
   } catch (error) {

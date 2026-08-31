@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
       "solutions",
       query,
       () => getPublicSolutions(query),
-      10 * 60 * 1000,
     );
 
     return ok(data, {

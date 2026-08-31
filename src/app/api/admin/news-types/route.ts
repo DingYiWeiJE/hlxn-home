@@ -5,6 +5,7 @@ import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -59,6 +60,8 @@ export async function POST(request: NextRequest) {
         updatedAt: true,
       },
     });
+
+    clearCacheByNamespace("news-types");
 
     return ok(type, { status: 201 });
   } catch (error) {

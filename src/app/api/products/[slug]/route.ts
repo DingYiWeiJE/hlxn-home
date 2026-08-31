@@ -435,7 +435,6 @@ export async function GET(
 
         return formatProductDetail(product);
       },
-      10 * 60 * 1000,
     );
 
     return ok(

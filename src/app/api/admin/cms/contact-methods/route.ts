@@ -5,6 +5,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { ok, fail } from "@/lib/api/response";
 import { ApiError } from "@/lib/api/errors";
 import { revalidatePath } from "next/cache";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/company-info");
+    clearCacheByNamespace("cms-company-info");
 
     return ok(contactMethod, { status: 201 });
   } catch (error) {
@@ -102,6 +104,7 @@ export async function PUT(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/company-info");
+    clearCacheByNamespace("cms-company-info");
 
     return ok(updated);
   } catch (error) {
@@ -143,6 +146,7 @@ export async function DELETE(request: Request) {
 
     // 重置缓存
     revalidatePath("/api/cms/company-info");
+    clearCacheByNamespace("cms-company-info");
 
     return ok({ success: true });
   } catch (error) {

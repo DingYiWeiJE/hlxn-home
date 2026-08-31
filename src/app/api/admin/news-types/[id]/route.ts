@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { clearCacheByNamespace } from "@/lib/cache";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,8 @@ export async function PATCH(
       },
     });
 
+    clearCacheByNamespace("news-types");
+
     return ok(type);
   } catch (error) {
     return fail(error);
@@ -88,6 +91,8 @@ export async function DELETE(
         deletedAt: new Date(),
       },
     });
+
+    clearCacheByNamespace("news-types");
 
     return ok({ id });
   } catch (error) {

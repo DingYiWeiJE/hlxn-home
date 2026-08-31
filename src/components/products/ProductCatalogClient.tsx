@@ -177,14 +177,34 @@ export default function ProductCatalogClient({
   const [keywordInput, setKeywordInput] = useState("");
   const [keyword, setKeyword] = useState("");
 
-  // 路由语言切换时，清空筛选并回到第一页
+  // 路由语言切换时，清空筛选并回到第一页（跳过首次挂载，避免清掉从 URL 带入的初始分类）
+  const isFirstLocaleEffectRef = useRef(true);
+
   useEffect(() => {
+    if (isFirstLocaleEffectRef.current) {
+      isFirstLocaleEffectRef.current = false;
+      return;
+    }
+
     setSelectedPrimaryCategoryId("");
     setSelectedSecondaryCategoryId("");
     setKeywordInput("");
     setKeyword("");
     setCurrentPage(1);
   }, [locale]);
+
+  // 首次加载时，若 URL 已带有 primaryCategory 参数，滚动到产品列表区域
+  useEffect(() => {
+    if (!searchParams.get("primaryCategory")) return;
+
+    window.requestAnimationFrame(() => {
+      sectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 监听导航栏的一级分类切换事件
   useEffect(() => {

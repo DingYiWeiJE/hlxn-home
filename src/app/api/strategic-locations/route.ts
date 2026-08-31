@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
           ),
         };
       },
-      10 * 60 * 1000,
     );
 
     return ok(data);

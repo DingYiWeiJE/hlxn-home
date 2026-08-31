@@ -16,25 +16,15 @@ export async function withCache<T>(
   queryFn: () => Promise<T>,
   ttl?: number,
 ): Promise<T> {
-  // 尝试从缓存获取
-  const cached = cacheManager.get<T>(namespace, params);
-  if (cached) {
-    logger.info(`[${namespace}] 缓存命中，直接返回`, { namespace });
-    return cached;
-  }
+  return cacheManager.getOrCreate(namespace, params, async () => {
+    logger.info(`[${namespace}] 执行数据库查询`, { namespace });
+    const startTime = Date.now();
+    const data = await queryFn();
+    const duration = Date.now() - startTime;
 
-  // 缓存未命中，执行查询
-  logger.info(`[${namespace}] 执行数据库查询`, { namespace });
-  const startTime = Date.now();
-  const data = await queryFn();
-  const duration = Date.now() - startTime;
-
-  logger.info(`[${namespace}] 数据库查询完成`, { namespace, duration: `${duration}ms` });
-
-  // 存入缓存
-  cacheManager.set(namespace, data, params, ttl);
-
-  return data;
+    logger.info(`[${namespace}] 数据库查询完成`, { namespace, duration: `${duration}ms` });
+    return data;
+  }, ttl);
 }
 
 /**

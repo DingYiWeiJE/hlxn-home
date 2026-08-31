@@ -279,7 +279,6 @@ export async function GET(
           },
         };
       },
-      10 * 60 * 1000,
     );
 
     return ok(
