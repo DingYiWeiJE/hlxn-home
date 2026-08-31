@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { newsEmitter } from "@/lib/events";
+import { productEmitter } from "@/lib/products-events";
 import { solutionEmitter } from "@/lib/solutions-events";
 import Dropdown from "./Dropdown";
 
@@ -27,6 +28,15 @@ type NewsType = {
   enName: string;
 };
 
+type PrimaryProductCategory = {
+  id: string;
+  name: string;
+  nameZh: string;
+  nameEn: string;
+  slug: string;
+  sortOrder: number;
+};
+
 export default function WebNavigation({
   hasbg,
   scrolledPast,
@@ -39,6 +49,9 @@ export default function WebNavigation({
   const router = useRouter();
   const [categories, setCategories] = useState<SolutionCategory[]>([]);
   const [newsTypes, setNewsTypes] = useState<NewsType[]>([]);
+  const [productCategories, setProductCategories] = useState<
+    PrimaryProductCategory[]
+  >([]);
 
   const textColor = isWhiteBg ? "text-black" : "text-white";
   const hoverTextColor = isWhiteBg ? "hover:text-gray-700" : "hover:text-gray-300";
@@ -112,6 +125,108 @@ export default function WebNavigation({
 
     fetchNewsTypes();
   }, []);
+
+  // 加载一级产品分类
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchProductCategories() {
+      try {
+        const response = await fetch(
+          `/api/categories?locale=${locale}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
+        const result = await response.json();
+        if (result.success && result.data?.primaryCategories) {
+          setProductCategories(result.data.primaryCategories);
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load product categories:", err);
+      }
+    }
+
+    fetchProductCategories();
+
+    return () => {
+      controller.abort();
+    };
+  }, [locale]);
+
+  const productDropdownItems = [
+    {
+      label: "all",
+      element: (
+        <button
+          onClick={(e) => {
+            const isProductsPage =
+              pathname === `/${locale}/products`;
+
+            if (isProductsPage) {
+              e.preventDefault();
+              productEmitter.emit(
+                "changeProductCategory",
+                null,
+              );
+            } else {
+              window.location.href = `/${locale}/products`;
+            }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
+          }}
+        >
+          {locale === "zh" ? "全部产品" : "All Products"}
+        </button>
+      ),
+    },
+    ...productCategories.map((category) => ({
+      label: category.id,
+      element: (
+        <button
+          key={category.id}
+          onClick={(e) => {
+            const isProductsPage =
+              pathname === `/${locale}/products`;
+
+            if (isProductsPage) {
+              e.preventDefault();
+              productEmitter.emit(
+                "changeProductCategory",
+                category.id,
+              );
+            } else {
+              window.location.href = `/${locale}/products?primaryCategory=${category.id}`;
+            }
+          }}
+          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.8)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "rgba(100, 116, 139, 0.4)";
+          }}
+        >
+          {locale === "zh"
+            ? category.nameZh || category.name
+            : category.nameEn || category.name}
+        </button>
+      ),
+    })),
+  ];
 
   const newsDropdownItems = newsTypes.map((type) => ({
     label: type.id,
@@ -314,16 +429,21 @@ export default function WebNavigation({
         }
         items={solutionDropdownItems}
       />
-      <Link
-        href={`/${locale}/products`}
-        className={`transition ${
-          isActive(`/${locale}/products`)
-            ? `${activeTextColor} text-lg font-bold`
-            : `${textColor} ${hoverTextColor}`
-        }`}
-      >
-        {t("nav.products")}
-      </Link>
+      {/* Products with Dropdown */}
+      <Dropdown
+        trigger={
+          <button
+            className={`transition ${
+              isActive(`/${locale}/products`)
+                ? `${activeTextColor} text-lg font-bold`
+                : `${textColor} ${hoverTextColor}`
+            }`}
+          >
+            {t("nav.products")}
+          </button>
+        }
+        items={productDropdownItems}
+      />
 
 
       <Link

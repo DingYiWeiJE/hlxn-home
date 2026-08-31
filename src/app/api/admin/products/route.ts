@@ -322,257 +322,248 @@ export async function POST(request: Request) {
         ? new Date()
         : null;
 
-    const product =
-      await prisma.$transaction(
-        async (transaction) => {
-          const slug =
-            await generateUniqueSlug({
-              source: body.name,
-              maxLength: 150,
+    const slug =
+      await generateUniqueSlug({
+        source: body.name,
+        maxLength: 150,
 
-              exists: async (
-                candidate,
-              ) => {
-                const existingProduct =
-                  await transaction.product
-                    .findFirst({
-                      where: {
-                        locale,
-                        slug: candidate,
-                      },
+        exists: async (candidate) => {
+          const existingProduct =
+            await prisma.product.findFirst({
+              where: {
+                locale,
+                slug: candidate,
+              },
 
-                      select: {
-                        id: true,
-                      },
-                    });
-
-                return (
-                  existingProduct !== null
-                );
+              select: {
+                id: true,
               },
             });
 
-          return transaction.product.create({
-            data: {
-              locale,
+          return existingProduct !== null;
+        },
+      });
 
-              name: body.name,
-              slug,
+    const product =
+      await prisma.product.create({
+        data: {
+          locale,
 
-              seriesName:
-                body.seriesName?.trim() ||
-                null,
+          name: body.name,
+          slug,
 
-              secondaryCategoryId:
-                body.secondaryCategoryId,
+          seriesName:
+            body.seriesName?.trim() ||
+            null,
 
-              summaryParagraphs:
-                body.summaryParagraphs,
+          secondaryCategoryId:
+            body.secondaryCategoryId,
 
-              highlights:
-                body.highlights,
+          summaryParagraphs:
+            body.summaryParagraphs,
 
-              introductionParagraphs:
-                body.introductionParagraphs,
+          highlights:
+            body.highlights,
 
-              specificationTitle:
-                body.specification?.title ??
-                null,
+          introductionParagraphs:
+            body.introductionParagraphs,
 
-              specificationHeaders:
-                body.specification
-                  ? body.specification.headers
-                  : Prisma.DbNull,
+          specificationTitle:
+            body.specification?.title ??
+            null,
 
-              specificationRows:
-                body.specification
-                  ? body.specification.rows
-                  : Prisma.DbNull,
+          specificationHeaders:
+            body.specification
+              ? body.specification.headers
+              : Prisma.DbNull,
 
-              coverImageAssetId:
-                body.coverImageAssetId ??
-                null,
+          specificationRows:
+            body.specification
+              ? body.specification.rows
+              : Prisma.DbNull,
 
-              introBackgroundImageAssetId:
-                body.introBackgroundImageAssetId,
+          coverImageAssetId:
+            body.coverImageAssetId ??
+            null,
 
-              detailPdfAssetId:
-                body.detailPdfAssetId ??
-                null,
+          introBackgroundImageAssetId:
+            body.introBackgroundImageAssetId,
 
-              status:
-                body.status,
+          detailPdfAssetId:
+            body.detailPdfAssetId ??
+            null,
 
-              sortOrder:
-                body.sortOrder,
+          status:
+            body.status,
 
-              publishedAt,
+          sortOrder:
+            body.sortOrder,
 
-              ...(body.advantages.length > 0
-                ? {
-                    advantages: {
-                      create:
-                        body.advantages.map(
-                          (item, index) => ({
-                            assetId:
-                              item.assetId,
+          publishedAt,
 
-                            title:
-                              item.title,
+          ...(body.advantages.length > 0
+            ? {
+                advantages: {
+                  create:
+                    body.advantages.map(
+                      (item, index) => ({
+                        assetId:
+                          item.assetId,
 
-                            sortOrder:
-                              item.sortOrder ??
-                              index,
-                          }),
-                        ),
-                    },
-                  }
-                : {}),
+                        title:
+                          item.title,
 
-              ...(body.applications.length >
-              0
-                ? {
-                    applications: {
-                      create:
-                        body.applications.map(
-                          (item, index) => ({
-                            assetId:
-                              item.assetId,
+                        sortOrder:
+                          item.sortOrder ??
+                          index,
+                      }),
+                    ),
+                },
+              }
+            : {}),
 
-                            title:
-                              item.title,
+          ...(body.applications.length >
+          0
+            ? {
+                applications: {
+                  create:
+                    body.applications.map(
+                      (item, index) => ({
+                        assetId:
+                          item.assetId,
 
-                            sortOrder:
-                              item.sortOrder ??
-                              index,
-                          }),
-                        ),
-                    },
-                  }
-                : {}),
-            },
+                        title:
+                          item.title,
 
+                        sortOrder:
+                          item.sortOrder ??
+                          index,
+                      }),
+                    ),
+                },
+              }
+            : {}),
+        },
+
+        select: {
+          id: true,
+          locale: true,
+          name: true,
+          slug: true,
+          seriesName: true,
+
+          summaryParagraphs: true,
+          highlights: true,
+          introductionParagraphs: true,
+
+          specificationTitle: true,
+          specificationHeaders: true,
+          specificationRows: true,
+
+          status: true,
+          sortOrder: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+
+          secondaryCategory: {
             select: {
               id: true,
-              locale: true,
               name: true,
               slug: true,
-              seriesName: true,
 
-              summaryParagraphs: true,
-              highlights: true,
-              introductionParagraphs: true,
-
-              specificationTitle: true,
-              specificationHeaders: true,
-              specificationRows: true,
-
-              status: true,
-              sortOrder: true,
-              publishedAt: true,
-              createdAt: true,
-              updatedAt: true,
-
-              secondaryCategory: {
+              parent: {
                 select: {
                   id: true,
                   name: true,
                   slug: true,
-
-                  parent: {
-                    select: {
-                      id: true,
-                      name: true,
-                      slug: true,
-                    },
-                  },
-                },
-              },
-
-              coverImageAsset: {
-                select: {
-                  id: true,
-                  relativePath: true,
-                  originalName: true,
-                  width: true,
-                  height: true,
-                  alt: true,
-                },
-              },
-
-              introBackgroundImageAsset: {
-                select: {
-                  id: true,
-                  type: true,
-                  relativePath: true,
-                  filename: true,
-                  originalName: true,
-                  mimeType: true,
-                  size: true,
-                  width: true,
-                  height: true,
-                  alt: true,
-                },
-              },
-
-              advantages: {
-                orderBy: {
-                  sortOrder: "asc",
-                },
-
-                select: {
-                  id: true,
-                  title: true,
-                  sortOrder: true,
-
-                  asset: {
-                    select: {
-                      id: true,
-                      relativePath: true,
-                      originalName: true,
-                      width: true,
-                      height: true,
-                      alt: true,
-                    },
-                  },
-                },
-              },
-
-              applications: {
-                orderBy: {
-                  sortOrder: "asc",
-                },
-
-                select: {
-                  id: true,
-                  title: true,
-                  sortOrder: true,
-
-                  asset: {
-                    select: {
-                      id: true,
-                      relativePath: true,
-                      originalName: true,
-                      width: true,
-                      height: true,
-                      alt: true,
-                    },
-                  },
-                },
-              },
-
-              detailPdfAsset: {
-                select: {
-                  id: true,
-                  originalName: true,
-                  mimeType: true,
-                  size: true,
                 },
               },
             },
-          });
+          },
+
+          coverImageAsset: {
+            select: {
+              id: true,
+              relativePath: true,
+              originalName: true,
+              width: true,
+              height: true,
+              alt: true,
+            },
+          },
+
+          introBackgroundImageAsset: {
+            select: {
+              id: true,
+              type: true,
+              relativePath: true,
+              filename: true,
+              originalName: true,
+              mimeType: true,
+              size: true,
+              width: true,
+              height: true,
+              alt: true,
+            },
+          },
+
+          advantages: {
+            orderBy: {
+              sortOrder: "asc",
+            },
+
+            select: {
+              id: true,
+              title: true,
+              sortOrder: true,
+
+              asset: {
+                select: {
+                  id: true,
+                  relativePath: true,
+                  originalName: true,
+                  width: true,
+                  height: true,
+                  alt: true,
+                },
+              },
+            },
+          },
+
+          applications: {
+            orderBy: {
+              sortOrder: "asc",
+            },
+
+            select: {
+              id: true,
+              title: true,
+              sortOrder: true,
+
+              asset: {
+                select: {
+                  id: true,
+                  relativePath: true,
+                  originalName: true,
+                  width: true,
+                  height: true,
+                  alt: true,
+                },
+              },
+            },
+          },
+
+          detailPdfAsset: {
+            select: {
+              id: true,
+              originalName: true,
+              mimeType: true,
+              size: true,
+            },
+          },
         },
-      );
+      });
 
     clearCacheByNamespace("products");
 

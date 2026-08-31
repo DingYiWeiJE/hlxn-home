@@ -28,6 +28,7 @@ export type PublicSolutionListItem = {
   slug: string;
   summaryParagraphs: unknown;
   highlights: unknown;
+  coverImage: SolutionImage | null;
   workingPrincipleBackgroundImage: SolutionImage | null;
   publishedAt: Date | null;
   detailUrl: string;
@@ -108,6 +109,7 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
     locale,
     status: SolutionStatus.PUBLISHED,
     deletedAt: null,
+    ...(query.type ? { categoryId: query.type } : {}),
     ...(query.keyword
       ? {
           OR: [
@@ -159,6 +161,9 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
         summaryParagraphs: true,
         highlights: true,
         publishedAt: true,
+        coverImageAsset: {
+          select: imageSelect,
+        },
         workingPrincipleBackgroundAsset: {
           select: imageSelect,
         },
@@ -182,6 +187,7 @@ export async function getPublicSolutions(query: PublicSolutionListQuery) {
         slug: item.slug,
         summaryParagraphs: item.summaryParagraphs,
         highlights: item.highlights,
+        coverImage: formatImage(item.coverImageAsset),
         workingPrincipleBackgroundImage: formatImage(
           item.workingPrincipleBackgroundAsset,
         ),

@@ -27,7 +27,7 @@ interface ApiSolution {
   title: string;
   slug: string;
   locale?: Locale;
-  coverImageAsset?: {
+  coverImage?: {
     url?: string | null;
   } | null;
 }
@@ -135,7 +135,7 @@ export default function SolutionCatalog({ locale }: { locale: Locale }) {
           items.map((item: ApiSolution) => ({
             id: item.id,
             title: item.title,
-            image: item.coverImageAsset?.url ?? null,
+            image: item.coverImage?.url ?? null,
             slug: item.slug,
             href: `/${locale}/solutions/${item.slug}`,
           }))

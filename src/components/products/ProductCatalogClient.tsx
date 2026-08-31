@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   type FormEvent,
   useMemo,
@@ -17,6 +18,8 @@ import {
   memo,
   useEffect,
 } from "react";
+
+import { productEmitter } from "@/lib/products-events";
 
 type ProductLocale = "zh" | "en";
 
@@ -158,8 +161,17 @@ export default function ProductCatalogClient({
 }: Props) {
   const text = labels[locale];
   const sectionRef = useRef<HTMLElement>(null);
+  const searchParams = useSearchParams();
 
-  const [selectedPrimaryCategoryId, setSelectedPrimaryCategoryId] = useState("");
+  const initialPrimaryCategoryId = (() => {
+    const raw = searchParams.get("primaryCategory");
+    if (!raw) return "";
+    return primaryCategories.some((c) => c.id === raw) ? raw : "";
+  })();
+
+  const [selectedPrimaryCategoryId, setSelectedPrimaryCategoryId] = useState(
+    initialPrimaryCategoryId,
+  );
   const [selectedSecondaryCategoryId, setSelectedSecondaryCategoryId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [keywordInput, setKeywordInput] = useState("");
@@ -173,6 +185,30 @@ export default function ProductCatalogClient({
     setKeyword("");
     setCurrentPage(1);
   }, [locale]);
+
+  // 监听导航栏的一级分类切换事件
+  useEffect(() => {
+    const handleChangeProductCategory = (categoryId: string | null) => {
+      setSelectedPrimaryCategoryId(categoryId ?? "");
+      setSelectedSecondaryCategoryId("");
+      setKeywordInput("");
+      setKeyword("");
+      setCurrentPage(1);
+
+      window.requestAnimationFrame(() => {
+        sectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    };
+
+    productEmitter.on("changeProductCategory", handleChangeProductCategory);
+
+    return () => {
+      productEmitter.off("changeProductCategory", handleChangeProductCategory);
+    };
+  }, []);
 
   // 计算可见的二级分类
   const visibleSecondaryCategories = useMemo(() => {
