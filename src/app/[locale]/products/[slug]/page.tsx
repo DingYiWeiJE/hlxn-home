@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import {
   setRequestLocale,
 } from "next-intl/server";
@@ -10,6 +9,7 @@ import type { Metadata } from "next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
 import { ProductTracker } from "@/components/analytics/Tracker";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 type ProductLocale = "zh" | "en";
 
@@ -879,52 +879,3 @@ async function fetchProductDetail(
   }
 }
 
-async function getSiteOrigin(): Promise<string> {
-  const configuredOrigin =
-    process.env
-      .NEXT_PUBLIC_SITE_URL ??
-    process.env.APP_ORIGIN ??
-    process.env
-      .NEXT_PUBLIC_API_BASE_URL;
-
-  if (configuredOrigin) {
-    return configuredOrigin.replace(
-      /\/+$/,
-      "",
-    );
-  }
-
-  const requestHeaders =
-    await headers();
-
-  const host =
-    requestHeaders.get(
-      "x-forwarded-host",
-    ) ??
-    requestHeaders.get("host");
-
-  if (!host) {
-    return "http://localhost:3000";
-  }
-
-  const forwardedProtocol =
-    requestHeaders.get(
-      "x-forwarded-proto",
-    );
-
-  const isLocal =
-    host.startsWith(
-      "localhost",
-    ) ||
-    host.startsWith(
-      "127.0.0.1",
-    );
-
-  const protocol =
-    forwardedProtocol ??
-    (isLocal
-      ? "http"
-      : "https");
-
-  return `${protocol}://${host}`;
-}
