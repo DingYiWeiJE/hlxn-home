@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     return ok(data, {
       headers: {
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+        "Cache-Control": "private, no-store",
       },
     });
   } catch (error) {
