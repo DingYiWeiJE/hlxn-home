@@ -191,11 +191,11 @@ export default function DevelopmentHistory({ locale, translations }: Props) {
                               : "text-[#606b77] hover:text-[#0759a6]",
                           ].join(" ")}
                         >
-                          <span className="min-w-[30px] font-semibold">
-                            {event.time}:
-                          </span>
+                          {/* <span className="min-w-[30px] font-semibold">
+                            
+                          </span> */}
 
-                          <span>{event.content}</span>
+                          <span>{event.time}:{event.content}</span>
                         </button>
                       );
                     })}
