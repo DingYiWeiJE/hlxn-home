@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
+import PageHero from "@/components/PageHero";
 import SolutionCatalogNew from "@/components/solutions/SolutionCatalogNew";
 
 type Props = {
@@ -38,30 +37,15 @@ export default async function SolutionsPage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <section className="relative flex h-[60vh] min-h-[420px] flex-col overflow-hidden">
-        <Image
-          src="/images/solutions/solutions-bg.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-[#001524]/60" />
-        <div className="relative z-10 flex h-full flex-col">
-          <Navigation />
-          <div className="flex flex-1 items-center">
-            <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-              <h1 className="max-w-3xl text-[3rem] font-bold text-white ">
-                {t("solutionsPageContent.heroTitle")}
-              </h1>
-              <p className="mt-4 max-w-2xl text-lg leading-8 text-white md:text-xl">
-                {t("solutionsPageContent.heroSubtitle")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        location="SOLUTIONS"
+        fallbackImage="/images/solutions/solutions-bg.jpg"
+        title={t("solutionsPageContent.heroTitle")}
+        subtitle={t("solutionsPageContent.heroSubtitle")}
+        heightClassName="h-[60vh] min-h-[420px]"
+        titleClassName="max-w-3xl text-[3rem] font-bold text-white"
+        subtitleClassName="mt-4 max-w-2xl text-lg leading-8 text-white md:text-xl"
+      />
 
       <main className="flex-1">
         <Suspense fallback={<div className="min-h-96" />}>

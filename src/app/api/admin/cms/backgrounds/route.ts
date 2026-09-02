@@ -5,8 +5,8 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { ok, fail } from "@/lib/api/response";
 import { ApiError } from "@/lib/api/errors";
 import { deleteFromQiniu } from "@/lib/cms/qiniu";
-import { revalidatePath } from "next/cache";
-import { clearCacheByNamespace } from "@/lib/cache";
+import { CMS_BACKGROUNDS_CACHE_TAG } from "@/lib/cms/backgrounds";
+import { revalidatePath, revalidateTag } from "next/cache";
 import * as qiniu from "qiniu";
 
 export const runtime = "nodejs";
@@ -132,9 +132,8 @@ export async function POST(request: Request) {
       },
     });
 
-    // 重置缓存
     revalidatePath("/api/cms/backgrounds");
-    clearCacheByNamespace("cms-backgrounds");
+    revalidateTag(CMS_BACKGROUNDS_CACHE_TAG, { expire: 0 });
 
     return ok(background, { status: 201 });
   } catch (error) {
@@ -197,9 +196,8 @@ export async function DELETE(request: Request) {
       where: { id: background.id },
     });
 
-    // 重置缓存
     revalidatePath("/api/cms/backgrounds");
-    clearCacheByNamespace("cms-backgrounds");
+    revalidateTag(CMS_BACKGROUNDS_CACHE_TAG, { expire: 0 });
 
     return ok({ success: true });
   } catch (error) {

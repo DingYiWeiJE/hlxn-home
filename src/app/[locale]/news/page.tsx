@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
+import PageHero from "@/components/PageHero";
 import NewsList from "./components/NewsList";
 
 type Props = {
@@ -21,28 +21,17 @@ export const dynamic = "force-dynamic";
 export default async function LocaleNews({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations({ locale });
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div
-        className="relative flex h-[60vh] flex-col bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/images/news/news-bg.jpg')",
-          backgroundAttachment: "fixed",
-        }}
-      >
-        <div className="absolute inset-0 bg-[#070614] opacity-50" />
-        <div className="relative flex h-full flex-col">
-          <Navigation />
-          <div className="flex flex-1 flex-col items-start justify-center">
-            <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-              <h1 className="mb-4 text-[3rem] font-bold text-white">
-                新闻中心
-              </h1>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        location="NEWS"
+        fallbackImage="/images/news/news-bg.jpg"
+        title={t("newsPage.title")}
+        subtitle={t("newsPage.subtitle")}
+        overlayClassName="bg-[#070614] opacity-50"
+      />
       <NewsList />
       <Footer locale={locale} />
     </div>

@@ -1,9 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/SiteFooter";
+import PageHero from "@/components/PageHero";
 import type { Metadata } from "next";
-import Image from "next/image";
 import ProductCatalog from "../../../components/products/ProductCatalog";
 
 export const dynamic = 'force-dynamic';
@@ -32,34 +31,14 @@ async function ProductsContent({ locale }: { locale: string }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="relative flex h-[60vh] flex-col overflow-hidden">
-        <Image
-          src="/images/products/product_bg.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-
-        <div className="absolute inset-0 bg-[#001524]/50" />
-
-        <div className="relative z-10 flex h-full flex-col">
-          <Navigation />
-
-          <div className="flex flex-1 flex-col items-start justify-center">
-            <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-              <h1 className="mb-4 text-[3rem] font-bold text-white">
-                {page.heroTitle}
-              </h1>
-
-              <p className="max-w-2xl text-lg text-white md:text-xl">
-                {page.heroSubtitle}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        location="PRODUCTS"
+        fallbackImage="/images/products/product_bg.jpg"
+        title={page.heroTitle}
+        subtitle={page.heroSubtitle}
+        overlayClassName="bg-[#001524]/50"
+        subtitleClassName="max-w-2xl text-lg text-white md:text-xl"
+      />
       <main>
         <section className="bg-[#eaf7ff] py-20 lg:py-28">
           <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
