@@ -72,6 +72,19 @@ const DESKTOP_METRICS: SlideMetrics = {
   rotateDeg: 0,
 };
 
+// 把 "210 / 297" 这类 CSS aspect-ratio 字符串解析成 宽/高 数值。
+function parseAspectRatio(value: string): number {
+  const [widthPart, heightPart] = value.split("/");
+  const width = Number.parseFloat(widthPart ?? "");
+  const height = Number.parseFloat(heightPart ?? "");
+
+  if (Number.isFinite(width) && Number.isFinite(height) && height > 0) {
+    return width / height;
+  }
+
+  return 1;
+}
+
 function normalizeIndex(index: number, length: number) {
   return ((index % length) + length) % length;
 }
@@ -112,6 +125,14 @@ export default function Carousel3DClient({
   const metrics = isDesktop ? DESKTOP_METRICS : MOBILE_METRICS;
   // 多渲染一层用于淡出动画，避免图片超出可见范围时直接消失。
   const renderRange = metrics.visibleOffset + 1;
+
+  // 容器的宽高比不能直接用图片本身的宽高比：中间图片只占容器宽度的
+  // centerWidthPercent%，如果容器整体也按图片比例来算高度，会比实际
+  // 可见内容高出很多，在图片上下留出大片空白。这里反过来，按“中间图片
+  // 缩放后的宽度”换算出容器应有的宽高比。
+  const imageRatio = parseAspectRatio(imageAspectRatio);
+  const containerAspectRatio =
+    imageRatio * (100 / metrics.centerWidthPercent);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
@@ -214,7 +235,7 @@ export default function Carousel3DClient({
         <div
           className="relative mx-auto overflow-hidden"
           style={{
-            aspectRatio: imageAspectRatio,
+            aspectRatio: containerAspectRatio,
             perspective: "1600px",
           }}
           onTouchStart={handleTouchStart}

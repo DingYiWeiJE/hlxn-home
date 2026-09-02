@@ -9,6 +9,7 @@ import ImageCarousel from "@/components/home/carousel/ImageCarousel";
 import Carousel3D from "@/components/home/carousel/Carousel3D";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
+import { getCmsCompanyHonors } from "@/lib/cms/company-honors";
 import DevelopmentHistory from "@/components/about/DevelopmentHistory";
 import FadeAnimation from "@/components/FadeAnimation";
 
@@ -25,6 +26,15 @@ async function getAboutHistoryItems(locale: CompanyHistoryLocale) {
     return await getCompanyHistoryByLocale(locale);
   } catch (error) {
     console.warn("[About] Failed to load company history items.", error);
+    return [];
+  }
+}
+
+async function getAboutHonorImages() {
+  try {
+    return await getCmsCompanyHonors();
+  } catch (error) {
+    console.warn("[About] Failed to load company honor images.", error);
     return [];
   }
 }
@@ -253,6 +263,7 @@ async function PatentSection({ locale }: { locale: string }) {
     number: number;
     label: string;
   }>;
+  const honorImages = await getAboutHonorImages();
 
   return (
     <section className="bg-[#eaf7ff] py-8 lg:py-20">
@@ -287,12 +298,7 @@ async function PatentSection({ locale }: { locale: string }) {
           {t("aboutPage.honorTitle")}
         </h2>
         <Carousel3D
-          images={[
-            "/images/about/patent-1.jpeg",
-            "/images/about/patent-2.jpeg",
-            "/images/about/patent-3.jpeg",
-            "/images/about/patent-4.jpeg",
-          ]}
+          images={honorImages}
           imageFit="contain"
           imageAspectRatio="210 / 297"
           imagePriorityCount={4}
