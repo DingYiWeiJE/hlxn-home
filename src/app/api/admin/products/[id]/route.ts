@@ -37,6 +37,9 @@ const productDetailSelect = {
   specificationHeaders: true,
   specificationRows: true,
 
+  keyParametersTitle: true,
+  keyParametersItems: true,
+
   coverImageAssetId: true,
   introBackgroundImageAssetId: true,
   detailPdfAssetId: true,
@@ -174,6 +177,10 @@ function formatProductDetail(
     product.specificationHeaders !== null ||
     product.specificationRows !== null;
 
+  const hasKeyParameters =
+    product.keyParametersTitle !== null ||
+    product.keyParametersItems !== null;
+
   return {
     id: product.id,
     locale: product.locale,
@@ -238,6 +245,16 @@ function formatProductDetail(
 
           rows:
             product.specificationRows ?? [],
+        }
+      : null,
+
+    keyParameters: hasKeyParameters
+      ? {
+          title:
+            product.keyParametersTitle ?? "",
+
+          items:
+            product.keyParametersItems ?? [],
         }
       : null,
 
@@ -602,6 +619,25 @@ export async function PATCH(
 
                       specificationRows:
                         body.specification.rows,
+                    }
+                : {}),
+
+              ...(body.keyParameters !==
+              undefined
+                ? body.keyParameters === null
+                  ? {
+                      keyParametersTitle:
+                        null,
+
+                      keyParametersItems:
+                        Prisma.DbNull,
+                    }
+                  : {
+                      keyParametersTitle:
+                        body.keyParameters.title,
+
+                      keyParametersItems:
+                        body.keyParameters.items,
                     }
                 : {}),
 

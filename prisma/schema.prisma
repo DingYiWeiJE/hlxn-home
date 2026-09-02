@@ -367,6 +367,9 @@ model Product {
   specificationHeaders Json?
   specificationRows    Json?
 
+  keyParametersTitle String?
+  keyParametersItems Json?
+
   // 产品封面图片
   coverImageAssetId String?
 

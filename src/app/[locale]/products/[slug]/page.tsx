@@ -71,6 +71,11 @@ type ProductDetail = {
     rows: unknown;
   } | null;
 
+  keyParameters: {
+    title: string;
+    items: unknown;
+  } | null;
+
   applications: Array<{
     id: string;
     title: string;
@@ -111,6 +116,7 @@ const labels = {
     productIntroduction: "产品介绍",
     productAdvantages: "产品优势",
     specifications: "规格参数",
+    keyParameters: "主要技术参数",
     applications: "应用场景",
     downloadPdf: "下载产品资料",
     backToProducts: "返回产品中心",
@@ -123,6 +129,8 @@ const labels = {
     productAdvantages:
       "Product Advantages",
     specifications: "Specifications",
+    keyParameters:
+      "Key Technical Parameters",
     applications: "Applications",
     downloadPdf: "Download Product PDF",
     backToProducts: "Back to Products",
@@ -270,6 +278,14 @@ export default async function ProductDetailPage({
     specificationHeaders.length >
       0;
 
+  const keyParameterItems =
+    toKeyValueItems(
+      product.keyParameters?.items,
+    );
+
+  const hasKeyParameters =
+    keyParameterItems.length > 0;
+
   const hasApplications =
     product.applications.length >
     0;
@@ -407,6 +423,15 @@ export default async function ProductDetailPage({
                 href="#specifications"
                 label={
                   text.specifications
+                }
+              />
+            ) : null}
+
+            {hasKeyParameters ? (
+              <AnchorLink
+                href="#key-parameters"
+                label={
+                  text.keyParameters
                 }
               />
             ) : null}
@@ -611,6 +636,51 @@ export default async function ProductDetailPage({
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {/* 主要技术参数 */}
+        {hasKeyParameters ? (
+          <section
+            id="key-parameters"
+            className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
+          >
+            <div className="mx-auto w-full max-w-[900px]">
+              <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                <div className="bg-[#2364c7] px-6 py-5 text-center">
+                  <h2 className="text-lg font-bold tracking-wide text-white sm:text-xl">
+                    {product
+                      .keyParameters
+                      ?.title ||
+                      text.keyParameters}
+                  </h2>
+                </div>
+
+                <dl>
+                  {keyParameterItems.map(
+                    (item, index) => (
+                      <div
+                        key={`${item.key}-${index}`}
+                        className={[
+                          "grid grid-cols-[minmax(110px,32%)_1fr] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0 sm:grid-cols-[220px_1fr] sm:px-8 sm:py-5",
+                          index % 2 === 0
+                            ? "bg-white"
+                            : "bg-slate-100",
+                        ].join(" ")}
+                      >
+                        <dt className="text-sm font-bold text-[#1f5aa8] sm:text-base">
+                          {item.key}
+                        </dt>
+
+                        <dd className="text-sm leading-6 text-slate-700 sm:text-base">
+                          {item.value}
+                        </dd>
+                      </div>
+                    ),
+                  )}
+                </dl>
               </div>
             </div>
           </section>
@@ -829,6 +899,44 @@ function toStringMatrix(
           ? cell
           : String(cell ?? ""),
       ),
+    );
+}
+
+function toKeyValueItems(
+  value: unknown,
+): Array<{
+  key: string;
+  value: string;
+}> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(
+      (
+        item,
+      ): item is Record<
+        string,
+        unknown
+      > =>
+        typeof item === "object" &&
+        item !== null,
+    )
+    .map((item) => ({
+      key:
+        typeof item.key === "string"
+          ? item.key
+          : "",
+      value:
+        typeof item.value === "string"
+          ? item.value
+          : "",
+    }))
+    .filter(
+      (item) =>
+        item.key.trim().length > 0 &&
+        item.value.trim().length > 0,
     );
 }
 

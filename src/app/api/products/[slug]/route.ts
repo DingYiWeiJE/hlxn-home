@@ -42,6 +42,9 @@ const productDetailSelect = {
   specificationHeaders: true,
   specificationRows: true,
 
+  keyParametersTitle: true,
+  keyParametersItems: true,
+
   publishedAt: true,
   createdAt: true,
   updatedAt: true,
@@ -193,6 +196,10 @@ function formatProductDetail(
     product.specificationHeaders !== null ||
     product.specificationRows !== null;
 
+  const hasKeyParameters =
+    product.keyParametersTitle !== null ||
+    product.keyParametersItems !== null;
+
   const coverImage =
     product.coverImageAsset &&
     product.coverImageAsset.type ===
@@ -328,6 +335,16 @@ function formatProductDetail(
 
           rows:
             product.specificationRows ?? [],
+        }
+      : null,
+
+    keyParameters: hasKeyParameters
+      ? {
+          title:
+            product.keyParametersTitle ?? "",
+
+          items:
+            product.keyParametersItems ?? [],
         }
       : null,
 

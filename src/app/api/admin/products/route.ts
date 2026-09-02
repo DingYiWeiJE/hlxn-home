@@ -382,6 +382,15 @@ export async function POST(request: Request) {
               ? body.specification.rows
               : Prisma.DbNull,
 
+          keyParametersTitle:
+            body.keyParameters?.title ??
+            null,
+
+          keyParametersItems:
+            body.keyParameters
+              ? body.keyParameters.items
+              : Prisma.DbNull,
+
           coverImageAssetId:
             body.coverImageAssetId ??
             null,
@@ -459,6 +468,9 @@ export async function POST(request: Request) {
           specificationTitle: true,
           specificationHeaders: true,
           specificationRows: true,
+
+          keyParametersTitle: true,
+          keyParametersItems: true,
 
           status: true,
           sortOrder: true,
