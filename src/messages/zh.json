@@ -101,7 +101,9 @@
     "title": "新闻",
     "back": "返回新闻列表",
     "categoryDynamic": "新闻动态",
-    "categoryEvent": "展会活动"
+    "categoryEvent": "展会活动",
+    "previous": "上一篇",
+    "next": "下一篇"
   },
   "newsPage": {
     "title": "新闻中心",
