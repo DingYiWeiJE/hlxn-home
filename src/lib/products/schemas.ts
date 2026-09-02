@@ -178,8 +178,10 @@ const productFieldsSchema = z.object({
     .trim()
     .min(
       1,
-      "请选择产品介绍背景图",
-    ),
+      "产品介绍背景图素材 ID 不正确",
+    )
+    .optional()
+    .nullable(),
 
   detailPdfAssetId: z
     .string()

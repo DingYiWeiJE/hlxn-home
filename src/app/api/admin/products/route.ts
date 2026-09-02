@@ -396,7 +396,8 @@ export async function POST(request: Request) {
             null,
 
           introBackgroundImageAssetId:
-            body.introBackgroundImageAssetId,
+            body.introBackgroundImageAssetId ??
+            null,
 
           detailPdfAssetId:
             body.detailPdfAssetId ??

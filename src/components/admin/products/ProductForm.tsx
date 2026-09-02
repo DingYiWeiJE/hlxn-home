@@ -875,14 +875,6 @@ export default function ProductForm({
         );
       }
 
-      if (
-        !introBackgroundImage?.id
-      ) {
-        throw new Error(
-          "请选择产品介绍背景图",
-        );
-      }
-
       validateImageItems(
         advantages,
         "产品优势",
@@ -927,7 +919,8 @@ export default function ProductForm({
           coverImage?.id ?? null,
 
         introBackgroundImageAssetId:
-          introBackgroundImage.id,
+          introBackgroundImage?.id ??
+          null,
 
         advantages:
           advantages.map(
@@ -1535,9 +1528,6 @@ export default function ProductForm({
               <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                 <h2 className="text-sm font-bold text-slate-900">
                   产品介绍背景图
-                  <span className="ml-1 text-red-500">
-                    *
-                  </span>
                 </h2>
 
                 {introBackgroundImage ? (
@@ -1625,7 +1615,7 @@ export default function ProductForm({
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-                  该图片用于产品详情页的产品介绍背景区域，创建产品时必须选择。
+                  该图片用于产品详情页的产品介绍背景区域，可选；不上传时该区域将使用纯色背景。
                 </p>
               </div>
             </section>
