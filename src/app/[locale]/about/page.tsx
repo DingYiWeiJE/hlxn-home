@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import StrategicLayoutMapSection from "@/components/strategic-layout/StrategicLayoutMapSection";
 import ImageCarousel from "@/components/home/carousel/ImageCarousel";
+import Carousel3D from "@/components/home/carousel/Carousel3D";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
 import DevelopmentHistory from "@/components/about/DevelopmentHistory";
@@ -285,7 +286,7 @@ async function PatentSection({ locale }: { locale: string }) {
         <h2 className="text-center text-[#2A62BB] text-[3rem] mt-12 md:mt-5rem font-bold">
           {t("aboutPage.honorTitle")}
         </h2>
-        <ImageCarousel
+        <Carousel3D
           images={[
             "/images/about/patent-1.jpeg",
             "/images/about/patent-2.jpeg",
@@ -294,7 +295,6 @@ async function PatentSection({ locale }: { locale: string }) {
           ]}
           imageFit="contain"
           imageAspectRatio="210 / 297"
-          desktopVisibleCount={4}
           imagePriorityCount={4}
         />
       </div>
