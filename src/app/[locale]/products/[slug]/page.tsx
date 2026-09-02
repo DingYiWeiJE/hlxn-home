@@ -268,6 +268,10 @@ export default async function ProductDetailPage({
       0 ||
     summaryParagraphs.length > 0;
 
+  const hasIntroBackground = Boolean(
+    product.introBackgroundImage?.url,
+  );
+
   const hasAdvantages =
     product.advantages.length > 0;
 
@@ -454,40 +458,66 @@ export default async function ProductDetailPage({
             className="scroll-mt-24"
           >
             <div
-              className="relative flex min-h-[440px] items-center justify-center overflow-hidden bg-slate-800 px-5 py-16 sm:min-h-[520px] sm:px-8 lg:min-h-[620px]"
+              className={[
+                "relative flex min-h-[440px] items-center justify-center overflow-hidden px-5 py-16 sm:min-h-[520px] sm:px-8 lg:min-h-[620px]",
+                hasIntroBackground
+                  ? "bg-slate-800"
+                  : "bg-[#F7FAFC]",
+              ].join(" ")}
             >
-              {product
-                .introBackgroundImage
-                ?.url ? (
-                <Image
-                  src={
-                    product
-                      .introBackgroundImage
-                      .url
-                  }
-                  alt={
-                    product
-                      .introBackgroundImage
-                      .alt ||
-                    `${product.name}产品介绍`
-                  }
-                  fill
-                  unoptimized
-                  sizes="100vw"
-                  className="object-cover"
-                />
+              {hasIntroBackground ? (
+                <>
+                  <Image
+                    src={
+                      product
+                        .introBackgroundImage!
+                        .url
+                    }
+                    alt={
+                      product
+                        .introBackgroundImage!
+                        .alt ||
+                      `${product.name}产品介绍`
+                    }
+                    fill
+                    unoptimized
+                    sizes="100vw"
+                    className="object-cover"
+                  />
+
+                  <div className="absolute inset-0 bg-slate-950/45" />
+                </>
               ) : null}
 
-              <div className="absolute inset-0 bg-slate-950/45" />
-
-              <div className="relative z-10 mx-auto w-full max-w-4xl text-center text-white">
-                <h2 className="text-[3rem] font-bold tracking-wide">
+              <div
+                className={[
+                  "relative z-10 mx-auto w-full max-w-4xl text-center",
+                  hasIntroBackground
+                    ? "text-white"
+                    : "text-slate-700",
+                ].join(" ")}
+              >
+                <h2
+                  className={[
+                    "text-[3rem] font-bold tracking-wide",
+                    hasIntroBackground
+                      ? "text-white"
+                      : "text-[#2364c7]",
+                  ].join(" ")}
+                >
                   {
                     text.productIntroduction
                   }
                 </h2>
 
-                <div className="mx-auto mt-7 max-w-3xl space-y-4 text-sm leading-8 text-white/95 sm:text-base sm:leading-9">
+                <div
+                  className={[
+                    "mx-auto mt-7 max-w-3xl space-y-4 text-sm leading-8 sm:text-base sm:leading-9",
+                    hasIntroBackground
+                      ? "text-white/95"
+                      : "text-slate-600",
+                  ].join(" ")}
+                >
                   {introductionParagraphs.length >
                   0 ? (
                     introductionParagraphs.map(
