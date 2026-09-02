@@ -115,7 +115,6 @@ const labels = {
     downloadPdf: "下载产品资料",
     backToProducts: "返回产品中心",
     productCategory: "产品分类",
-    noSpecifications: "暂无规格参数",
   },
 
   en: {
@@ -128,8 +127,6 @@ const labels = {
     downloadPdf: "Download Product PDF",
     backToProducts: "Back to Products",
     productCategory: "Category",
-    noSpecifications:
-      "No specifications available",
   },
 } satisfies Record<
   ProductLocale,
@@ -258,6 +255,29 @@ export default async function ProductDetailPage({
       product.specification?.rows,
     );
 
+  const hasIntroduction =
+    introductionParagraphs.length >
+      0 ||
+    summaryParagraphs.length > 0;
+
+  const hasAdvantages =
+    product.advantages.length > 0;
+
+  const hasSpecifications =
+    Boolean(
+      product.specification,
+    ) &&
+    specificationHeaders.length >
+      0;
+
+  const hasApplications =
+    product.applications.length >
+    0;
+
+  const hasDetailPdf = Boolean(
+    product.detailPdf,
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <div className="border-b border-slate-100 bg-white">
@@ -364,127 +384,136 @@ export default async function ProductDetailPage({
         {/* 锚点导航 */}
         <nav className="sticky top-0 z-30 border-y border-slate-100 bg-white/95 shadow-sm backdrop-blur">
           <div className="mx-auto flex w-full max-w-[1100px] overflow-x-auto px-4 sm:justify-center sm:px-6">
-            <AnchorLink
-              href="#introduction"
-              label={
-                text.productIntroduction
-              }
-            />
+            {hasIntroduction ? (
+              <AnchorLink
+                href="#introduction"
+                label={
+                  text.productIntroduction
+                }
+              />
+            ) : null}
 
-            <AnchorLink
-              href="#advantages"
-              label={
-                text.productAdvantages
-              }
-            />
+            {hasAdvantages ? (
+              <AnchorLink
+                href="#advantages"
+                label={
+                  text.productAdvantages
+                }
+              />
+            ) : null}
 
-            <AnchorLink
-              href="#specifications"
-              label={
-                text.specifications
-              }
-            />
+            {hasSpecifications ? (
+              <AnchorLink
+                href="#specifications"
+                label={
+                  text.specifications
+                }
+              />
+            ) : null}
 
-            <AnchorLink
-              href="#applications"
-              label={
-                text.applications
-              }
-            />
+            {hasApplications ? (
+              <AnchorLink
+                href="#applications"
+                label={
+                  text.applications
+                }
+              />
+            ) : null}
           </div>
         </nav>
 
         {/* 产品介绍 */}
-        <section
-          id="introduction"
-          className="scroll-mt-24"
-        >
-          <div
-            className="relative flex min-h-[440px] items-center justify-center overflow-hidden bg-slate-800 px-5 py-16 sm:min-h-[520px] sm:px-8 lg:min-h-[620px]"
+        {hasIntroduction ? (
+          <section
+            id="introduction"
+            className="scroll-mt-24"
           >
-            {product
-              .introBackgroundImage
-              ?.url ? (
-              <Image
-                src={
-                  product
-                    .introBackgroundImage
-                    .url
-                }
-                alt={
-                  product
-                    .introBackgroundImage
-                    .alt ||
-                  `${product.name}产品介绍`
-                }
-                fill
-                unoptimized
-                sizes="100vw"
-                className="object-cover"
-              />
-            ) : null}
+            <div
+              className="relative flex min-h-[440px] items-center justify-center overflow-hidden bg-slate-800 px-5 py-16 sm:min-h-[520px] sm:px-8 lg:min-h-[620px]"
+            >
+              {product
+                .introBackgroundImage
+                ?.url ? (
+                <Image
+                  src={
+                    product
+                      .introBackgroundImage
+                      .url
+                  }
+                  alt={
+                    product
+                      .introBackgroundImage
+                      .alt ||
+                    `${product.name}产品介绍`
+                  }
+                  fill
+                  unoptimized
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              ) : null}
 
-            <div className="absolute inset-0 bg-slate-950/45" />
+              <div className="absolute inset-0 bg-slate-950/45" />
 
-            <div className="relative z-10 mx-auto w-full max-w-4xl text-center text-white">
-              <h2 className="text-[3rem] font-bold tracking-wide">
-                {
-                  text.productIntroduction
-                }
-              </h2>
+              <div className="relative z-10 mx-auto w-full max-w-4xl text-center text-white">
+                <h2 className="text-[3rem] font-bold tracking-wide">
+                  {
+                    text.productIntroduction
+                  }
+                </h2>
 
-              <div className="mx-auto mt-7 max-w-3xl space-y-4 text-sm leading-8 text-white/95 sm:text-base sm:leading-9">
-                {introductionParagraphs.length >
-                0 ? (
-                  introductionParagraphs.map(
-                    (
-                      paragraph,
-                      index,
-                    ) => (
-                      <p
-                        className="intro"
-                        key={index}
-                      >
-                        {
-                          paragraph
-                        }
-                      </p>
-                    ),
-                  )
-                ) : (
-                  summaryParagraphs.map(
-                    (
-                      paragraph,
-                      index,
-                    ) => (
-                      <p
-                        className="intro"
-                        key={index}
-                      >
-                        {
-                          paragraph
-                        }
-                      </p>
-                    ),
-                  )
-                )}
+                <div className="mx-auto mt-7 max-w-3xl space-y-4 text-sm leading-8 text-white/95 sm:text-base sm:leading-9">
+                  {introductionParagraphs.length >
+                  0 ? (
+                    introductionParagraphs.map(
+                      (
+                        paragraph,
+                        index,
+                      ) => (
+                        <p
+                          className="intro"
+                          key={index}
+                        >
+                          {
+                            paragraph
+                          }
+                        </p>
+                      ),
+                    )
+                  ) : (
+                    summaryParagraphs.map(
+                      (
+                        paragraph,
+                        index,
+                      ) => (
+                        <p
+                          className="intro"
+                          key={index}
+                        >
+                          {
+                            paragraph
+                          }
+                        </p>
+                      ),
+                    )
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         {/* 产品优势 */}
-        <section
-          id="advantages"
-          className="scroll-mt-24 bg-[#eaf7ff] px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
-        >
-          <div className="mx-auto w-full max-w-[1100px]">
-            <SectionTitle>
-              {text.productAdvantages}
-            </SectionTitle>
+        {hasAdvantages ? (
+          <section
+            id="advantages"
+            className="scroll-mt-24 bg-[#eaf7ff] px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
+          >
+            <div className="mx-auto w-full max-w-[1100px]">
+              <SectionTitle>
+                {text.productAdvantages}
+              </SectionTitle>
 
-            {product.advantages.length >
-            0 ? (
               <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {product.advantages.map(
                   (item) => (
@@ -500,25 +529,23 @@ export default async function ProductDetailPage({
                   ),
                 )}
               </div>
-            ) : null}
-          </div>
-        </section>
+            </div>
+          </section>
+        ) : null}
 
         {/* 规格参数 */}
-        <section
-          id="specifications"
-          className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
-        >
-          <div className="mx-auto w-full max-w-[900px]">
-            <SectionTitle>
-              {product.specification
-                ?.title ||
-                text.specifications}
-            </SectionTitle>
+        {hasSpecifications ? (
+          <section
+            id="specifications"
+            className="scroll-mt-24 bg-white px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
+          >
+            <div className="mx-auto w-full max-w-[900px]">
+              <SectionTitle>
+                {product.specification
+                  ?.title ||
+                  text.specifications}
+              </SectionTitle>
 
-            {product.specification &&
-            specificationHeaders.length >
-              0 ? (
               <div className="mt-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[680px] border-collapse text-center text-sm">
@@ -585,28 +612,21 @@ export default async function ProductDetailPage({
                   </table>
                 </div>
               </div>
-            ) : (
-              <div className="mt-10 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center text-sm text-slate-500">
-                {
-                  text.noSpecifications
-                }
-              </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        ) : null}
 
         {/* 应用场景 */}
-        <section
-          id="applications"
-          className="scroll-mt-24 bg-[#eaf7ff] px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
-        >
-          <div className="mx-auto w-full max-w-[1000px]">
-            <SectionTitle>
-              {text.applications}
-            </SectionTitle>
+        {hasApplications ? (
+          <section
+            id="applications"
+            className="scroll-mt-24 bg-[#eaf7ff] px-5 py-16 sm:px-8 sm:py-20 lg:py-24"
+          >
+            <div className="mx-auto w-full max-w-[1000px]">
+              <SectionTitle>
+                {text.applications}
+              </SectionTitle>
 
-            {product.applications.length >
-            0 ? (
               <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {product.applications.map(
                   (item) => (
@@ -622,58 +642,58 @@ export default async function ProductDetailPage({
                   ),
                 )}
               </div>
-            ) : null}
-          </div>
-        </section>
+            </div>
+          </section>
+        ) : null}
 
+      {hasDetailPdf ? (
+        <div
+          className="h-[300px] relative bg-cover bg-center flex flex-col items-center justify-center"
+          style={{
+            backgroundImage: "url('/images/products/dy.jpg')",
+          }}
+        >
+          {/* 遮罩 */}
+          <div className="absolute inset-0" style={{ backgroundColor: '#1A589BA6' }}></div>
 
-
-      <div
-        className="h-[300px] relative bg-cover bg-center flex flex-col items-center justify-center"
-        style={{
-          backgroundImage: "url('/images/products/dy.jpg')",
-        }}
-      >
-        {/* 遮罩 */}
-        <div className="absolute inset-0" style={{ backgroundColor: '#1A589BA6' }}></div>
-
-        {/* 内容层 */}
-        <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-          <h2 className="text-[3rem] font-bold text-white">下载产品单页</h2>
-          <a
-            href={
-                   product.detailPdf ? product.detailPdf
-                      .downloadUrl : '#'
-                  }
-            className="
-              inline-flex items-center gap-3
-              rounded-full bg-white
-              px-7 py-3
-              text-base font-medium text-slate-600
-              shadow-sm
-              transition-all duration-200
-              hover:opacity-90 hover:shadow-md
-            "
-          >
-            <span>点击查看</span>
-
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-5 w-5"
-              aria-hidden="true"
+          {/* 内容层 */}
+          <div className="relative flex flex-col items-center justify-center gap-4 text-center">
+            <h2 className="text-[3rem] font-bold text-white">下载产品单页</h2>
+            <a
+              href={
+                product.detailPdf!
+                  .downloadUrl
+              }
+              className="
+                inline-flex items-center gap-3
+                rounded-full bg-white
+                px-7 py-3
+                text-base font-medium text-slate-600
+                shadow-sm
+                transition-all duration-200
+                hover:opacity-90 hover:shadow-md
+              "
             >
-              <path d="M5 12h14" />
-              <path d="m13 6 6 6-6 6" />
-            </svg>
-          </a>
+              <span>点击查看</span>
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </a>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       </main>
 
