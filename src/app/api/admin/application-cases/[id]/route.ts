@@ -4,6 +4,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import {
   updateApplicationCaseSchema,
@@ -43,7 +44,7 @@ export async function GET(
           imageAsset: {
             select: {
               id: true,
-              url: true,
+              relativePath: true,
               width: true,
               height: true,
               alt: true,
@@ -63,7 +64,10 @@ export async function GET(
       );
     }
 
-    return ok(applicationCase);
+    return ok({
+      ...applicationCase,
+      imageAsset: withMediaUrl(applicationCase.imageAsset),
+    });
   } catch (error) {
     return fail(error);
   }

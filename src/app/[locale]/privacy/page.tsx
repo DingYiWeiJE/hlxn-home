@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title:
       locale === "zh"
         ? "隐私政策 | 汉理新能源"
-        : "Privacy Policy | Hanli New Energy",
+        : "Privacy Policy | Hanly Energy",
     description:
       locale === "zh"
         ? "了解汉理新能源的隐私政策和数据保护实践"
-        : "Learn about Hanli New Energy's privacy policy and data protection practices",
+        : "Learn about Hanly Energy's privacy policy and data protection practices",
   };
 }
 

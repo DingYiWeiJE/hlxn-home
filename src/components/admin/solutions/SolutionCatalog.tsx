@@ -4,6 +4,7 @@ import {
   ChevronDown,
   Edit3,
   Eye,
+  ImageIcon,
   Languages,
   Loader2,
   Plus,
@@ -12,6 +13,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import {
@@ -19,6 +21,7 @@ import {
   type DataTableColumn,
   type DataTablePaginationProps,
 } from "@/components/admin/DataTable";
+import { isQiniuUrl } from "@/lib/config";
 
 type SolutionLocale = "zh" | "en";
 type SolutionStatus = "DRAFT" | "PUBLISHED";
@@ -26,7 +29,8 @@ type SolutionStatus = "DRAFT" | "PUBLISHED";
 type SolutionItem = {
   id: string;
   locale: SolutionLocale;
-  name: string;
+  title: string;
+  subtitle: string | null;
   slug: string;
   status: SolutionStatus;
   sortOrder: number;
@@ -34,6 +38,14 @@ type SolutionItem = {
   publishedAt: string | null;
   updatedAt: string;
   deletedAt: string | null;
+  coverImage: {
+    id: string;
+    url: string;
+    originalName: string | null;
+    width: number | null;
+    height: number | null;
+    alt: string | null;
+  } | null;
   counts: {
     usageScenarios: number;
     customerValues: number;
@@ -86,20 +98,6 @@ function getErrorMessage(result: ListResponse | MutateResponse): string {
   }
 
   return "Request failed";
-}
-
-function formatDate(value: string | null): string {
-  if (!value) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 }
 
 export default function SolutionCatalog() {
@@ -188,16 +186,39 @@ export default function SolutionCatalog() {
           key: "name",
           label: "名称",
           render: (item) => (
-            <div>
-              <div className="font-semibold text-slate-900">
-                {item.name}
+            <div className="flex min-w-[280px] items-center gap-4">
+              <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                {item.coverImage ? (
+                  <Image
+                    src={item.coverImage.url}
+                    alt={item.coverImage.alt || item.title}
+                    fill
+                    unoptimized={isQiniuUrl(item.coverImage.url)}
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-slate-400">
+                    <ImageIcon className="h-6 w-6" />
+                  </div>
+                )}
               </div>
-              {item.translationKey ? (
-                <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
-                  <Languages className="h-3.5 w-3.5" />
-                  {item.translationKey}
+              <div className="min-w-0">
+                <div className="truncate font-semibold text-slate-900">
+                  {item.title}
                 </div>
-              ) : null}
+                {item.subtitle ? (
+                  <div className="mt-1 truncate text-xs text-slate-500">
+                    {item.subtitle}
+                  </div>
+                ) : null}
+                {item.translationKey ? (
+                  <div className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
+                    <Languages className="h-3.5 w-3.5" />
+                    {item.translationKey}
+                  </div>
+                ) : null}
+              </div>
             </div>
           ),
         },
@@ -236,35 +257,6 @@ export default function SolutionCatalog() {
                 ? "已发布"
                 : "草稿"}
             </span>
-          ),
-        },
-        {
-          key: "sortOrder",
-          label: "排序",
-          render: (item) => (
-            <p className="text-sm">
-              {item.sortOrder}
-            </p>
-          ),
-        },
-        {
-          key: "counts",
-          label: "子项",
-          render: (item) => (
-            <p className="text-sm text-slate-500">
-              场景 {item.counts.usageScenarios} /
-              价值 {item.counts.customerValues}
-            </p>
-          ),
-        },
-        {
-          key: "dates",
-          label: "发布/更新",
-          render: (item) => (
-            <div className="text-xs leading-6 text-slate-500">
-              <div>发布：{formatDate(item.publishedAt)}</div>
-              <div>更新：{formatDate(item.updatedAt)}</div>
-            </div>
           ),
         },
         {
@@ -341,8 +333,8 @@ export default function SolutionCatalog() {
 
     const confirmed =
       action === "delete"
-        ? window.confirm(`确认删除「${item.name}」？`)
-        : window.confirm(`确认恢复「${item.name}」？`);
+        ? window.confirm(`确认删除「${item.title}」？`)
+        : window.confirm(`确认恢复「${item.title}」？`);
 
     if (!confirmed) {
       return;

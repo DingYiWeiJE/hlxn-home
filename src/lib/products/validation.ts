@@ -47,78 +47,85 @@ export type ProductReferenceInput = {
 export async function validateProductReferences(
   input: ProductReferenceInput,
 ): Promise<void> {
-  await validateSecondaryCategory(
-    input.secondaryCategoryId,
-  );
+  /*
+   * 各项引用校验彼此独立，且大多是远程数据库查询。
+   * 使用 Promise.all 并发执行，避免逐条 await 累加网络往返延迟。
+   * 任意一项校验失败都会抛出 ApiError，Promise.all 会立即拒绝。
+   */
+  await Promise.all([
+    validateSecondaryCategory(
+      input.secondaryCategoryId,
+    ),
 
-  await validateSingleImageAsset({
-    assetId:
-      input.coverImageAssetId,
+    validateSingleImageAsset({
+      assetId:
+        input.coverImageAssetId,
 
-    expectedPurpose:
-      MediaAssetPurpose.PRODUCT_COVER,
+      expectedPurpose:
+        MediaAssetPurpose.PRODUCT_COVER,
 
-    fieldName:
-      "coverImageAssetId",
+      fieldName:
+        "coverImageAssetId",
 
-    errorMessage:
-      "产品封面图片不存在、已停用、文件类型不正确或素材用途不匹配",
-  });
+      errorMessage:
+        "产品封面图片不存在、已停用、文件类型不正确或素材用途不匹配",
+    }),
 
-  await validateSingleImageAsset({
-    assetId:
-      input.introBackgroundImageAssetId,
+    validateSingleImageAsset({
+      assetId:
+        input.introBackgroundImageAssetId,
 
-    expectedPurpose:
-      MediaAssetPurpose
-        .PRODUCT_INTRO_BACKGROUND,
+      expectedPurpose:
+        MediaAssetPurpose
+          .PRODUCT_INTRO_BACKGROUND,
 
-    fieldName:
-      "introBackgroundImageAssetId",
+      fieldName:
+        "introBackgroundImageAssetId",
 
-    errorMessage:
-      "产品介绍背景图不存在、已停用、文件类型不正确或素材用途不匹配",
-  });
+      errorMessage:
+        "产品介绍背景图不存在、已停用、文件类型不正确或素材用途不匹配",
+    }),
 
-  await validateImageAssetList({
-    items:
-      input.advantages,
+    validateImageAssetList({
+      items:
+        input.advantages,
 
-    expectedPurposes: [
-      MediaAssetPurpose
-        .PRODUCT_ADVANTAGE,
-      MediaAssetPurpose
-        .PRODUCT_APPLICATION,
-    ],
+      expectedPurposes: [
+        MediaAssetPurpose
+          .PRODUCT_ADVANTAGE,
+        MediaAssetPurpose
+          .PRODUCT_APPLICATION,
+      ],
 
-    fieldName:
-      "advantages",
+      fieldName:
+        "advantages",
 
-    errorMessage:
-      "部分产品优势图片不存在、已停用、文件类型不正确或素材用途不匹配",
-  });
+      errorMessage:
+        "部分产品优势图片不存在、已停用、文件类型不正确或素材用途不匹配",
+    }),
 
-  await validateImageAssetList({
-    items:
-      input.applications,
+    validateImageAssetList({
+      items:
+        input.applications,
 
-    expectedPurposes: [
-      MediaAssetPurpose
-        .PRODUCT_ADVANTAGE,
-      MediaAssetPurpose
-        .PRODUCT_APPLICATION,
-    ],
+      expectedPurposes: [
+        MediaAssetPurpose
+          .PRODUCT_ADVANTAGE,
+        MediaAssetPurpose
+          .PRODUCT_APPLICATION,
+      ],
 
-    fieldName:
-      "applications",
+      fieldName:
+        "applications",
 
-    errorMessage:
-      "部分应用场景图片不存在、已停用、文件类型不正确或素材用途不匹配",
-  });
+      errorMessage:
+        "部分应用场景图片不存在、已停用、文件类型不正确或素材用途不匹配",
+    }),
 
-  await validatePdfAsset(
-    input.detailPdfAssetId,
-  );
+    validatePdfAsset(
+      input.detailPdfAssetId,
+    ),
+  ]);
 }
 
 async function validateSecondaryCategory(

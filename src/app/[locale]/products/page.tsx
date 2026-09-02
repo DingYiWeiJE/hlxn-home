@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
 
   return {
-    title: locale === "zh" ? "产品中心 | 汉理楚能" : "Products | Hanli Chuneng",
+    title: locale === "zh" ? "产品中心 | 汉理新能" : "Products | Hanli Chuneng",
     description:
       locale === "zh"
-        ? "了解汉理楚能的产品解决方案"
+        ? "了解汉理新能的产品解决方案"
         : "Explore Hanli Chuneng's product solutions",
   };
 }

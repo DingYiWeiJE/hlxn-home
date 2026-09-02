@@ -1,4 +1,5 @@
 import ProductCatalogClient from "./ProductCatalogClient";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 type ProductLocale = "zh" | "en";
 
@@ -173,7 +174,7 @@ async function fetchCategories(
   locale: ProductLocale
 ): Promise<CategoryResponse> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+    const baseUrl = await getSiteOrigin();
 
     const response = await fetch(
       `${baseUrl}/api/categories?${new URLSearchParams({
@@ -213,7 +214,7 @@ async function fetchAllProducts(
   locale: ProductLocale
 ): Promise<ProductResponse> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+    const baseUrl = await getSiteOrigin();
 
     // 获取所有产品（不分页，pageSize设置为一个足够大的数）
     const response = await fetch(

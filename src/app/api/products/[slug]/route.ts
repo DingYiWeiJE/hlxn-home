@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { withCache } from "@/lib/cache";
 
@@ -41,6 +42,9 @@ const productDetailSelect = {
   specificationHeaders: true,
   specificationRows: true,
 
+  keyParametersTitle: true,
+  keyParametersItems: true,
+
   publishedAt: true,
   createdAt: true,
   updatedAt: true,
@@ -65,7 +69,7 @@ const productDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       originalName: true,
       mimeType: true,
       width: true,
@@ -80,7 +84,7 @@ const productDetailSelect = {
   select: {
     id: true,
     type: true,
-    url: true,
+    relativePath: true,
     originalName: true,
     mimeType: true,
     width: true,
@@ -119,7 +123,7 @@ const productDetailSelect = {
       asset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           width: true,
           height: true,
           alt: true,
@@ -156,7 +160,7 @@ const productDetailSelect = {
       asset: {
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           width: true,
           height: true,
           alt: true,
@@ -192,6 +196,10 @@ function formatProductDetail(
     product.specificationHeaders !== null ||
     product.specificationRows !== null;
 
+  const hasKeyParameters =
+    product.keyParametersTitle !== null ||
+    product.keyParametersItems !== null;
+
   const coverImage =
     product.coverImageAsset &&
     product.coverImageAsset.type ===
@@ -200,7 +208,9 @@ function formatProductDetail(
     product.coverImageAsset.deletedAt === null
       ? {
           id: product.coverImageAsset.id,
-          url: product.coverImageAsset.url,
+          url: buildMediaUrl(
+            product.coverImageAsset.relativePath,
+          ),
           originalName:
             product.coverImageAsset.originalName,
           mimeType:
@@ -224,8 +234,9 @@ function formatProductDetail(
         id:
           product.introBackgroundImageAsset.id,
 
-        url:
-          product.introBackgroundImageAsset.url,
+        url: buildMediaUrl(
+          product.introBackgroundImageAsset.relativePath,
+        ),
 
         originalName:
           product.introBackgroundImageAsset.originalName,
@@ -304,7 +315,14 @@ function formatProductDetail(
         id: item.id,
         title: item.title,
         sortOrder: item.sortOrder,
-        image: item.asset,
+        image: item.asset
+          ? {
+              ...item.asset,
+              url: buildMediaUrl(
+                item.asset.relativePath,
+              ),
+            }
+          : null,
       })),
 
     specification: hasSpecification
@@ -320,12 +338,29 @@ function formatProductDetail(
         }
       : null,
 
+    keyParameters: hasKeyParameters
+      ? {
+          title:
+            product.keyParametersTitle ?? "",
+
+          items:
+            product.keyParametersItems ?? [],
+        }
+      : null,
+
     applications:
       product.applications.map((item) => ({
         id: item.id,
         title: item.title,
         sortOrder: item.sortOrder,
-        image: item.asset,
+        image: item.asset
+          ? {
+              ...item.asset,
+              url: buildMediaUrl(
+                item.asset.relativePath,
+              ),
+            }
+          : null,
       })),
 
     detailPdf,
@@ -417,15 +452,13 @@ export async function GET(
 
         return formatProductDetail(product);
       },
-      10 * 60 * 1000,
     );
 
     return ok(
       data,
       {
         headers: {
-          "Cache-Control":
-            "public, max-age=60, stale-while-revalidate=300",
+          "Cache-Control": "private, no-store",
         },
       },
     );

@@ -14,7 +14,7 @@ export const publicProductListSelect = {
   summaryParagraphs: true,
   coverImageAsset: {
     select: {
-      url: true,
+      relativePath: true,
     },
   },
 } satisfies Prisma.ProductSelect;

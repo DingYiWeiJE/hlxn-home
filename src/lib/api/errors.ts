@@ -14,8 +14,10 @@ export const errorCodes = [
   "INVALID_MEDIA_PATH",
   "UPLOAD_FAILED",
   "NOT_FOUND",
+  "CONFLICT",
   "BAD_REQUEST",
   "INTERNAL_SERVER_ERROR",
+  "QINIU_DELETE_FAILED",
 ] as const;
 
 export type ApiErrorCode = (typeof errorCodes)[number];

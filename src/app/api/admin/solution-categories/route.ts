@@ -18,8 +18,6 @@ const updateCategorySchema = createCategorySchema.partial();
 
 export async function GET() {
   try {
-    await requireAdminActor();
-
     const categories = await prisma.solutionCategory.findMany({
       where: {
         deletedAt: null,

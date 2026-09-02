@@ -5,7 +5,7 @@ import Footer from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import StrategicLayoutMapSection from "@/components/strategic-layout/StrategicLayoutMapSection";
-import ImageCarousel from "../abHomeComponents/carousel/ImageCarousel";
+import ImageCarousel from "@/components/home/carousel/ImageCarousel";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
 import DevelopmentHistory from "@/components/about/DevelopmentHistory";

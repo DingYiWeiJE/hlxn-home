@@ -21,7 +21,7 @@ const organizationJsonLd = {
     addressCountry: "CN",
     addressRegion: "湖北省",
     addressLocality: "武汉市",
-    streetAddress: "武昌区中北路武汉中央大厦B座九层",
+    streetAddress: "武昌区中北路武汉中交大厦B座九层",
   },
 };
 

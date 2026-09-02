@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/api/errors";
 import { fail } from "@/lib/api/response";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -55,7 +56,7 @@ async function serveMedia(
         },
         select: {
           id: true,
-          url: true,
+          relativePath: true,
           mimeType: true,
         },
       });
@@ -80,7 +81,7 @@ async function serveMedia(
 
     const qiniuResponse =
       await fetchQiniuImage(
-        asset.url,
+        buildMediaUrl(asset.relativePath),
       );
 
     if (!qiniuResponse.ok) {

@@ -17,12 +17,11 @@ export async function GET(request: NextRequest) {
       "solutions",
       query,
       () => getPublicSolutions(query),
-      10 * 60 * 1000,
     );
 
     return ok(data, {
       headers: {
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+        "Cache-Control": "private, no-store",
       },
     });
   } catch (error) {

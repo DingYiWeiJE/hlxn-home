@@ -16,6 +16,7 @@ const getQiniuHostname = (): string => {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  serverExternalPackages: ["qiniu"],
   images: {
     unoptimized: false,
     remotePatterns: [

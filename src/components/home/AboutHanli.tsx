@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 type Props = {
@@ -20,27 +21,27 @@ const AboutHanli: React.FC<Props> = async ({ locale }) => {
           <p>{t("aboutHanli.description2")}</p>
         </div>
 
-        <button
-          type="button"
-          className="group mt-12 inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-[#2f67bd] px-10 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2459a8] hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 sm:mt-14 sm:text-lg"
+        <Link
+          href={`/${locale}/about`}
+          className="group mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#2f67bd] px-8 text-base font-medium text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#2459a8] hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300/50 sm:min-h-14 sm:px-9 sm:text-lg"
         >
           <span>{t("aboutHanli.buttonText")}</span>
 
           <svg
+            aria-hidden="true"
             viewBox="0 0 24 24"
             fill="none"
-            aria-hidden="true"
             className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
           >
             <path
               d="M5 12h13M13 6l6 6-6 6"
               stroke="currentColor"
-              strokeWidth="2.4"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+        </Link>
       </div>
     </section>
   );

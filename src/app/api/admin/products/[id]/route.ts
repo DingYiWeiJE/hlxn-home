@@ -7,6 +7,7 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { ApiError } from "@/lib/api/errors";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import { updateProductSchema } from "@/lib/products/schemas";
 import { validateProductReferences } from "@/lib/products/validation";
@@ -35,6 +36,9 @@ const productDetailSelect = {
   specificationTitle: true,
   specificationHeaders: true,
   specificationRows: true,
+
+  keyParametersTitle: true,
+  keyParametersItems: true,
 
   coverImageAssetId: true,
   introBackgroundImageAssetId: true,
@@ -68,7 +72,7 @@ const productDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       originalName: true,
       mimeType: true,
       size: true,
@@ -82,7 +86,7 @@ const productDetailSelect = {
     select: {
       id: true,
       type: true,
-      url: true,
+      relativePath: true,
       filename: true,
       originalName: true,
       mimeType: true,
@@ -108,7 +112,7 @@ const productDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           originalName: true,
           mimeType: true,
           size: true,
@@ -135,7 +139,7 @@ const productDetailSelect = {
         select: {
           id: true,
           type: true,
-          url: true,
+          relativePath: true,
           originalName: true,
           mimeType: true,
           size: true,
@@ -165,6 +169,46 @@ type ProductDetailPayload =
     select: typeof productDetailSelect;
   }>;
 
+/**
+ * 判断产品优势 / 应用场景两组图片项是否与已存储的内容一致。
+ *
+ * 表单每次都会提交完整数组，这里按顺序比较素材 ID 与标题，
+ * 一致则说明用户没有改动该子表，可跳过删除重建，减少数据库写入。
+ */
+function sameImageItems(
+  existing: Array<{
+    assetId: string;
+    title: string;
+  }>,
+  incoming: Array<{
+    assetId: string;
+    title: string;
+  }>,
+): boolean {
+  if (
+    existing.length !== incoming.length
+  ) {
+    return false;
+  }
+
+  for (
+    let index = 0;
+    index < existing.length;
+    index += 1
+  ) {
+    if (
+      existing[index].assetId !==
+        incoming[index].assetId ||
+      existing[index].title.trim() !==
+        incoming[index].title.trim()
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function formatProductDetail(
   product: ProductDetailPayload,
 ) {
@@ -172,6 +216,10 @@ function formatProductDetail(
     product.specificationTitle !== null ||
     product.specificationHeaders !== null ||
     product.specificationRows !== null;
+
+  const hasKeyParameters =
+    product.keyParametersTitle !== null ||
+    product.keyParametersItems !== null;
 
   return {
     id: product.id,
@@ -207,19 +255,25 @@ function formatProductDetail(
       product.coverImageAssetId,
 
     coverImage:
-      product.coverImageAsset,
+      withMediaUrl(product.coverImageAsset),
 
     introBackgroundImageAssetId:
       product.introBackgroundImageAssetId,
 
     introBackgroundImageAsset:
-      product.introBackgroundImageAsset,
+      withMediaUrl(product.introBackgroundImageAsset),
 
     advantages:
-      product.advantages,
+      product.advantages.map((item) => ({
+        ...item,
+        asset: withMediaUrl(item.asset),
+      })),
 
     applications:
-      product.applications,
+      product.applications.map((item) => ({
+        ...item,
+        asset: withMediaUrl(item.asset),
+      })),
 
     specification: hasSpecification
       ? {
@@ -231,6 +285,16 @@ function formatProductDetail(
 
           rows:
             product.specificationRows ?? [],
+        }
+      : null,
+
+    keyParameters: hasKeyParameters
+      ? {
+          title:
+            product.keyParametersTitle ?? "",
+
+          items:
+            product.keyParametersItems ?? [],
         }
       : null,
 
@@ -352,6 +416,31 @@ export async function PATCH(
           slug: true,
           status: true,
           publishedAt: true,
+
+          secondaryCategoryId: true,
+          coverImageAssetId: true,
+          introBackgroundImageAssetId: true,
+          detailPdfAssetId: true,
+
+          advantages: {
+            orderBy: {
+              sortOrder: "asc" as const,
+            },
+            select: {
+              assetId: true,
+              title: true,
+            },
+          },
+
+          applications: {
+            orderBy: {
+              sortOrder: "asc" as const,
+            },
+            select: {
+              assetId: true,
+              title: true,
+            },
+          },
         },
       });
 
@@ -363,24 +452,76 @@ export async function PATCH(
       );
     }
 
+    /*
+     * 变更检测：表单每次都会提交完整字段，
+     * 但只有真正变化的字段才需要重新校验引用、重写子表。
+     * 未变化的部分直接跳过，避免不必要的远程数据库往返，
+     * 让"只改了几个字"这种编辑几乎瞬间完成。
+     */
+    const advantagesChanged =
+      body.advantages !== undefined &&
+      !sameImageItems(
+        existingProduct.advantages,
+        body.advantages,
+      );
+
+    const applicationsChanged =
+      body.applications !== undefined &&
+      !sameImageItems(
+        existingProduct.applications,
+        body.applications,
+      );
+
+    const categoryChanged =
+      body.secondaryCategoryId !==
+        undefined &&
+      body.secondaryCategoryId !==
+        existingProduct.secondaryCategoryId;
+
+    const coverChanged =
+      body.coverImageAssetId !==
+        undefined &&
+      (body.coverImageAssetId ?? null) !==
+        existingProduct.coverImageAssetId;
+
+    const introBackgroundChanged =
+      body.introBackgroundImageAssetId !==
+        undefined &&
+      body.introBackgroundImageAssetId !==
+        existingProduct.introBackgroundImageAssetId;
+
+    const detailPdfChanged =
+      body.detailPdfAssetId !==
+        undefined &&
+      (body.detailPdfAssetId ?? null) !==
+        existingProduct.detailPdfAssetId;
+
     await validateProductReferences({
       secondaryCategoryId:
-        body.secondaryCategoryId,
+        categoryChanged
+          ? body.secondaryCategoryId
+          : undefined,
 
-      coverImageAssetId:
-        body.coverImageAssetId,
+      coverImageAssetId: coverChanged
+        ? body.coverImageAssetId
+        : undefined,
 
       introBackgroundImageAssetId:
-        body.introBackgroundImageAssetId,
+        introBackgroundChanged
+          ? body.introBackgroundImageAssetId
+          : undefined,
 
-      advantages:
-        body.advantages,
+      advantages: advantagesChanged
+        ? body.advantages
+        : undefined,
 
-      applications:
-        body.applications,
+      applications: applicationsChanged
+        ? body.applications
+        : undefined,
 
-      detailPdfAssetId:
-        body.detailPdfAssetId,
+      detailPdfAssetId: detailPdfChanged
+        ? body.detailPdfAssetId
+        : undefined,
     });
 
     const nextLocale =
@@ -442,217 +583,225 @@ export async function PATCH(
       publishedAt = new Date();
     }
 
+    /*
+     * 使用一次带嵌套写入的 update 完成保存：
+     * Prisma 会把标量字段更新、子表的 deleteMany/create
+     * 打包进一次隐式事务批量执行，并通过 select 直接返回最新数据，
+     * 相比之前"交互式事务 + 逐条 deleteMany/createMany + 单独回读"
+     * 大幅减少远程数据库往返次数，也不再受 5s 事务超时限制。
+     * 未变化的子表（advantages / applications）完全跳过，不做删改。
+     */
     const product =
-      await prisma.$transaction(
-        async (transaction) => {
-          if (
-            body.advantages !== undefined
-          ) {
-            await transaction
-              .productAdvantage
-              .deleteMany({
-                where: {
-                  productId: id,
-                },
-              });
-
-            if (
-              body.advantages.length > 0
-            ) {
-              await transaction
-                .productAdvantage
-                .createMany({
-                  data:
-                    body.advantages.map(
-                      (item, index) => ({
-                        productId: id,
-                        assetId:
-                          item.assetId,
-                        title:
-                          item.title,
-                        sortOrder:
-                          item.sortOrder ??
-                          index,
-                      }),
-                    ),
-                });
-            }
-          }
-
-          if (
-            body.applications !== undefined
-          ) {
-            await transaction
-              .productApplication
-              .deleteMany({
-                where: {
-                  productId: id,
-                },
-              });
-
-            if (
-              body.applications.length > 0
-            ) {
-              await transaction
-                .productApplication
-                .createMany({
-                  data:
-                    body.applications.map(
-                      (item, index) => ({
-                        productId: id,
-                        assetId:
-                          item.assetId,
-                        title:
-                          item.title,
-                        sortOrder:
-                          item.sortOrder ??
-                          index,
-                      }),
-                    ),
-                });
-            }
-          }
-
-          await transaction.product.update({
-            where: {
-              id,
-            },
-
-            data: {
-              ...(body.locale !== undefined
-                ? {
-                    locale:
-                      body.locale as ProductLocale,
-                  }
-                : {}),
-
-              ...(body.name !== undefined
-                ? {
-                    name: body.name,
-                  }
-                : {}),
-
-              ...(body.seriesName !==
-              undefined
-                ? {
-                    seriesName:
-                      body.seriesName?.trim() ||
-                      null,
-                  }
-                : {}),
-
-              ...(body.secondaryCategoryId !==
-              undefined
-                ? {
-                    secondaryCategoryId:
-                      body.secondaryCategoryId,
-                  }
-                : {}),
-
-              ...(body.summaryParagraphs !==
-              undefined
-                ? {
-                    summaryParagraphs:
-                      body.summaryParagraphs,
-                  }
-                : {}),
-
-              ...(body.highlights !==
-              undefined
-                ? {
-                    highlights:
-                      body.highlights,
-                  }
-                : {}),
-
-              ...(body.introductionParagraphs !==
-              undefined
-                ? {
-                    introductionParagraphs:
-                      body.introductionParagraphs,
-                  }
-                : {}),
-
-              ...(body.specification !==
-              undefined
-                ? body.specification === null
-                  ? {
-                      specificationTitle:
-                        null,
-
-                      specificationHeaders:
-                        Prisma.DbNull,
-
-                      specificationRows:
-                        Prisma.DbNull,
-                    }
-                  : {
-                      specificationTitle:
-                        body.specification.title,
-
-                      specificationHeaders:
-                        body.specification.headers,
-
-                      specificationRows:
-                        body.specification.rows,
-                    }
-                : {}),
-
-              ...(body.coverImageAssetId !==
-              undefined
-                ? {
-                    coverImageAssetId:
-                      body.coverImageAssetId,
-                  }
-                : {}),
-
-              ...(body.introBackgroundImageAssetId !==
-                undefined
-                  ? {
-                      introBackgroundImageAssetId:
-                        body.introBackgroundImageAssetId,
-                    }
-                  : {}),
-
-              ...(body.detailPdfAssetId !==
-              undefined
-                ? {
-                    detailPdfAssetId:
-                      body.detailPdfAssetId,
-                  }
-                : {}),
-
-              ...(body.status !== undefined
-                ? {
-                    status: body.status,
-                  }
-                : {}),
-
-              ...(body.sortOrder !== undefined
-                ? {
-                    sortOrder:
-                      body.sortOrder,
-                  }
-                : {}),
-
-              ...(publishedAt !== undefined
-                ? {
-                    publishedAt,
-                  }
-                : {}),
-            },
-          });
-
-          return transaction.product
-            .findUniqueOrThrow({
-              where: {
-                id,
-              },
-              select:
-                productDetailSelect,
-            });
+      await prisma.product.update({
+        where: {
+          id,
         },
-      );
+
+        data: {
+          ...(body.locale !== undefined
+            ? {
+                locale:
+                  body.locale as ProductLocale,
+              }
+            : {}),
+
+          ...(body.name !== undefined
+            ? {
+                name: body.name,
+              }
+            : {}),
+
+          ...(body.seriesName !==
+          undefined
+            ? {
+                seriesName:
+                  body.seriesName?.trim() ||
+                  null,
+              }
+            : {}),
+
+          ...(body.secondaryCategoryId !==
+          undefined
+            ? {
+                secondaryCategoryId:
+                  body.secondaryCategoryId,
+              }
+            : {}),
+
+          ...(body.summaryParagraphs !==
+          undefined
+            ? {
+                summaryParagraphs:
+                  body.summaryParagraphs,
+              }
+            : {}),
+
+          ...(body.highlights !==
+          undefined
+            ? {
+                highlights:
+                  body.highlights,
+              }
+            : {}),
+
+          ...(body.introductionParagraphs !==
+          undefined
+            ? {
+                introductionParagraphs:
+                  body.introductionParagraphs,
+              }
+            : {}),
+
+          ...(body.specification !==
+          undefined
+            ? body.specification === null
+              ? {
+                  specificationTitle:
+                    null,
+
+                  specificationHeaders:
+                    Prisma.DbNull,
+
+                  specificationRows:
+                    Prisma.DbNull,
+                }
+              : {
+                  specificationTitle:
+                    body.specification.title,
+
+                  specificationHeaders:
+                    body.specification.headers,
+
+                  specificationRows:
+                    body.specification.rows,
+                }
+            : {}),
+
+          ...(body.keyParameters !==
+          undefined
+            ? body.keyParameters === null
+              ? {
+                  keyParametersTitle:
+                    null,
+
+                  keyParametersItems:
+                    Prisma.DbNull,
+                }
+              : {
+                  keyParametersTitle:
+                    body.keyParameters.title,
+
+                  keyParametersItems:
+                    body.keyParameters.items,
+                }
+            : {}),
+
+          ...(body.coverImageAssetId !==
+          undefined
+            ? {
+                coverImageAssetId:
+                  body.coverImageAssetId,
+              }
+            : {}),
+
+          ...(body.introBackgroundImageAssetId !==
+            undefined
+              ? {
+                  introBackgroundImageAssetId:
+                    body.introBackgroundImageAssetId,
+                }
+              : {}),
+
+          ...(body.detailPdfAssetId !==
+          undefined
+            ? {
+                detailPdfAssetId:
+                  body.detailPdfAssetId,
+              }
+            : {}),
+
+          ...(body.status !== undefined
+            ? {
+                status: body.status,
+              }
+            : {}),
+
+          ...(body.sortOrder !== undefined
+            ? {
+                sortOrder:
+                  body.sortOrder,
+              }
+            : {}),
+
+          ...(publishedAt !== undefined
+            ? {
+                publishedAt,
+              }
+            : {}),
+
+          ...(advantagesChanged &&
+          body.advantages
+            ? {
+                advantages: {
+                  deleteMany: {},
+
+                  ...(body.advantages
+                    .length > 0
+                    ? {
+                        create:
+                          body.advantages.map(
+                            (
+                              item,
+                              index,
+                            ) => ({
+                              assetId:
+                                item.assetId,
+                              title:
+                                item.title,
+                              sortOrder:
+                                item.sortOrder ??
+                                index,
+                            }),
+                          ),
+                      }
+                    : {}),
+                },
+              }
+            : {}),
+
+          ...(applicationsChanged &&
+          body.applications
+            ? {
+                applications: {
+                  deleteMany: {},
+
+                  ...(body.applications
+                    .length > 0
+                    ? {
+                        create:
+                          body.applications.map(
+                            (
+                              item,
+                              index,
+                            ) => ({
+                              assetId:
+                                item.assetId,
+                              title:
+                                item.title,
+                              sortOrder:
+                                item.sortOrder ??
+                                index,
+                            }),
+                          ),
+                      }
+                    : {}),
+                },
+              }
+            : {}),
+        },
+
+        select: productDetailSelect,
+      });
 
     clearCacheByNamespace("products");
 

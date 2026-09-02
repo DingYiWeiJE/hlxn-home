@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { requireAdminActor } from "@/lib/admin-auth/require-admin-actor";
 import { fail, ok } from "@/lib/api/response";
+import { withMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import {
   adminApplicationCaseListQuerySchema,
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
             imageAsset: {
               select: {
                 id: true,
-                url: true,
+                relativePath: true,
                 width: true,
                 height: true,
                 alt: true,
@@ -137,6 +138,7 @@ export async function GET(request: NextRequest) {
     return ok({
       items: items.map((item) => ({
         ...item,
+        imageAsset: withMediaUrl(item.imageAsset),
         contentParagraphCount: Array.isArray(
           item.contentParagraphs,
         )

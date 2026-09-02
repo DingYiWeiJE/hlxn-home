@@ -130,7 +130,13 @@ function WechatContent() {
   return (
     <div className="w-[300px] h-[350px] bg-white rounded-xl shadow-xl flex flex-col items-center justify-center">
       <div className="relative w-[230px] h-[230px]">
-        <Image src="/images/common/qr-code.jpg" alt="微信二维码" fill className="object-contain" />
+        <Image
+          src="/images/common/qr-code.jpg"
+          alt="微信二维码"
+          fill
+          sizes="230px"
+          className="object-contain"
+        />
       </div>
 
       <p className="mt-3 text-gray-500 text-sm">扫码关注汉理新能</p>

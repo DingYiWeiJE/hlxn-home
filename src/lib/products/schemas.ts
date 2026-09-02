@@ -84,6 +84,33 @@ export const specificationSchema = z
     });
   });
 
+const keyParameterItemSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(1, "参数名称不能为空")
+    .max(100, "参数名称不能超过 100 个字符"),
+
+  value: z
+    .string()
+    .trim()
+    .min(1, "参数取值不能为空")
+    .max(500, "参数取值不能超过 500 个字符"),
+});
+
+export const keyParametersSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "请输入主要技术参数标题")
+    .max(200, "标题不能超过 200 个字符"),
+
+  items: z
+    .array(keyParameterItemSchema)
+    .min(1, "请至少添加一项参数")
+    .max(100, "主要技术参数最多支持 100 项"),
+});
+
 const productFieldsSchema = z.object({
   // 创建产品时必传，不提供默认值
   locale: productLocaleSchema,
@@ -130,6 +157,10 @@ const productFieldsSchema = z.object({
     .optional()
     .nullable(),
 
+  keyParameters: keyParametersSchema
+    .optional()
+    .nullable(),
+
   applications: z
     .array(productImageItemSchema)
     .max(50, "应用场景最多支持 50 项")
@@ -147,8 +178,10 @@ const productFieldsSchema = z.object({
     .trim()
     .min(
       1,
-      "请选择产品介绍背景图",
-    ),
+      "产品介绍背景图素材 ID 不正确",
+    )
+    .optional()
+    .nullable(),
 
   detailPdfAssetId: z
     .string()

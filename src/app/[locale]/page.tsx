@@ -1,14 +1,15 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-import HeroContent from "@/app/[locale]/abHomeComponents/HeroContent";
+import HeroContent from "@/components/home/HeroContent";
 import type { Metadata } from "next";
-import ChooseHanliSection from "./abHomeComponents/ChooseHanliSection";
-import AboutHanli from "./abHomeComponents/AboutHanli";
-import SolutionsSection from "./abHomeComponents/SolutionsSection";
-import ProductIntroCard from "./abHomeComponents/ProductIntroCard/ProductIntroCard";
-import ImageCarousel from "./abHomeComponents/carousel/ImageCarousel";
-import NewsCenter from "./abHomeComponents/NewsCenter";
+import ChooseHanliSection from "@/components/home/ChooseHanliSection";
+import AboutHanli from "@/components/home/AboutHanli";
+import SolutionsSection from "@/components/home/SolutionsSection";
+import ProductIntroCard from "@/components/home/ProductIntroCard/ProductIntroCard";
+import ImageCarousel from "@/components/home/carousel/ImageCarousel";
+import NewsCenter from "@/components/home/NewsCenter";
+import { PartnerSection } from "@/components/home/PartnerSection";
 import SiteFooter from "@/components/SiteFooter";
 
 export const dynamic = 'force-dynamic';
@@ -86,20 +87,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:
       locale === "zh"
-        ? "汉理楚能 | 智能能源管理解决方案"
+        ? "汉理新能 | 专注新能源动力系统解决方案"
         : "Hanli Chuneng | Intelligent Energy Management Solutions",
     description:
       locale === "zh"
-        ? "汉理楚能致力于为全球企业提供先进的能源管理技术与服务"
+        ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
         : "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide",
     openGraph: {
       title:
         locale === "zh"
-          ? "汉理楚能 | 智能能源管理解决方案"
+          ? "汉理新能 | 专注新能源动力系统解决方案"
           : "Hanli Chuneng | Intelligent Energy Management Solutions",
       description:
         locale === "zh"
-          ? "汉理楚能致力于为全球企业提供先进的能源管理技术与服务"
+          ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
           : "Hanli Chuneng is committed to providing advanced energy management technology and services to enterprises worldwide",
       type: "website",
       locale: locale === "zh" ? "zh_CN" : "en_US",
@@ -130,7 +131,7 @@ export default async function Home({ params }: Props) {
         {/* 内容层 */}
         <div className="relative flex flex-col h-full">
           <Navigation />
-          <HeroContent />
+          <HeroContent  locale={locale} />
         </div>
       </div>
       <ChooseHanliSection locale={locale} />
@@ -172,6 +173,8 @@ export default async function Home({ params }: Props) {
       
       <NewsCenter locale={locale} maxItems={3} />
 
+      <PartnerSection locale={locale} />
+
       <div
         className="h-[300px] relative bg-cover bg-center flex flex-col items-center justify-center"
         style={{
@@ -185,7 +188,7 @@ export default async function Home({ params }: Props) {
         <div className="relative flex flex-col items-center justify-center gap-4 text-center">
           <h2 className="text-[3rem] font-bold text-white">{t("focusSection.title")}</h2>
           <a
-            href="#"
+            href={`/${locale}/solutions`}
             className="
               inline-flex items-center gap-3
               rounded-full bg-white

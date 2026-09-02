@@ -3,6 +3,7 @@ import type {
   Prisma,
 } from "@prisma/client";
 
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 
 export const newsListSelect = {
@@ -18,7 +19,7 @@ export const newsListSelect = {
   coverImageAsset: {
     select: {
       id: true,
-      url: true,
+      relativePath: true,
       filename: true,
       originalName: true,
       mimeType: true,
@@ -32,6 +33,15 @@ export const newsListSelect = {
   authorName: true,
   status: true,
   isFeatured: true,
+
+  newsTypeId: true,
+  newsType: {
+    select: {
+      id: true,
+      chName: true,
+      enName: true,
+    },
+  },
 
   sourceType: true,
   sourceAccountName: true,
@@ -67,6 +77,10 @@ export function normalizeNewsListItem(
     item.coverImageAsset
       ? {
           ...item.coverImageAsset,
+
+          url: buildMediaUrl(
+            item.coverImageAsset.relativePath,
+          ),
 
           alt:
             item.coverImageAlt ||

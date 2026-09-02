@@ -34,6 +34,9 @@ import ProductImageItemsEditor, {
 import ProductSpecificationEditor, {
   type ProductSpecificationValue,
 } from "@/components/admin/products/ProductSpecificationEditor";
+import ProductKeyParametersEditor, {
+  type ProductKeyParametersValue,
+} from "@/components/admin/products/ProductKeyParametersEditor";
 
 type ProductLocale = "zh" | "en";
 
@@ -106,6 +109,13 @@ export type ProductFormInitialData = {
         title: string;
         headers: unknown;
         rows: unknown;
+      }
+    | null;
+
+  keyParameters:
+    | {
+        title: string;
+        items: unknown;
       }
     | null;
 
@@ -230,6 +240,49 @@ function normalizeSpecification(
       value.headers,
     ),
     rows: toStringMatrix(value.rows),
+  };
+}
+
+function toKeyValueItems(
+  value: unknown,
+): Array<{
+  key: string;
+  value: string;
+}> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" &&
+        item !== null,
+    )
+    .map((item) => ({
+      key:
+        typeof item.key === "string"
+          ? item.key
+          : "",
+      value:
+        typeof item.value === "string"
+          ? item.value
+          : "",
+    }));
+}
+
+function normalizeKeyParameters(
+  value:
+    | ProductFormInitialData["keyParameters"]
+    | undefined,
+): ProductKeyParametersValue | null {
+  if (!value) {
+    return null;
+  }
+
+  return {
+    title: value.title ?? "",
+    items: toKeyValueItems(value.items),
   };
 }
 
@@ -439,6 +492,16 @@ export default function ProductForm({
     useState<ProductSpecificationValue | null>(
       normalizeSpecification(
         initialData?.specification,
+      ),
+    );
+
+  const [
+    keyParameters,
+    setKeyParameters,
+  ] =
+    useState<ProductKeyParametersValue | null>(
+      normalizeKeyParameters(
+        initialData?.keyParameters,
       ),
     );
 
@@ -745,6 +808,55 @@ export default function ProductForm({
     };
   }
 
+  function buildKeyParameters():
+    | ProductKeyParametersValue
+    | null {
+    if (!keyParameters) {
+      return null;
+    }
+
+    const title =
+      keyParameters.title.trim();
+
+    if (!title) {
+      throw new Error(
+        "请填写主要技术参数标题",
+      );
+    }
+
+    if (
+      keyParameters.items.length === 0
+    ) {
+      throw new Error(
+        "请至少添加一项主要技术参数",
+      );
+    }
+
+    const items =
+      keyParameters.items.map(
+        (item, index) => {
+          const key = item.key.trim();
+          const value =
+            item.value.trim();
+
+          if (!key || !value) {
+            throw new Error(
+              `主要技术参数第 ${
+                index + 1
+              } 项尚未填写完整`,
+            );
+          }
+
+          return { key, value };
+        },
+      );
+
+    return {
+      title,
+      items,
+    };
+  }
+
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
@@ -763,14 +875,6 @@ export default function ProductForm({
         );
       }
 
-      if (
-        !introBackgroundImage?.id
-      ) {
-        throw new Error(
-          "请选择产品介绍背景图",
-        );
-      }
-
       validateImageItems(
         advantages,
         "产品优势",
@@ -783,6 +887,9 @@ export default function ProductForm({
 
       const normalizedSpecification =
         buildSpecification();
+
+      const normalizedKeyParameters =
+        buildKeyParameters();
 
       setIsSubmitting(true);
 
@@ -812,7 +919,8 @@ export default function ProductForm({
           coverImage?.id ?? null,
 
         introBackgroundImageAssetId:
-          introBackgroundImage.id,
+          introBackgroundImage?.id ??
+          null,
 
         advantages:
           advantages.map(
@@ -825,6 +933,9 @@ export default function ProductForm({
 
         specification:
           normalizedSpecification,
+
+        keyParameters:
+          normalizedKeyParameters,
 
         applications:
           applications.map(
@@ -1249,6 +1360,13 @@ export default function ProductForm({
               }
             />
 
+            <ProductKeyParametersEditor
+              value={keyParameters}
+              onChange={
+                setKeyParameters
+              }
+            />
+
             <ProductImageItemsEditor
               label="应用场景"
               description="每项可选择已有应用场景图片，也可直接上传新的应用场景图片。"
@@ -1410,9 +1528,6 @@ export default function ProductForm({
               <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
                 <h2 className="text-sm font-bold text-slate-900">
                   产品介绍背景图
-                  <span className="ml-1 text-red-500">
-                    *
-                  </span>
                 </h2>
 
                 {introBackgroundImage ? (
@@ -1500,7 +1615,7 @@ export default function ProductForm({
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-                  该图片用于产品详情页的产品介绍背景区域，创建产品时必须选择。
+                  该图片用于产品详情页的产品介绍背景区域，可选；不上传时该区域将使用纯色背景。
                 </p>
               </div>
             </section>

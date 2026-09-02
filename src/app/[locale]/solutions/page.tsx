@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${t("solutionsPageContent.heroTitle")} | ${
-      normalizedLocale === "zh" ? "汉理楚能" : "Hanli Chuneng"
+      normalizedLocale === "zh" ? "汉理新能" : "Hanli Chuneng"
     }`,
     description: t("solutionsPageContent.heroSubtitle"),
     alternates: {

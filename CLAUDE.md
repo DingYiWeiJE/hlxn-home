@@ -1,4 +1,4 @@
-# Hanli New Energy - Development Guide
+# Hanly Energy - Development Guide
 
 ## Project Overview
 这是一个nextJs ts tailwind next-intl(仅支持中英)多语言 多语言企业网站，支持中英文切换。主要关注点是确保所有新功能都能正确响应语言变化，在布局的时候一定要想到移动端适配；

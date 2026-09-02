@@ -1,18 +1,32 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 
 import { MediaAssetType } from "@prisma/client";
 
 import { getUploadConfig } from "@/lib/media/config";
-import {
-  uploadImage,
-  type UploadedMediaAsset,
-} from "@/lib/media/upload";
+import { buildMediaUrl } from "@/lib/media/asset-url";
 import { prisma } from "@/lib/prisma";
 import type { TiptapNode } from "@/lib/news/tiptap";
 import type { WechatRemoteImage } from "@/lib/news/wechat-import";
+import { uploadBufferToQiniu } from "@/lib/qiniu/direct-upload";
+
+type UploadedMediaAsset = {
+  id: string;
+  type: MediaAssetType;
+  url: string;
+  relativePath: string;
+  filename: string;
+  originalName: string | null;
+  mimeType: string;
+  size: number;
+  checksum: string | null;
+  width: number | null;
+  height: number | null;
+  alt: string | null;
+  createdAt: Date;
+};
 
 const FETCH_TIMEOUT_MS = 15_000;
 const MAX_REDIRECTS = 3;
@@ -22,7 +36,6 @@ const MAX_TOTAL_IMAGE_BYTES = 50 * 1024 * 1024;
 const mediaAssetSelect = {
   id: true,
   type: true,
-  url: true,
   relativePath: true,
   filename: true,
   originalName: true,
@@ -133,26 +146,17 @@ export async function localizeWechatImages(
         downloaded.contentType,
       );
 
-      /*
-      * File 构造器要求 ArrayBuffer 类型的数据。
-      * 显式复制为普通 Uint8Array，避免 Node.js Buffer
-      * 使用 ArrayBufferLike 导致 TypeScript 类型冲突。
-      */
-      const fileBytes = new Uint8Array(
-        downloaded.buffer.length,
-      );
+      const contentType =
+        downloaded.contentType || "application/octet-stream";
 
-      fileBytes.set(downloaded.buffer);
+      const extension = getImageExtension(
+        image.url,
+        downloaded.contentType,
+      ).replace(/^\./, "");
 
-      const file = new File(
-        [fileBytes],
-        originalName,
-        {
-          type:
-            downloaded.contentType ||
-            "application/octet-stream",
-        },
-      );
+      const filename = `${randomBytes(16).toString("hex")}.${extension}`;
+
+      const key = `news/wechat/${filename}`;
 
       console.log(
         "📤 Uploading image:",
@@ -162,11 +166,31 @@ export async function localizeWechatImages(
         }
       );
 
-      const asset = await uploadImage(file, {
-        scope: "news",
-        alt: image.alt,
-        createdById: null,
+      const { url } = await uploadBufferToQiniu(key, downloaded.buffer);
+
+      const checksum = createHash("sha256")
+        .update(downloaded.buffer)
+        .digest("hex");
+
+      const created = await prisma.mediaAsset.create({
+        data: {
+          type: MediaAssetType.IMAGE,
+          relativePath: key,
+          filename,
+          originalName,
+          mimeType: contentType,
+          size: downloaded.buffer.length,
+          checksum,
+          width: null,
+          height: null,
+          alt: image.alt?.trim() || null,
+          enabled: true,
+          createdById: null,
+        },
+        select: mediaAssetSelect,
       });
+
+      const asset: UploadedMediaAsset = { ...created, url };
 
       console.log(
         "✅ Image uploaded successfully:",
@@ -287,7 +311,7 @@ async function findExistingWechatAsset(
     .digest("hex")
     .slice(0, 32);
 
-  return prisma.mediaAsset.findFirst({
+  const found = await prisma.mediaAsset.findFirst({
     where: {
       type: MediaAssetType.IMAGE,
 
@@ -304,6 +328,9 @@ async function findExistingWechatAsset(
     },
     select: mediaAssetSelect,
   });
+
+  if (!found) return null;
+  return { ...found, url: buildMediaUrl(found.relativePath) };
 }
 
 async function downloadWechatImage(
@@ -513,12 +540,11 @@ function getImageExtension(
   }
 
   /*
-   * uploadImage 会根据真实文件内容自动转换为 WebP（GIF 除外）。
    * 当 Content-Type 无法识别且 URL 中也没有扩展名时，
-   * 默认假设为 WebP，因为这是最终保存到七牛云的格式。
-   * 如果是 GIF 会有 image/gif Content-Type，已在上面处理。
+   * 默认假设为 JPEG，这是微信公众号图片最常见的实际编码。
+   * 如果是 GIF/WebP/PNG 会通过上面的 Content-Type 分支返回正确的扩展名。
    */
-  return ".webp";
+  return ".jpg";
 }
 
 function replaceTiptapImageUrls(

@@ -33,7 +33,7 @@ const labels = {
     usageScenarios: "应用场景",
     customerValues: "客户价值",
     notFound: "解决方案不存在",
-    brand: "汉理楚能",
+    brand: "汉理新能",
   },
   en: {
     back: "Back to Solutions",

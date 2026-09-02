@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:
       locale === "zh"
-        ? "联系我们 | 汉理楚能"
+        ? "联系我们 | 汉理新能"
         : "Contact Us | Hanli Chuneng",
     description:
       locale === "zh"
-        ? "联系汉理楚能获取更多信息"
+        ? "联系汉理新能获取更多信息"
         : "Contact Hanli Chuneng for more information",
   };
 }

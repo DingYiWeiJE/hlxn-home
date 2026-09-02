@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { newsEmitter } from "@/lib/events";
+import { productEmitter } from "@/lib/products-events";
 import { solutionEmitter } from "@/lib/solutions-events";
 import Dropdown from "./Dropdown";
 
@@ -21,6 +22,21 @@ type SolutionCategory = {
   enName: string;
 };
 
+type NewsType = {
+  id: string;
+  chName: string;
+  enName: string;
+};
+
+type PrimaryProductCategory = {
+  id: string;
+  name: string;
+  nameZh: string;
+  nameEn: string;
+  slug: string;
+  sortOrder: number;
+};
+
 export default function WebNavigation({
   hasbg,
   scrolledPast,
@@ -32,6 +48,10 @@ export default function WebNavigation({
   const pathname = usePathname();
   const router = useRouter();
   const [categories, setCategories] = useState<SolutionCategory[]>([]);
+  const [newsTypes, setNewsTypes] = useState<NewsType[]>([]);
+  const [productCategories, setProductCategories] = useState<
+    PrimaryProductCategory[]
+  >([]);
 
   const textColor = isWhiteBg ? "text-black" : "text-white";
   const hoverTextColor = isWhiteBg ? "hover:text-gray-700" : "hover:text-gray-300";
@@ -87,148 +107,164 @@ export default function WebNavigation({
     fetchCategories();
   }, []);
 
-  const newsDropdownItems = [
-    {
-      label: "updates",
-      element: (
-        <button
-          onClick={(e) => {
-            const isNewsPage =
-              pathname ===
-              `/${locale}/news`;
+  // 加载新闻类型
+  useEffect(() => {
+    async function fetchNewsTypes() {
+      try {
+        const response = await fetch("/api/news-types", {
+          cache: "no-store",
+        });
+        const result = await response.json();
+        if (result.success && result.data?.types) {
+          setNewsTypes(result.data.types);
+        }
+      } catch (err) {
+        console.error("Failed to load news types:", err);
+      }
+    }
 
-            if (isNewsPage) {
-              e.preventDefault();
-              newsEmitter.emit(
-                "changeNewsType",
-                "DYNAMIC",
-              );
-            } else {
-              window.location.href =
-                `/${locale}/news`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.newsSubmenu.updates")}
-        </button>
-      ),
-    },
-    {
-      label: "exhibitions",
-      element: (
-        <button
-          onClick={(e) => {
-            const isNewsPage =
-              pathname ===
-              `/${locale}/news`;
+    fetchNewsTypes();
+  }, []);
 
-            if (isNewsPage) {
-              e.preventDefault();
-              newsEmitter.emit(
-                "changeNewsType",
-                "EVENT",
-              );
-            } else {
-              window.location.href =
-                `/${locale}/news?type=EVENT`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.newsSubmenu.exhibitions")}
-        </button>
-      ),
-    },
-  ];
+  // 加载一级产品分类
+  useEffect(() => {
+    const controller = new AbortController();
 
-  const solutionDropdownItems = [
-    {
-      label: "all",
-      element: (
-        <button
-          onClick={(e) => {
-            const isSolutionsPage =
-              pathname ===
-              `/${locale}/solutions`;
+    async function fetchProductCategories() {
+      try {
+        const response = await fetch(
+          `/api/categories?locale=${locale}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
+        const result = await response.json();
+        if (result.success && result.data?.primaryCategories) {
+          setProductCategories(result.data.primaryCategories);
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load product categories:", err);
+      }
+    }
 
-            if (isSolutionsPage) {
-              e.preventDefault();
-              solutionEmitter.emit(
-                "changeSolutionCategory",
-                null,
-              );
-            } else {
-              window.location.href =
-                `/${locale}/solutions`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {t("nav.solutionsSubmenu.allCategories")}
-        </button>
-      ),
-    },
-    ...categories.map((category) => ({
-      label: category.id,
-      element: (
-        <button
-          key={category.id}
-          onClick={(e) => {
-            const isSolutionsPage =
-              pathname ===
-              `/${locale}/solutions`;
+    fetchProductCategories();
 
-            if (isSolutionsPage) {
-              e.preventDefault();
-              solutionEmitter.emit(
-                "changeSolutionCategory",
-                category.id,
-              );
-            } else {
-              window.location.href =
-                `/${locale}/solutions?category=${category.id}`;
-            }
-          }}
-          className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.8)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(100, 116, 139, 0.4)";
-          }}
-        >
-          {locale === "zh" ? category.chName : category.enName}
-        </button>
-      ),
-    })),
-  ];
+    return () => {
+      controller.abort();
+    };
+  }, [locale]);
+
+  const productDropdownItems = productCategories.map((category) => ({
+    label: category.id,
+    element: (
+      <button
+        key={category.id}
+        onClick={(e) => {
+          const isProductsPage =
+            pathname === `/${locale}/products`;
+
+          if (isProductsPage) {
+            e.preventDefault();
+            productEmitter.emit(
+              "changeProductCategory",
+              category.id,
+            );
+          } else {
+            window.location.href = `/${locale}/products?primaryCategory=${category.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh"
+          ? category.nameZh || category.name
+          : category.nameEn || category.name}
+      </button>
+    ),
+  }));
+
+  const newsDropdownItems = newsTypes.map((type) => ({
+    label: type.id,
+    element: (
+      <button
+        key={type.id}
+        onClick={(e) => {
+          const isNewsPage =
+            pathname ===
+            `/${locale}/news`;
+
+          if (isNewsPage) {
+            e.preventDefault();
+            newsEmitter.emit(
+              "changeNewsType",
+              type.id,
+            );
+          } else {
+            window.location.href =
+              `/${locale}/news?type=${type.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh" ? type.chName : type.enName}
+      </button>
+    ),
+  }));
+
+  const solutionDropdownItems = categories.map((category) => ({
+    label: category.id,
+    element: (
+      <button
+        key={category.id}
+        onClick={(e) => {
+          const isSolutionsPage =
+            pathname ===
+            `/${locale}/solutions`;
+
+          if (isSolutionsPage) {
+            e.preventDefault();
+            solutionEmitter.emit(
+              "changeSolutionCategory",
+              category.id,
+            );
+          } else {
+            window.location.href =
+              `/${locale}/solutions?category=${category.id}`;
+          }
+        }}
+        className="block w-full text-left px-4 py-2 text-white hover:bg-blue-600 transition whitespace-nowrap bg-slate-600/40"
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.8)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor =
+            "rgba(100, 116, 139, 0.4)";
+        }}
+      >
+        {locale === "zh" ? category.chName : category.enName}
+      </button>
+    ),
+  }));
 
   const languageDropdownItems = [
     {
@@ -311,7 +347,8 @@ export default function WebNavigation({
       {/* Solutions with Dropdown */}
       <Dropdown
         trigger={
-          <button
+          <Link
+            href={`/${locale}/solutions`}
             className={`transition ${
               isActive(`/${locale}/solutions`)
                 ? `${activeTextColor} text-lg font-bold`
@@ -319,20 +356,26 @@ export default function WebNavigation({
             }`}
           >
             {t("nav.solutions")}
-          </button>
+          </Link>
         }
         items={solutionDropdownItems}
       />
-      <Link
-        href={`/${locale}/products`}
-        className={`transition ${
-          isActive(`/${locale}/products`)
-            ? `${activeTextColor} text-lg font-bold`
-            : `${textColor} ${hoverTextColor}`
-        }`}
-      >
-        {t("nav.products")}
-      </Link>
+      {/* Products with Dropdown */}
+      <Dropdown
+        trigger={
+          <Link
+            href={`/${locale}/products`}
+            className={`transition ${
+              isActive(`/${locale}/products`)
+                ? `${activeTextColor} text-lg font-bold`
+                : `${textColor} ${hoverTextColor}`
+            }`}
+          >
+            {t("nav.products")}
+          </Link>
+        }
+        items={productDropdownItems}
+      />
 
 
       <Link
@@ -349,7 +392,8 @@ export default function WebNavigation({
       {/* News with Dropdown */}
       <Dropdown
         trigger={
-          <button
+          <Link
+            href={`/${locale}/news`}
             className={`transition ${
               isActive(`/${locale}/news`)
                 ? `${activeTextColor} text-lg font-bold`
@@ -357,7 +401,7 @@ export default function WebNavigation({
             }`}
           >
             {t("nav.news")}
-          </button>
+          </Link>
         }
         items={newsDropdownItems}
       />

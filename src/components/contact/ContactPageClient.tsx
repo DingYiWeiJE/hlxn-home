@@ -52,7 +52,7 @@ export default function ContactPageClient({ locale }: ContactPageClientProps) {
         {activeTab === "eventOrganizer" && (
           <EventOrganizerForm locale={locale} />
         )}
-        {activeTab === "contactInfo" && <ContactInfo />}
+        {activeTab === "contactInfo" && <ContactInfo locale={locale} />}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { Check, ImageIcon, Loader2, Search, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { type ChangeEvent, type FormEvent, useCallback, useEffect, useState } from "react";
+import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useState } from "react";
 import { isQiniuUrl } from "@/lib/config";
 
 type Asset = {
@@ -118,9 +118,15 @@ export default function CompanyHistoryImagePicker({
     void loadAssets();
   }, [loadAssets]);
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function runSearch() {
     setKeyword(keywordInput.trim());
+  }
+
+  function handleKeywordKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runSearch();
+    }
   }
 
   async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
@@ -271,23 +277,25 @@ export default function CompanyHistoryImagePicker({
                   />
                 </label>
 
-                <form onSubmit={handleSearch} className="flex min-w-0 flex-1 gap-3">
+                <div className="flex min-w-0 flex-1 gap-3">
                   <label className="relative min-w-0 flex-1">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       value={keywordInput}
                       onChange={(event) => setKeywordInput(event.target.value)}
+                      onKeyDown={handleKeywordKeyDown}
                       className="h-11 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                       placeholder="搜索文件名或替代文本"
                     />
                   </label>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={runSearch}
                     className="h-11 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white"
                   >
                     搜索
                   </button>
-                </form>
+                </div>
               </div>
             </div>
 
