@@ -758,12 +758,26 @@ export default async function ProductDetailPage({
 
           {/* 内容层 */}
           <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-            <h2 className="text-[3rem] font-bold text-white">下载产品单页</h2>
             <a
               href={
                 product.detailPdf!
                   .downloadUrl
               }
+              download={
+                product.detailPdf!
+                  .originalName ??
+                product.detailPdf!.filename
+              }
+            >
+              <h2 className="cursor-pointer text-[3rem] font-bold text-white">下载产品单页</h2>
+            </a>
+            <a
+              href={`${
+                product.detailPdf!
+                  .downloadUrl
+              }?mode=view`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="
                 inline-flex items-center gap-3
                 rounded-full bg-white

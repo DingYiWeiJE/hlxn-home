@@ -104,6 +104,7 @@ async function getDownloadAsset(assetId: string) {
 function createDownloadHeaders(input: {
   fileSize: number;
   downloadName: string;
+  disposition: "attachment" | "inline";
 }) {
   const asciiFilename = createAsciiFilename(
     input.downloadName,
@@ -120,20 +121,60 @@ function createDownloadHeaders(input: {
       input.fileSize,
     ),
     "Content-Disposition":
-      `attachment; filename="${asciiFilename}"; ` +
+      `${input.disposition}; filename="${asciiFilename}"; ` +
       `filename*=UTF-8''${encodedFilename}`,
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
   };
 }
 
+function resolveDisposition(
+  request: Request,
+): "attachment" | "inline" {
+  const { searchParams } = new URL(
+    request.url,
+  );
+
+  return searchParams.get("mode") === "view"
+    ? "inline"
+    : "attachment";
+}
+
 /**
- * 下载产品详情 PDF
+ * 服务端拉取七牛文件内容后直接转发，而非重定向，
+ * 这样 Content-Disposition 才会作用于浏览器实际收到的响应。
+ */
+async function fetchQiniuFile(url: string) {
+  const originalEnv =
+    process.env
+      .NODE_TLS_REJECT_UNAUTHORIZED;
+
+  try {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED =
+      "0";
+
+    return await fetch(url, {
+      redirect: "follow",
+    });
+  } finally {
+    if (originalEnv !== undefined) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED =
+        originalEnv;
+    } else {
+      delete process.env
+        .NODE_TLS_REJECT_UNAUTHORIZED;
+    }
+  }
+}
+
+/**
+ * 下载/查看产品详情 PDF
  *
- * GET /api/downloads/:assetId
+ * GET /api/downloads/:assetId          -> 触发下载（attachment）
+ * GET /api/downloads/:assetId?mode=view -> 浏览器内预览（inline）
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   context: RouteContext,
 ) {
   try {
@@ -141,21 +182,35 @@ export async function GET(
 
     const {
       asset,
-      fileSize,
       downloadName,
     } = await getDownloadAsset(assetId);
 
+    const qiniuResponse =
+      await fetchQiniuFile(
+        buildMediaUrl(asset.relativePath),
+      );
+
+    if (!qiniuResponse.ok) {
+      throw new ApiError(
+        "INTERNAL_SERVER_ERROR",
+        "无法获取产品详情文件",
+        qiniuResponse.status,
+      );
+    }
+
+    const buffer =
+      await qiniuResponse.arrayBuffer();
+
     const headers = createDownloadHeaders({
-      fileSize,
+      fileSize: buffer.byteLength,
       downloadName,
+      disposition:
+        resolveDisposition(request),
     });
 
-    return new Response(null, {
-      status: 307,
-      headers: {
-        ...headers,
-        Location: buildMediaUrl(asset.relativePath),
-      },
+    return new Response(buffer, {
+      status: 200,
+      headers,
     });
   } catch (error) {
     return fail(error);
@@ -168,7 +223,7 @@ export async function GET(
  * HEAD /api/downloads/:assetId
  */
 export async function HEAD(
-  _request: Request,
+  request: Request,
   context: RouteContext,
 ) {
   try {
@@ -184,6 +239,8 @@ export async function HEAD(
       headers: createDownloadHeaders({
         fileSize,
         downloadName,
+        disposition:
+          resolveDisposition(request),
       }),
     });
   } catch (error) {
