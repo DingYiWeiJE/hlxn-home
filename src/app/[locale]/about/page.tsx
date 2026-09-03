@@ -10,6 +10,8 @@ import Carousel3D from "@/components/home/carousel/Carousel3D";
 import { getCompanyHistoryByLocale } from "@/lib/company-history/queries";
 import type { CompanyHistoryLocale } from "@/lib/company-history/types";
 import { getCmsCompanyHonors } from "@/lib/cms/company-honors";
+import { getCmsWorkshopImages } from "@/lib/cms/workshop-images";
+import { getCmsBranchImage } from "@/lib/cms/branch-images";
 import DevelopmentHistory from "@/components/about/DevelopmentHistory";
 import FadeAnimation from "@/components/FadeAnimation";
 
@@ -36,6 +38,24 @@ async function getAboutHonorImages() {
   } catch (error) {
     console.warn("[About] Failed to load company honor images.", error);
     return [];
+  }
+}
+
+async function getAboutWorkshopImages() {
+  try {
+    return await getCmsWorkshopImages();
+  } catch (error) {
+    console.warn("[About] Failed to load workshop images.", error);
+    return [];
+  }
+}
+
+async function getAboutBranchImage() {
+  try {
+    return await getCmsBranchImage();
+  } catch (error) {
+    console.warn("[About] Failed to load branch image.", error);
+    return null;
   }
 }
 
@@ -161,6 +181,7 @@ async function AboutContent({
         <PatentSection locale={locale} />
         </FadeAnimation>
         <StrategicLayoutMapSection locale={locale} />
+        <BranchSection locale={locale} />
         <MapSection locale={locale} />
       </main>
       <Footer locale={locale} />
@@ -310,6 +331,7 @@ async function PatentSection({ locale }: { locale: string }) {
 
 async function MapSection({ locale }: { locale: string }) {
   const t = await getTranslations({ locale });
+  const workshopImages = await getAboutWorkshopImages();
 
   return (
     <>
@@ -323,12 +345,7 @@ async function MapSection({ locale }: { locale: string }) {
               {t("aboutPage.mapDescription")}
             </p>
             <ImageCarousel
-              images={[
-                "/images/about/showcase-1.jpeg",
-                "/images/about/showcase-2.jpeg",
-                "/images/about/showcase-3.jpeg",
-                "/images/about/showcase-4.jpeg",
-              ]}
+              images={workshopImages}
               desktopVisibleCount={3}
               imagePriorityCount={4}
             />
@@ -336,6 +353,34 @@ async function MapSection({ locale }: { locale: string }) {
         </div>
       </section>
     </>
+  );
+}
+
+async function BranchSection({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale });
+  const branchImage = await getAboutBranchImage();
+
+  return (
+    <section className="bg-white py-16 lg:py-24">
+      <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-[3rem] font-bold text-[#2365c4] mb-6">
+            {t("aboutPage.branchTitle")}
+          </h2>
+          <p className="text-base md:text-lg text-[#1f3448] max-w-2xl mx-auto">
+            {t("aboutPage.branchDescription")}
+          </p>
+        </div>
+        {branchImage && (
+          // 分支机构只有一张图片，按原始宽高比整宽展示，不需要轮播。
+          <img
+            src={branchImage}
+            alt={t("aboutPage.branchTitle")}
+            className="mt-10 h-auto w-full rounded-2xl shadow-lg md:mt-12"
+          />
+        )}
+      </div>
+    </section>
   );
 }
 

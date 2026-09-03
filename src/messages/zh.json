@@ -293,6 +293,8 @@
     "honorTitle": "公司荣誉",
     "mapTitle": "控制器生产车间",
     "mapDescription": "覆盖SMT贴片、DIP插装、程序烧录、老化测试、功能验证等全工序，实现从PCB到成品的一站式生产。",
+    "branchTitle": "分支机构",
+    "branchDescription": "汉理新能在全国及海外设立多个分支机构，就近服务本地客户，提供快速响应的销售与技术支持。",
     "history": {
       "title": "发展历程",
       "previous": "上一项发展历程",

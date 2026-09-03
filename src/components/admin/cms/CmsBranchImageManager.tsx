@@ -51,7 +51,7 @@ export default function CmsBranchImageManager() {
 
       const data = await res.json();
       if (res.ok) {
-        alert("分支机构图片添加成功");
+        alert("分支机构图片已更新");
         setFile(null);
         await fetchImages();
       } else {
@@ -98,7 +98,7 @@ export default function CmsBranchImageManager() {
             onChange={setFile}
             accept="image/*"
             label="分支机构图片"
-            description="支持 JPG, PNG, WebP 等格式，最大 3MB"
+            description="支持 JPG, PNG, WebP 等格式，最大 3MB。分支机构只保留一张图片，重新上传会自动替换现有图片。"
           />
 
           <button
@@ -106,14 +106,14 @@ export default function CmsBranchImageManager() {
             disabled={!file || uploading}
             className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {uploading ? "上传中..." : "上传图片"}
+            {uploading ? "上传中..." : images.length > 0 ? "替换图片" : "上传图片"}
           </button>
         </form>
       </div>
 
       {/* 图片列表 */}
       <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="mb-6 text-lg font-semibold text-gray-900">分支机构图片</h3>
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">当前分支机构图片</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {images.length === 0 ? (
             <p className="col-span-full py-8 text-center text-gray-500">暂无分支机构图片</p>

@@ -293,6 +293,8 @@
     "honorTitle": "Company Honors",
     "mapTitle": "Controller Production Workshop",
     "mapDescription": "Covering SMT placement, DIP insertion, program burning, aging testing, function verification and other full processes, achieving one-stop production from PCB to finished product.",
+    "branchTitle": "Branch Offices",
+    "branchDescription": "Hanly Energy operates multiple branch offices across China and overseas, providing local customers with responsive sales and technical support.",
     "history": {
       "title": "Our Journey",
       "previous": "Previous milestone",

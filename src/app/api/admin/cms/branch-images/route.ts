@@ -4,8 +4,9 @@ import { assertSameOriginRequest } from "@/lib/admin-auth/csrf";
 import { ok, fail } from "@/lib/api/response";
 import { ApiError } from "@/lib/api/errors";
 import { deleteFromQiniu } from "@/lib/cms/qiniu";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { clearCacheByNamespace } from "@/lib/cache";
+import { CMS_BRANCH_IMAGES_CACHE_TAG } from "@/lib/cms/branch-images";
 import * as qiniu from "qiniu";
 
 export const runtime = "nodejs";
@@ -85,6 +86,29 @@ export async function POST(request: Request) {
     // 上传到七牛云
     const { key } = await uploadFileToQiniu(file, qiniuKey);
 
+    // 分支机构只允许存在一张图片：上传新图片时清掉所有旧图片
+    // （七牛云文件 + 数据库记录），避免多张图片同时存在。
+    const existingImages = await prisma.cmsBranchImage.findMany({
+      where: { deletedAt: null },
+    });
+
+    for (const existingImage of existingImages) {
+      try {
+        await deleteFromQiniu(existingImage.imageRelativePath);
+      } catch (error) {
+        console.warn(
+          "[CMS] Failed to delete old branch image from Qiniu.",
+          error,
+        );
+      }
+    }
+
+    if (existingImages.length > 0) {
+      await prisma.cmsBranchImage.deleteMany({
+        where: { id: { in: existingImages.map((image) => image.id) } },
+      });
+    }
+
     // 创建分支机构图片记录
     const image = await prisma.cmsBranchImage.create({
       data: {
@@ -98,6 +122,7 @@ export async function POST(request: Request) {
     // 重置缓存
     revalidatePath("/api/cms/branch-images");
     clearCacheByNamespace("cms-branch-images");
+    revalidateTag(CMS_BRANCH_IMAGES_CACHE_TAG, { expire: 0 });
 
     return ok(image, { status: 201 });
   } catch (error) {
@@ -163,6 +188,7 @@ export async function DELETE(request: Request) {
     // 重置缓存
     revalidatePath("/api/cms/branch-images");
     clearCacheByNamespace("cms-branch-images");
+    revalidateTag(CMS_BRANCH_IMAGES_CACHE_TAG, { expire: 0 });
 
     return ok({ success: true });
   } catch (error) {
