@@ -443,7 +443,11 @@ export default function ProductCatalogClient({
               <option value="">{text.allTypes}</option>
 
               {visibleSecondaryCategories.map((category) => (
-                <option key={category.id} value={category.id}>
+                <option
+                  key={category.id}
+                  value={category.id}
+                  suppressHydrationWarning
+                >
                   {getCategoryTitle(category, locale)}
                 </option>
               ))}
@@ -545,6 +549,10 @@ const CategoryButton = memo(function CategoryButton({
       type="button"
       aria-pressed={active}
       onClick={onClick}
+      // 分类名称由后台可编辑；开发环境下 Next.js 会对 Server Component
+      // 做两次渲染，若两次渲染之间恰好落一次编辑，SSR HTML 与 RSC payload
+      // 会出现瞬时不一致。允许该子树 hydration 不严格比对文本。
+      suppressHydrationWarning
       className={[
         "min-h-11 whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-semibold shadow-sm transition sm:px-8",
         active
@@ -571,6 +579,7 @@ const SecondaryCategoryButton = memo(function SecondaryCategoryButton({
       type="button"
       aria-pressed={active}
       onClick={onClick}
+      suppressHydrationWarning
       className={[
         "block w-full rounded-xl px-4 py-3 text-left text-sm font-medium transition",
         active
