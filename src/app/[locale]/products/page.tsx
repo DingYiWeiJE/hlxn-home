@@ -4,6 +4,7 @@ import Footer from "@/components/SiteFooter";
 import PageHero from "@/components/PageHero";
 import type { Metadata } from "next";
 import ProductCatalog from "../../../components/products/ProductCatalog";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 async function ProductsContent({ locale }: { locale: string }) {
   const t = await getTranslations({ locale });
   const page = t.raw("productsPageContent");
+
+  const brochureLanguage = locale === "en" ? "en" : "zh";
+  const brochure = await prisma.cmsBrochure.findFirst({
+    where: { language: brochureLanguage, deletedAt: null },
+    select: { filename: true },
+  });
+  const brochureDownloadUrl = brochure
+    ? `/api/downloads/brochure/${brochureLanguage}`
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -98,9 +108,23 @@ async function ProductsContent({ locale }: { locale: string }) {
 
           {/* 内容层 */}
           <div className="relative flex flex-col items-center justify-center gap-4 text-center">
-            <h2 className="text-[3rem] font-bold text-white">{page.downloadBrochureTitle}</h2>
+            {brochureDownloadUrl ? (
+              <a href={brochureDownloadUrl} download={brochure?.filename}>
+                <h2 className="cursor-pointer text-[3rem] font-bold text-white">
+                  {page.downloadBrochureTitle}
+                </h2>
+              </a>
+            ) : (
+              <h2 className="text-[3rem] font-bold text-white">
+                {page.downloadBrochureTitle}
+              </h2>
+            )}
             <a
-              href="#"
+              href={
+                brochureDownloadUrl ? `${brochureDownloadUrl}?mode=view` : "#"
+              }
+              target={brochureDownloadUrl ? "_blank" : undefined}
+              rel={brochureDownloadUrl ? "noopener noreferrer" : undefined}
               className="
                 inline-flex items-center gap-3
                 rounded-full bg-white
