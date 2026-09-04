@@ -7,8 +7,35 @@ const secretKey = process.env.QINIU_SECRET_KEY!;
 const bucket = process.env.QINIU_BUCKET!;
 const cdnDomain = process.env.QINIU_DOMAIN!;
 
+export const QINIU_UPLOAD_URL =
+  process.env.QINIU_UPLOAD_DOMAIN ?? "https://up-na0.qiniup.com";
+
+function getMac(): qiniu.auth.digest.Mac {
+  return new qiniu.auth.digest.Mac(accessKey, secretKey);
+}
+
+export type ScopedTokenOptions = {
+  key: string;
+  fsizeLimit?: number;
+  mimeLimit?: string;
+  insertOnly?: 0 | 1;
+  expiresSeconds?: number;
+};
+
+export function getScopedUploadToken(options: ScopedTokenOptions): string {
+  const mac = getMac();
+  const putPolicy = new qiniu.rs.PutPolicy({
+    scope: `${bucket}:${options.key}`,
+    fsizeLimit: options.fsizeLimit,
+    mimeLimit: options.mimeLimit,
+    insertOnly: options.insertOnly ?? 1,
+    expires: options.expiresSeconds ?? 3600,
+  });
+  return putPolicy.uploadToken(mac);
+}
+
 function getUploadToken(): string {
-  const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
+  const mac = getMac();
   const putPolicy = new qiniu.rs.PutPolicy({ scope: bucket });
   return putPolicy.uploadToken(mac);
 }
@@ -23,6 +50,40 @@ export function buildQiniuKey(folder: string, ext: string): string {
   const safeExt = (ext || "bin").replace(/^\.+/, "").toLowerCase() || "bin";
   const prefix = folder ? `${folder.replace(/\/+$/, "")}/` : "";
   return `${prefix}${timestamp}-${random}.${safeExt}`;
+}
+
+export type QiniuObjectStat = {
+  fsize: number;
+  mimeType: string;
+  hash: string;
+};
+
+export async function statQiniuObject(key: string): Promise<QiniuObjectStat> {
+  const mac = getMac();
+  const config = new qiniu.conf.Config();
+  const bucketManager = new qiniu.rs.BucketManager(mac, config);
+
+  return new Promise<QiniuObjectStat>((resolve, reject) => {
+    bucketManager.stat(bucket, key, (err, body, resp) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (resp?.statusCode !== 200 || !body) {
+        reject(
+          new Error(
+            `Qiniu stat failed: status=${resp?.statusCode} body=${JSON.stringify(body)}`,
+          ),
+        );
+        return;
+      }
+      resolve({
+        fsize: Number(body.fsize ?? 0),
+        mimeType: String(body.mimeType ?? ""),
+        hash: String(body.hash ?? ""),
+      });
+    });
+  });
 }
 
 export async function uploadBufferToQiniu(

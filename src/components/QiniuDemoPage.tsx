@@ -134,7 +134,7 @@ const url = getQiniuImageUrl('image.jpg', {
           <h3 className="font-bold text-blue-900 mb-2">✅ 已配置</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• qiniu 包已安装</li>
-            <li>• API 端点：/api/uploads/images</li>
+            <li>• API 端点：/api/admin/assets/upload-token + finalize（客户端直传）</li>
             <li>• 域名白名单已配置</li>
             <li>• 环境变量已设置</li>
           </ul>

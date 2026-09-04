@@ -18,6 +18,7 @@ import {
   useState,
 } from "react";
 import { isQiniuUrl } from "@/lib/config";
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
 
 export type ProductMediaPurpose =
   | "GENERAL"
@@ -414,68 +415,21 @@ export default function MediaAssetPicker({
     setError("");
 
     try {
-      const formData =
-        new FormData();
-
-      formData.append(
-        "file",
-        file,
-      );
-
-      formData.append(
-        "type",
+      const uploaded = await uploadAssetDirect(file, {
         type,
-      );
+        purpose: effectivePurpose,
+        alt:
+          type === "IMAGE" && uploadAlt?.trim()
+            ? uploadAlt.trim()
+            : undefined,
+      });
 
-      formData.append(
-        "purpose",
-        effectivePurpose,
-      );
-
-      if (
-        type === "IMAGE" &&
-        uploadAlt?.trim()
-      ) {
-        formData.append(
-          "alt",
-          uploadAlt.trim(),
-        );
-      }
-
-      const response =
-        await fetch(
-          "/api/admin/assets/upload",
-          {
-            method: "POST",
-            credentials:
-              "include",
-            body: formData,
-          },
-        );
-
-      const result =
-        (await response.json()) as AssetUploadResponse;
-
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        throw new Error(
-          getErrorMessage(result),
-        );
-      }
-
-      const uploadedAsset:
-        ProductMediaAsset = {
-        ...result.data,
-
+      const uploadedAsset: ProductMediaAsset = {
+        ...uploaded,
         purpose:
-          result.data.purpose ??
+          (uploaded.purpose as ProductMediaPurpose) ??
           effectivePurpose,
-
-        usage:
-          result.data.usage ??
-          emptyUsage,
+        usage: emptyUsage,
       };
 
       /*

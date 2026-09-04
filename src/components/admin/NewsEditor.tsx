@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
@@ -35,17 +36,6 @@ import type { TiptapNode } from "@/lib/news/tiptap";
 type Props = {
   value: TiptapNode;
   onChange: (value: TiptapNode) => void;
-};
-
-type UploadResponse = {
-  success: boolean;
-  data?: {
-    url: string;
-    relativePath: string;
-  };
-  error?: {
-    message?: string;
-  };
 };
 
 export default function NewsEditor({
@@ -139,60 +129,29 @@ export default function NewsEditor({
     setUploading(true);
 
     try {
-      const formData =
-        new FormData();
+      const asset = await uploadAssetDirect(file, {
+        type: "IMAGE",
+        purpose: "NEWS_CONTENT",
+        alt: file.name || "新闻图片",
+      });
 
-      formData.append(
-        "file",
-        file,
-      );
-
-      const response =
-        await fetch(
-          "/api/uploads/images",
-          {
-            method: "POST",
-            credentials:
-              "include",
-            body: formData,
-          },
-        );
-
-      const result =
-        (await response.json()) as UploadResponse;
-
-      if (
-        !response.ok ||
-        !result.success ||
-        !result.data?.url ||
-        !result.data?.relativePath
-      ) {
-        window.alert(
-          result.error?.message ??
-            "图片上传失败",
-        );
-
-        return;
-      }
-
-      const proxyUrl =
-        `/api/media/${encodeURIComponent(
-          result.data.relativePath,
-        )}`;
+      const proxyUrl = `/api/media/${encodeURIComponent(
+        asset.relativePath,
+      )}`;
 
       editor
         .chain()
         .focus()
         .setImage({
           src: proxyUrl,
-          alt:
-            file.name ||
-            "新闻图片",
+          alt: file.name || "新闻图片",
         })
         .run();
-    } catch {
+    } catch (error) {
       window.alert(
-        "图片上传失败，请稍后重试",
+        error instanceof Error
+          ? error.message
+          : "图片上传失败，请稍后重试",
       );
     } finally {
       setUploading(false);

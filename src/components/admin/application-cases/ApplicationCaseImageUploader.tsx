@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { isQiniuUrl } from "@/lib/config";
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -95,47 +96,20 @@ export default function ApplicationCaseImageUploader({
 
       reader.readAsDataURL(file);
 
-      const formData = new FormData();
-
-      formData.append("file", file);
-      formData.append("type", "IMAGE");
-      formData.append(
-        "purpose",
-        "APPLICATION_CASE_IMAGE",
-      );
-
       try {
-        const response = await fetch(
-          "/api/admin/assets/upload",
-          {
-            method: "POST",
-            body: formData,
-          },
-        );
+        const asset = await uploadAssetDirect(file, {
+          type: "IMAGE",
+          purpose: "APPLICATION_CASE_IMAGE",
+        });
 
-        const data =
-          await response.json();
+        onImageAssetIdChange(asset.id, {
+          url: asset.url,
+          alt: asset.alt,
+          width: asset.width,
+          height: asset.height,
+        });
 
-        if (data.success) {
-          onImageAssetIdChange(
-            data.data.id,
-            {
-              url: data.data.url,
-              alt: data.data.alt,
-              width: data.data.width,
-              height: data.data.height,
-            },
-          );
-
-          setTempPreview(data.data.url);
-        } else {
-          setError(
-            data.error?.message ||
-              "上传失败",
-          );
-
-          setTempPreview(null);
-        }
+        setTempPreview(asset.url);
       } catch (err) {
         setError(
           err instanceof Error

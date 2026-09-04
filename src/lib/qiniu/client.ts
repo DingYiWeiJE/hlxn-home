@@ -3,6 +3,7 @@
  */
 
 import { qiniuConfig } from '../config';
+import { uploadAssetDirect } from './upload-client';
 
 export interface UploadResult {
   url: string
@@ -13,30 +14,25 @@ export interface UploadResult {
 }
 
 /**
- * 上传图片到七牛
+ * 上传图片到七牛（客户端直传，走 /api/admin/assets/upload-token + finalize）
  */
 export async function uploadImageToQiniu(
   file: File,
   alt?: string
 ): Promise<UploadResult> {
-  const formData = new FormData()
-  formData.append('file', file)
-  if (alt) {
-    formData.append('alt', alt)
-  }
-
-  const response = await fetch('/api/uploads/images', {
-    method: 'POST',
-    body: formData,
+  const asset = await uploadAssetDirect(file, {
+    type: 'IMAGE',
+    purpose: 'GENERAL',
+    alt,
   })
 
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || '上传失败')
+  return {
+    url: asset.url,
+    id: asset.id,
+    alt: asset.alt ?? undefined,
+    mimeType: asset.mimeType,
+    sizeBytes: asset.size,
   }
-
-  const result = await response.json()
-  return result.data
 }
 
 /**

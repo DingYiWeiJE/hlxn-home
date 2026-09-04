@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { Trash2, FileText } from "lucide-react";
 import FileUploadInput from "./FileUploadInput";
+import {
+  uploadBrochureDirect,
+  type BrochureLanguage,
+} from "@/lib/qiniu/upload-client";
 
 interface Brochure {
   id: string;
@@ -13,9 +17,11 @@ interface Brochure {
 export default function CmsBrochureManager() {
   const [brochures, setBrochures] = useState<Brochure[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLanguage, setSelectedLanguage] = useState("zh");
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<BrochureLanguage>("zh");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetchBrochures();
@@ -40,28 +46,24 @@ export default function CmsBrochureManager() {
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("language", selectedLanguage);
-
-      const res = await fetch("/api/admin/cms/brochures", {
-        method: "POST",
-        body: formData,
+      await uploadBrochureDirect(file, {
+        language: selectedLanguage,
+        onProgress: setUploadProgress,
       });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("上传成功！旧文件已自动删除");
-        setFile(null);
-        await fetchBrochures();
-      } else {
-        alert(`上传失败: ${data.message || "未知错误"}`);
-      }
+      alert("上传成功！旧文件已自动覆盖");
+      setFile(null);
+      await fetchBrochures();
     } catch (error) {
-      alert(`上传错误: ${error}`);
+      alert(
+        `上传失败: ${
+          error instanceof Error ? error.message : "未知错误"
+        }`,
+      );
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -99,7 +101,9 @@ export default function CmsBrochureManager() {
               <label className="block text-sm font-medium text-gray-700">语言</label>
               <select
                 value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
+                onChange={(e) =>
+                  setSelectedLanguage(e.target.value as BrochureLanguage)
+                }
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="zh">中文</option>
@@ -113,8 +117,24 @@ export default function CmsBrochureManager() {
             onChange={setFile}
             accept="application/pdf"
             label="企业画册 PDF 文件"
-            description="支持 PDF 格式，最大 3MB"
+            description="仅支持 PDF 格式"
           />
+
+          {uploading && (
+            <div className="space-y-1">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-blue-100">
+                <div
+                  className="h-full bg-blue-600 transition-all"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                {uploadProgress < 100
+                  ? `上传中 ${uploadProgress}%`
+                  : "处理中..."}
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"
