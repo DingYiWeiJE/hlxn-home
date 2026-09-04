@@ -20,6 +20,8 @@ import {
   useState,
 } from "react";
 
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
+
 type MediaAssetType = "IMAGE" | "PDF";
 
 type AssetItem = {
@@ -309,37 +311,13 @@ export default function AdminAssetsPage() {
     setUploadError("");
 
     try {
-      const formData = new FormData();
-
-      formData.set("file", uploadFile);
-      formData.set("type", uploadType);
-
-      if (
-        uploadType === "IMAGE" &&
-        uploadAlt.trim()
-      ) {
-        formData.set(
-          "alt",
-          uploadAlt.trim(),
-        );
-      }
-
-      const response = await fetch(
-        "/api/admin/assets/upload",
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      const result =
-        (await response.json()) as AssetUploadResponse;
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          getErrorMessage(result),
-        );
-      }
+      await uploadAssetDirect(uploadFile, {
+        type: uploadType,
+        alt:
+          uploadType === "IMAGE" && uploadAlt.trim()
+            ? uploadAlt.trim()
+            : undefined,
+      });
 
       closeUpload(true);
       await loadAssets(1);

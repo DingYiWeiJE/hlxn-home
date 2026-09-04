@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import FileUploadInput from "./FileUploadInput";
 import MediaPreview from "./MediaPreview";
+import {
+  uploadBackgroundDirect,
+  type BackgroundLocation,
+  type BackgroundType,
+} from "@/lib/qiniu/upload-client";
 
-const LOCATIONS = [
+const LOCATIONS: Array<{ value: BackgroundLocation; label: string }> = [
   { value: "HOMEPAGE", label: "首页背景" },
   { value: "ABOUT_US", label: "关于我们背景" },
   { value: "SOLUTIONS", label: "解决方案背景" },
@@ -28,10 +33,12 @@ export default function CmsBackgroundManager() {
   const router = useRouter();
   const [backgrounds, setBackgrounds] = useState<Background[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLocation, setSelectedLocation] = useState("HOMEPAGE");
-  const [selectedType, setSelectedType] = useState("image");
+  const [selectedLocation, setSelectedLocation] =
+    useState<BackgroundLocation>("HOMEPAGE");
+  const [selectedType, setSelectedType] = useState<BackgroundType>("image");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetchBackgrounds();
@@ -56,29 +63,25 @@ export default function CmsBackgroundManager() {
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("location", selectedLocation);
-      formData.append("type", selectedType);
-
-      const res = await fetch("/api/admin/cms/backgrounds", {
-        method: "POST",
-        body: formData,
+      await uploadBackgroundDirect(file, {
+        location: selectedLocation,
+        type: selectedType,
+        onProgress: setUploadProgress,
       });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("上传成功！旧文件已自动删除");
-        setFile(null);
-        await fetchBackgrounds();
-      } else {
-        alert(`上传失败: ${data.message || "未知错误"}`);
-      }
+      alert("上传成功！旧文件已自动删除");
+      setFile(null);
+      await fetchBackgrounds();
     } catch (error) {
-      alert(`上传错误: ${error}`);
+      alert(
+        `上传失败: ${
+          error instanceof Error ? error.message : "未知错误"
+        }`,
+      );
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -116,7 +119,9 @@ export default function CmsBackgroundManager() {
               <label className="block text-sm font-medium text-gray-700">位置</label>
               <select
                 value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={(e) =>
+                  setSelectedLocation(e.target.value as BackgroundLocation)
+                }
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 {LOCATIONS.map((loc) => (
@@ -131,7 +136,9 @@ export default function CmsBackgroundManager() {
               <label className="block text-sm font-medium text-gray-700">类型</label>
               <select
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                onChange={(e) =>
+                  setSelectedType(e.target.value as BackgroundType)
+                }
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 <option value="image">图片</option>
@@ -145,8 +152,28 @@ export default function CmsBackgroundManager() {
             onChange={setFile}
             accept={selectedType === "image" ? "image/*" : "video/*"}
             label={selectedType === "image" ? "背景图片" : "背景视频"}
-            description={`${selectedType === "image" ? "支持 JPG, PNG, WebP 等格式" : "支持 MP4, WebM 等格式"}，最大 3MB`}
+            description={
+              selectedType === "image"
+                ? "支持 JPG, PNG, WebP 等格式"
+                : "支持 MP4, WebM 等格式"
+            }
           />
+
+          {uploading && (
+            <div className="space-y-1">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-blue-100">
+                <div
+                  className="h-full bg-blue-600 transition-all"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                {uploadProgress < 100
+                  ? `上传中 ${uploadProgress}%`
+                  : "处理中..."}
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"

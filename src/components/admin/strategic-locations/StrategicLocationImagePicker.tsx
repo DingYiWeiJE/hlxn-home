@@ -4,6 +4,7 @@ import { Check, ImageIcon, Loader2, Search, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useState } from "react";
 import { isQiniuUrl } from "@/lib/config";
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
 
 type Asset = {
   id: string;
@@ -151,23 +152,12 @@ export default function StrategicLocationImagePicker({
     setMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "IMAGE");
-      formData.append("purpose", "STRATEGIC_LOCATION_IMAGE");
-
-      const response = await fetch("/api/admin/assets/upload", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
+      const asset = await uploadAssetDirect(file, {
+        type: "IMAGE",
+        purpose: "STRATEGIC_LOCATION_IMAGE",
       });
-      const result = (await response.json()) as UploadResponse;
 
-      if (!response.ok || !result.success) {
-        throw new Error(getError(result));
-      }
-
-      onChange(result.data.url);
+      onChange(asset.url);
       setOpen(false);
       await loadAssets(1);
     } catch (uploadError) {

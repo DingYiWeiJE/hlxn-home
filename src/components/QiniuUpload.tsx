@@ -2,12 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Upload, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
-
-interface UploadResponse {
-  success: boolean
-  url?: string
-  error?: string
-}
+import { uploadImageToQiniu } from '@/lib/qiniu/client'
 
 export function QiniuUpload() {
   const [uploading, setUploading] = useState(false)
@@ -33,27 +28,14 @@ export function QiniuUpload() {
     // 上传
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('alt', file.name)
+      const result = await uploadImageToQiniu(file, file.name)
 
-      const response = await fetch('/api/uploads/images', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || '上传失败')
-      }
-
-      setUploadedUrl(data.data.url)
+      setUploadedUrl(result.url)
       setError(null)
 
       // 复制到剪贴板
-      if (navigator.clipboard && data.data.url) {
-        navigator.clipboard.writeText(data.data.url)
+      if (navigator.clipboard && result.url) {
+        navigator.clipboard.writeText(result.url)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '上传出错')

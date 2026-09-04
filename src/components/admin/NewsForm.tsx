@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import NewsEditor from "./NewsEditor";
 import NewsTypeManager, { type NewsTypeItem } from "./NewsTypeManager";
 import type { TiptapNode } from "@/lib/news/tiptap";
+import { uploadAssetDirect } from "@/lib/qiniu/upload-client";
 
 export type NewsMediaAsset = {
   id: string;
@@ -980,51 +981,11 @@ export default function NewsForm({
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", "IMAGE");
-      formData.append(
-        "purpose",
-        "NEWS_COVER",
-      );
-      formData.append(
-        "alt",
-        form.title ||
-          file.name,
-      );
-
-      const response =
-        await fetch(
-          "/api/admin/assets/upload",
-          {
-            method: "POST",
-            credentials:
-              "include",
-            body: formData,
-          },
-        );
-
-      const result =
-        (await response.json()) as {
-          success?: boolean;
-          data?: NewsMediaAsset;
-          error?: {
-            message?: string;
-          };
-        };
-
-      if (
-        !response.ok ||
-        !result.success ||
-        !result.data
-      ) {
-        throw new Error(
-          result.error?.message ??
-            "图片上传失败",
-        );
-      }
-
-      const asset = result.data;
+      const asset = await uploadAssetDirect(file, {
+        type: "IMAGE",
+        purpose: "NEWS_COVER",
+        alt: form.title || file.name,
+      });
 
       setSelectedCover(asset);
 
