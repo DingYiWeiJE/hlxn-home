@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
 
   return {
-    title: locale === "zh" ? "关于我们 | 汉理新能" : "About Us | Hanli Energy",
+    title: locale === "zh" ? "走进汉理 | 汉理新能" : "About Us | Hanli Energy",
     description:
       locale === "zh"
         ? "了解汉理新能的公司信息、愿景使命和创新成果"
