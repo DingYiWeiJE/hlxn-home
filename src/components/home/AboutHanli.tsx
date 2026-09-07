@@ -10,7 +10,7 @@ const AboutHanli: React.FC<Props> = async ({ locale }) => {
   const t = await getTranslations({ locale });
 
   return (
-    <section className="bg-white px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-28">
+    <section className="bg-sky-50 px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-28">
       <div className="mx-auto max-w-[1280px] text-center">
         <h2 className="text-[3rem] font-bold tracking-wide text-[#2f67bd] lg:leading-[1.2]">
           {t("aboutHanli.title")}
