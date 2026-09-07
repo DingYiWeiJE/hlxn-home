@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import HeroContent from "@/components/home/HeroContent";
 import type { Metadata } from "next";
-import ChooseHanliSection from "@/components/home/ChooseHanliSection";
+// import ChooseHanliSection from "@/components/home/ChooseHanliSection";
 import AboutHanli from "@/components/home/AboutHanli";
 import SolutionsSection from "@/components/home/SolutionsSection";
 import ProductIntroCard from "@/components/home/ProductIntroCard/ProductIntroCard";
@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title:
       locale === "zh"
         ? "汉理新能 | 专注新能源动力系统解决方案"
-        : "Hanli Chuneng | Intelligent Energy Management Solutions",
+        : "Hanly  Energy | New Energy Power System Solution",
     description:
       locale === "zh"
         ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
@@ -97,7 +97,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title:
         locale === "zh"
           ? "汉理新能 | 专注新能源动力系统解决方案"
-          : "Hanli Chuneng | Intelligent Energy Management Solutions",
+          : "Hanly  Energy | New Energy Power System Solution",
       description:
         locale === "zh"
           ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
@@ -134,7 +134,7 @@ export default async function Home({ params }: Props) {
           <HeroContent  locale={locale} />
         </div>
       </div>
-      <ChooseHanliSection locale={locale} />
+      {/* <ChooseHanliSection locale={locale} /> */}
       <AboutHanli locale={locale} />
       <SolutionsSection locale={locale} />
       {products.map((product, index) => (

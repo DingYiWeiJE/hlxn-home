@@ -24,7 +24,7 @@ export async function generateMetadata({
   if (!isValidLocale) notFound();
 
   return {
-    title: locale === "zh" ? "汉理新能 | 专注新能源动力系统解决方案" : "Hanli Chuneng | Intelligent Energy Management Solutions",
+    title: locale === "zh" ? "汉理新能 | 专注新能源动力系统解决方案" : "Hanly  Energy | New Energy Power System Solution",
     description:
       locale === "zh"
         ? "汉理新能致力于为全球企业提供先进的能源管理技术与服务"
